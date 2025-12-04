@@ -23,12 +23,11 @@
                 <p>Organize o que você já viu e o que planeja assistir!</p>
 
                 <div class="botoes-backup">
-                    <button id="btn-exportar" title="Baixar Backup (Salvar)" class="btn-icon-header">⬇️</button>
-                    <button id="btn-importar" title="Restaurar Backup (Carregar)" class="btn-icon-header">⬆️</button>
+                    <button id="btn-exportar" title="Baixar Backup (Salvar)" aria-label="Exportar catálogo" class="btn-icon-header">⬇️</button>
+                    <button id="btn-importar" title="Restaurar Backup (Carregar)" aria-label="Importar catálogo" class="btn-icon-header">⬆️</button>
                     <input type="file" id="input-importar" accept=".json" class="oculto">
-
-                    <button id="btn-stats" title="Ver Estatísticas" class="btn-icon-header">📊</button>
-                    <button id="btn-roleta" title="Me sugira um anime! (Roleta)" class="btn-icon-header">🎲</button>
+                    <button id="btn-stats" title="Ver Estatísticas" aria-label="Abrir estatísticas" class="btn-icon-header">📊</button>
+                    <button id="btn-roleta" title="Me sugira um anime!" aria-label="Sortear anime aleatório" class="btn-icon-header">🎲</button>
                 </div>
 
                 <button id="dark-mode-icon-btn" aria-label="Modo Escuro"></button>
@@ -76,9 +75,9 @@
         <div class="lista-cards"></div>
 
         <div id="paginacao-container" class="oculto">
-            <button id="btn-anterior" onclick="mudarPagina(-1)" disabled>❮ Anterior</button>
+            <button id="btn-anterior" disabled>❮ Anterior</button>
             <span id="indicador-pagina">Página 1</span>
-            <button id="btn-proxima" onclick="mudarPagina(1)">Próxima ❯</button>
+            <button id="btn-proxima">Próxima ❯</button>
         </div>
 
     </main>
@@ -91,9 +90,9 @@
     </div>
 
     <div id="stats-modal" class="modal oculto">
-        <div class="modal-conteudo" style="max-width: 600px;">
+        <div class="modal-conteudo modal-pequeno">
             <span class="fechar-btn" id="fechar-stats">&times;</span>
-            <h2 style="text-align: center; margin-bottom: 20px;">Suas Estatísticas 📈</h2>
+            <h2 class="titulo-centralizado">Suas Estatísticas 📈</h2>
             
             <div class="stats-grid">
                 <div class="stat-card">
@@ -126,7 +125,7 @@
                 </div>
             </div>
 
-            <p style="text-align: center; font-size: 0.8em; color: #888; margin-top: 20px;">
+            <p class="nota-rodape">
                 *Estimativa baseada em 24min por episódio.
             </p>
         </div>

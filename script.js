@@ -251,10 +251,48 @@ function adicionarAoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicia
 function removerDoCatalogo(malId) {
     if (catalogoPessoal.hasOwnProperty(malId)) {
         const animeTitulo = catalogoPessoal[malId].title;
+        
+        // 1. Guarda dados para recriar o card "vazio" se necessário
+        const dadosParaReset = {
+            mal_id: malId,
+            title: catalogoPessoal[malId].title,
+            images: { jpg: { image_url: catalogoPessoal[malId].poster } },
+            episodes: catalogoPessoal[malId].maxEpisodes,
+            type: catalogoPessoal[malId].type,
+            year: catalogoPessoal[malId].year
+        };
+
+        // 2. Remove do banco de dados
         delete catalogoPessoal[malId];
         salvarCatalogo();
-        carregarAnimesSalvos();
-        showToast(`"${animeTitulo}" Removido!`, 'error');
+
+        // 3. DECISÃO INTELIGENTE DE INTERFACE
+        const card = document.querySelector(`.card-anime[data-mal-id="${malId}"]`);
+        const isSearchMode = campoBusca.value.trim().length > 0 || (resultadosBuscaAPI && !resultadosBuscaAPI.classList.contains('oculto'));
+
+        if (isSearchMode) {
+            // MODO BUSCA: Não remove o card, apenas substitui pelo botão de "Adicionar"
+            if (card) {
+                // Gera um card novo "virgem" (não salvo)
+                const novoCardElement = renderizarCardAnime(dadosParaReset, false, {}, true);
+                card.replaceWith(novoCardElement);
+            }
+        } else {
+            // MODO CATÁLOGO: Remove o card da tela pois ele não existe mais na lista
+            if (card) {
+                card.style.transition = 'opacity 0.3s, transform 0.3s';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.9)';
+                setTimeout(() => card.remove(), 300);
+            }
+            // Se a lista ficar vazia, recarrega para mostrar a mensagem de vazio
+            if (Object.keys(catalogoPessoal).length === 0) {
+                setTimeout(() => carregarAnimesSalvos(), 300);
+            }
+        }
+
+        showToast(`"${animeTitulo}" removido do catálogo.`, 'error');
+        fecharModal();
     }
 }
 
@@ -283,6 +321,59 @@ function updateProgressoDisplay(malId, season, episode, maxEpisodes) {
         if (pct < 0) pct = 0;
         if (pct > 100) pct = 100;
         barraElement.style.width = `${pct}%`;
+    }
+}
+
+function concluirAnimeRapido(malId) {
+    if (catalogoPessoal.hasOwnProperty(malId)) {
+        const anime = catalogoPessoal[malId];
+        
+        // 1. Atualiza Dados (Memória)
+        // Se tiver total de episódios, usa ele. Se não, mantém o que tem ou define um padrão.
+        if (anime.maxEpisodes) {
+            anime.episode = anime.maxEpisodes;
+        }
+        anime.status = 'Concluído'; // Força o status
+        
+        // 2. Salva
+        salvarCatalogo();
+        
+        // 3. ATUALIZAÇÃO VISUAL FORÇADA (DOM)
+        const card = document.querySelector(`.card-anime[data-mal-id="${malId}"]`);
+        
+        if (card) {
+            // A. Atualiza Inputs e Textos de Progresso
+            const inputElement = document.getElementById(`episode-input-${malId}`);
+            if (inputElement) inputElement.value = anime.episode;
+
+            const progressoTexto = document.getElementById(`ep-atual-${malId}`);
+            if (progressoTexto) {
+                const episodesTotal = anime.maxEpisodes ? ` / ${anime.maxEpisodes}` : '';
+                progressoTexto.textContent = `Ep ${anime.episode}${episodesTotal}`;
+            }
+
+            // B. Atualiza Barra de Progresso (Cheia)
+            const barra = document.getElementById(`bar-prog-${malId}`);
+            if (barra) {
+                barra.style.width = '100%';
+            }
+
+            // C. Atualiza Cores e Etiqueta (Status)
+            // Remove todas as classes antigas para garantir
+            card.classList.remove('status-quero-ver', 'status-em-andamento');
+            card.classList.add('status-concluido');
+
+            const etiqueta = card.querySelector('.etiqueta-status');
+            if (etiqueta) {
+                etiqueta.classList.remove('status-quero-ver', 'status-em-andamento');
+                etiqueta.classList.add('status-concluido');
+                etiqueta.textContent = 'Concluído ✅';
+            }
+        }
+        
+        // 4. Feedback e Fechamento
+        showToast('Anime marcado como Concluído! 🎉', 'success');
+        fecharModal();
     }
 }
 
@@ -842,21 +933,35 @@ async function abrirModal(malId) {
         let trailerEmbedUrl = anime.trailer?.embed_url ? anime.trailer.embed_url.replace(/[?&]autoplay=1/gi, '') + '&rel=0' : null;
 
         const isSaved = catalogoPessoal.hasOwnProperty(malId);
-        let areaGerenciamentoHTML = '';
+        
+        // ==========================================================
+        // 🛑 MUDANÇA AQUI: Layout dos botões de ação
+        // ==========================================================
+        let acoesHTML = '';
+        
         if (isSaved) {
-            const savedData = catalogoPessoal[malId];
-            areaGerenciamentoHTML = `
-                <div class="modal-gerenciamento-compacto">
-                    <select onchange="atualizarStatusAnime(${malId}, this.value)" class="modal-select-compacto">
-                        <option value="Quero Ver" ${savedData.status === 'Quero Ver' ? 'selected' : ''}>Quero Ver</option>
-                        <option value="Em Andamento" ${savedData.status === 'Em Andamento' ? 'selected' : ''}>Em Andamento</option>
-                        <option value="Concluído" ${savedData.status === 'Concluído' ? 'selected' : ''}>Concluído</option>
-                    </select>
-                    <button onclick="removerDoCatalogo(${malId}); fecharModal();" class="btn-base btn-remover">Remover</button>
-                </div><hr class="modal-divisor">`;
+            // Se já está salvo: Botão Concluir + Botão Lixo
+            acoesHTML = `
+                <div class="modal-actions-row">
+                    <button onclick="concluirAnimeRapido(${malId})" class="btn-modal-action btn-modal-concluir" title="Marcar como Concluído">
+                        ✅ Marcar Concluído
+                    </button>
+                    <button onclick="removerDoCatalogo(${malId})" class="btn-modal-action btn-modal-excluir" title="Remover do Catálogo">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+        } else {
+            // Se não está salvo: Botão normal de adicionar (Opcional colocar aqui ou deixar só no card)
+            // Para manter o padrão, vamos deixar vazio ou colocar um botão "Adicionar Agora" se quiser
+            // Por enquanto deixei vazio pois o usuário geralmente adiciona pelo card, 
+            // mas se quiser adicionar pelo modal, me avise!
         }
 
-        // ⭐ NOVO: Obter links de streaming
+        // ⭐ Obter links de streaming
         const linksStreaming = await obterLinksStreaming(anime);
         const streamingHTML = renderizarAbaStreaming(linksStreaming);
 
@@ -874,26 +979,29 @@ async function abrirModal(malId) {
 
         modalInfo.innerHTML = `
             <h2 id="modal-titulo">${anime.title_english || anime.title}</h2>
+            
             <div class="modal-poster-detalhes">
                 <img id="modal-poster" src="${anime.images.jpg.large_image_url}" alt="Poster">
-                <div id="modal-detalhes-rapidos">
-                    <p><strong>Tipo:</strong> ${tipoMidia}</p>
-                    <p><strong>Gêneros:</strong> ${generos}</p>
-                    <p><strong>Episódios:</strong> ${anime.episodes || 'N/A'}</p>
-                    <p><strong>Status:</strong> ${statusTraduzido}</p>
-                    <p><strong>Lançado em:</strong> ${anoLancamento}</p>
+                
+                <div id="modal-detalhes-rapidos" style="display: flex; flex-direction: column;">
+                    <div style="flex-grow: 1;">
+                        <p><strong>Tipo:</strong> ${tipoMidia}</p>
+                        <p><strong>Gêneros:</strong> ${generos}</p>
+                        <p><strong>Episódios:</strong> ${anime.episodes || 'N/A'}</p>
+                        <p><strong>Status:</strong> ${statusTraduzido}</p>
+                        <p><strong>Lançado em:</strong> ${anoLancamento}</p>
+                    </div>
+
+                    ${acoesHTML}
                 </div>
             </div>
-            ${areaGerenciamentoHTML}
             
-            <!-- SISTEMA DE ABAS COM STREAMING -->
             <div class="modal-tabs">
                 <button class="tab-button ativo" onclick="mudarAba(event, 'sinopse')">📖 Sinopse</button>
                 <button class="tab-button" onclick="mudarAba(event, 'trailer')">🎥 Trailer</button>
                 <button class="tab-button" onclick="mudarAba(event, 'streaming')">📺 Onde Assistir</button>
             </div>
 
-            <!-- Conteúdo das Abas -->
             <div class="modal-tab-conteudo">
                 <div id="sinopse" class="tab-content ativo">
                     <div class="sinopse-texto">
@@ -903,7 +1011,6 @@ async function abrirModal(malId) {
                 
                 ${trailerAbaHTML}
                 
-                <!-- ⭐ NOVA ABA DE STREAMING -->
                 <div id="streaming" class="tab-content oculto">
                     ${streamingHTML}
                 </div>
@@ -911,6 +1018,7 @@ async function abrirModal(malId) {
 
     } catch (error) {
         if (modalInfo) modalInfo.innerHTML = '<p style="text-align:center; color: red;">Não foi possível carregar detalhes.</p>';
+        console.error(error);
     }
 }
 
@@ -1111,6 +1219,14 @@ function setupListeners() {
     const btnDarkMode = document.getElementById('dark-mode-icon-btn');
     if (btnDarkMode) {
         btnDarkMode.addEventListener('click', toggleDarkMode);
+    }
+
+    if (btnAnterior) {
+        btnAnterior.addEventListener('click', () => mudarPagina(-1));
+    }
+    
+    if (btnProxima) {
+        btnProxima.addEventListener('click', () => mudarPagina(1));
     }
 
     // --- Campo de Busca ---
