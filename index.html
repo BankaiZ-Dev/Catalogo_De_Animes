@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Catálogo Pessoal de Animes</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>">
+</head>
+
+<body>
+
+    <div id="global-loading-overlay" class="oculto">
+        <div class="spinner"></div>
+        <span class="loading-text">Carregando...</span>
+    </div>
+
+    <header class="cabecalho">
+        <div class="cabecalho-conteudo">
+            <h1>Minha Lista de Animes</h1>
+            <div class="cabecalho-utilitarios">
+                <p>Organize o que você já viu e o que planeja assistir!</p>
+
+                <div class="botoes-backup">
+                    <button id="btn-exportar" title="Baixar Backup (Salvar)" class="btn-icon-header">⬇️</button>
+                    <button id="btn-importar" title="Restaurar Backup (Carregar)" class="btn-icon-header">⬆️</button>
+                    <input type="file" id="input-importar" accept=".json" class="oculto">
+
+                    <button id="btn-stats" title="Ver Estatísticas" class="btn-icon-header">📊</button>
+                    <button id="btn-roleta" title="Me sugira um anime! (Roleta)" class="btn-icon-header">🎲</button>
+                </div>
+
+                <button id="dark-mode-icon-btn" aria-label="Modo Escuro"></button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container-catalogo">
+
+        <div class="barra-ferramentas">
+
+            <button id="btn-voltar-catalogo" class="btn-voltar-home oculto">
+                🏠 Meu Catálogo
+            </button>
+
+            <div class="busca-input-container">
+                <input type="text" id="campo-busca" placeholder="Pesquise seu anime..." />
+                <button id="limpar-busca-btn" class="limpar-busca-btn oculto" type="button">×</button>
+                <div id="resultados-busca-api" class="oculto"></div>
+            </div>
+
+            <select id="filtro-status">
+                <option value="todos">Todos os Status</option>
+                <option value="Quero Ver">Quero Ver</option>
+                <option value="Em Andamento">Em Andamento</option>
+                <option value="Concluído">Concluído</option>
+                <option value="favoritos">Favoritos</option>
+            </select>
+
+            <select id="ordenacao-catalogo">
+                <option value="data-desc">Mais Recentes</option>
+                <option value="data-asc">Mais Antigos</option>
+                <option value="az">Nome (A-Z)</option>
+                <option value="za">Nome (Z-A)</option>
+            </select>
+
+            <div class="view-mode-toggle">
+                <button class="view-btn active" data-view="grid" title="Grade Normal">◫</button>
+                <button class="view-btn" data-view="compact" title="Grade Compacta">▦</button>
+                <button class="view-btn" data-view="list" title="Lista">☰</button>
+            </div>
+
+        </div>
+
+        <div class="lista-cards"></div>
+
+        <div id="paginacao-container" class="oculto">
+            <button id="btn-anterior" onclick="mudarPagina(-1)" disabled>❮ Anterior</button>
+            <span id="indicador-pagina">Página 1</span>
+            <button id="btn-proxima" onclick="mudarPagina(1)">Próxima ❯</button>
+        </div>
+
+    </main>
+
+    <div id="anime-modal" class="modal oculto">
+        <div class="modal-conteudo">
+            <span class="fechar-btn" id="fechar-modal-detalhes">&times;</span>
+            <div id="modal-info"></div>
+        </div>
+    </div>
+
+    <div id="stats-modal" class="modal oculto">
+        <div class="modal-conteudo" style="max-width: 600px;">
+            <span class="fechar-btn" id="fechar-stats">&times;</span>
+            <h2 style="text-align: center; margin-bottom: 20px;">Suas Estatísticas 📈</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-info">
+                        <span class="stat-valor" id="stat-total-animes">0</span>
+                        <span class="stat-label">Animes na Lista</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📺</div>
+                    <div class="stat-info">
+                        <span class="stat-valor" id="stat-total-eps">0</span>
+                        <span class="stat-label">Episódios Vistos</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-info">
+                        <span class="stat-valor" id="stat-tempo-total">0h</span>
+                        <span class="stat-label">Tempo Assistido</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <span class="stat-valor" id="stat-concluidos">0</span>
+                        <span class="stat-label">Animes Concluídos</span>
+                    </div>
+                </div>
+            </div>
+
+            <p style="text-align: center; font-size: 0.8em; color: #888; margin-top: 20px;">
+                *Estimativa baseada em 24min por episódio.
+            </p>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
