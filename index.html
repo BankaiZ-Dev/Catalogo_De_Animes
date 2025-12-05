@@ -7,6 +7,19 @@
     <title>Meu Catálogo Pessoal de Animes</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff4081">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('PWA registrado com sucesso!', reg))
+            .catch(err => console.log('Erro ao registrar PWA:', err));
+        });
+    }
+    </script>
 </head>
 
 <body>
@@ -134,6 +147,21 @@
     <div id="toast-container"></div>
 
     <script src="script.js"></script>
+
+    <div id="update-toast" class="update-notification oculto">
+        <div class="update-content">
+            <span class="update-icon">🔄</span>
+            <div class="update-text">
+                <strong>Atualização disponível!</strong>
+                <p>Nova versão pronta para instalar.</p>
+            </div>
+            <div class="update-buttons">
+                <button id="update-btn-agora" class="btn-atualizar-agora">Atualizar agora</button>
+                <button id="update-btn-depois" class="btn-atualizar-depois">Depois</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>

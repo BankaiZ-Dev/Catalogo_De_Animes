@@ -1213,8 +1213,90 @@ function toggleFavorite(malId) {
     }
 }
 
+// ========================================================
+// PWA: SISTEMA DE ATUALIZAÇÃO
+// ========================================================
+
+let newWorker; // Variável global para guardar o worker que está esperando
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => {
+                console.log('✅ Service Worker registrado:', reg);
+
+                // A. Se já tem um worker esperando (atualização baixada em background)
+                if (reg.waiting) {
+                    newWorker = reg.waiting;
+                    showUpdateNotification();
+                }
+
+                // B. Se encontrar uma atualização nova agora
+                reg.addEventListener('updatefound', () => {
+                    newWorker = reg.installing;
+                    
+                    newWorker.addEventListener('statechange', () => {
+                        // Se o estado mudou para 'installed' e já existe um controller,
+                        // significa que é uma atualização, não a primeira instalação.
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            showUpdateNotification();
+                        }
+                    });
+                });
+            })
+            .catch(err => console.error('❌ Erro SW:', err));
+    });
+
+    // C. Quando a atualização for aplicada (após clicar no botão), recarrega a página
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        localStorage.setItem('app_updated', 'true');
+        window.location.reload();
+    });
+}
+
+// --- FUNÇÕES VISUAIS DA NOTIFICAÇÃO ---
+
+function showUpdateNotification() {
+    const updateToast = document.getElementById('update-toast');
+    const btnAgora = document.getElementById('update-btn-agora');
+    const btnDepois = document.getElementById('update-btn-depois');
+
+    if (!updateToast) return;
+
+    // Remove classe oculto para mostrar
+    updateToast.classList.remove('oculto');
+
+    // Clique: Atualizar Agora
+    btnAgora.onclick = () => {
+        if (newWorker) {
+            // Manda sinal para o SW pular a espera e ativar
+            newWorker.postMessage({ type: 'SKIP_WAITING' });
+            // O evento 'controllerchange' lá em cima vai recarregar a página
+        }
+        hideUpdateNotification();
+    };
+
+    // Clique: Depois
+    btnDepois.onclick = () => {
+        hideUpdateNotification();
+    };
+}
+
+function hideUpdateNotification() {
+    const updateToast = document.getElementById('update-toast');
+    if (!updateToast) return;
+
+    updateToast.classList.add('saindo'); // Animação de saída CSS
+    setTimeout(() => {
+        updateToast.classList.add('oculto');
+        updateToast.classList.remove('saindo');
+    }, 400);
+}
+
 function setupListeners() {
-    
     // --- Dark Mode ---
     const btnDarkMode = document.getElementById('dark-mode-icon-btn');
     if (btnDarkMode) {
@@ -1311,4 +1393,12 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarAnimesSalvos();
     setupListeners();
     aplicarModoVisualizacaoInicial();
+    // 🛑 VERIFICAÇÃO DE SUCESSO DA ATUALIZAÇÃO
+    if (localStorage.getItem('app_updated')) {
+        // Mostra o Toast de sucesso
+        showToast('✅ App atualizado para a versão mais recente!', 'success');
+        
+        // Remove o lembrete para não mostrar de novo se der F5 normal
+        localStorage.removeItem('app_updated');
+    }
 });
