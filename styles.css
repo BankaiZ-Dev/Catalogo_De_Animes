@@ -19,6 +19,7 @@
     --largura-maxima: 1200px;
     --raio-borda: 8px;
     --sombra-padrao: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --sombra-texto-contorno: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
 
 body.dark-mode {
@@ -28,6 +29,7 @@ body.dark-mode {
     --cor-card-fundo: #1e1e1e;
     --cor-borda: #444;
     --sombra-padrao: 0 4px 8px rgba(0, 0, 0, 0.5);
+    --sombra-texto-contorno: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
 
 /* ==========================================================================
@@ -195,7 +197,7 @@ body.dark-mode #dark-mode-icon-btn::before {
     display: flex;
     align-items: center;
     gap: 8px;
-    height: 45px;
+    height: 42px;
     transition: background-color 0.2s, transform 0.2s;
 }
 
@@ -251,6 +253,7 @@ body.dark-mode #dark-mode-icon-btn::before {
     background-color: var(--cor-card-fundo);
     color: var(--cor-texto-principal);
     cursor: pointer;
+    height: 42px;
 }
 
 /* --- Resultados da Busca (Dropdown) --- */
@@ -323,8 +326,8 @@ body.dark-mode .resultado-item.ativo {
     display: flex;
     overflow: hidden;
     position: relative;
-    border-left: 5px solid transparent;
-    transition: transform 0.2s, border-left-color 0.5s ease; /* Adicionei border-left-color */
+    border-left: 5px solid var(--cor-atual, transparent);
+    transition: transform 0.2s, border-left-color 0.5s ease;
 }
 
 .card-anime:hover {
@@ -333,13 +336,13 @@ body.dark-mode .resultado-item.ativo {
 
 /* Cores da borda lateral conforme status */
 .status-concluido {
-    border-left-color: var(--status-concluido);
+    --cor-atual: var(--status-concluido);
 }
 .status-em-andamento {
-    border-left-color: var(--status-andamento);
+    --cor-atual: var(--status-andamento);
 }
 .status-quero-ver {
-    border-left-color: var(--status-querover);
+    --cor-atual: var(--status-querover);
 }
 
 .card-poster {
@@ -376,16 +379,8 @@ body.dark-mode .resultado-item.ativo {
     text-align: center;
     font-weight: bold;
     margin-bottom: 10px;
-}
-
-.etiqueta-status.status-concluido {
-    background-color: var(--status-concluido);
-}
-.etiqueta-status.status-em-andamento {
-    background-color: var(--status-andamento);
-}
-.etiqueta-status.status-quero-ver {
-    background-color: var(--status-querover);
+    background-color: var(--cor-atual, #ccc);
+    text-shadow: var(--sombra-texto-contorno);
 }
 
 .card-meta-info {
@@ -433,8 +428,6 @@ body.dark-mode .tag-tipo {
     justify-content: space-between;
     align-items: center;
     gap: 5px; /* Diminuí o gap para caber mais coisa */
-
-    /* SEGURANÇA: Garante que não saia do card */
     width: 100%;
     max-width: 100%;
 }
@@ -445,13 +438,9 @@ body.dark-mode .tag-tipo {
     font-size: 0.9em;
     color: var(--cor-texto-principal);
     margin: 0;
-
-    /* TRUQUE: Se o espaço acabar, o texto encolhe (...), mas não quebra linha */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-
-    /* O texto ocupa o espaço que sobrar, mas não empurra os botões pra fora */
     flex: 1;
     min-width: 0; /* Essencial para não estourar flexbox */
 }
@@ -513,7 +502,6 @@ body.dark-mode .tag-tipo {
     -webkit-appearance: none;
 }
 
-
 .barra-progresso-fundo {
     width: 100%;
     height: 6px;
@@ -531,16 +519,8 @@ body.dark-mode .barra-progresso-fundo {
 .barra-progresso-preenchimento {
     height: 100%;
     width: 0%;
-    background-color: var(--status-querover);
+    background-color: var(--cor-atual, var(--status-querover));
     transition: width 0.4s ease-in-out;
-}
-
-.status-em-andamento .barra-progresso-preenchimento {
-    background-color: var(--status-andamento) !important;
-}
-
-.status-concluido .barra-progresso-preenchimento {
-    background-color: var(--status-concluido);
 }
 
 /* --- Rodapé do Card (Ações) --- */
@@ -556,8 +536,6 @@ body.dark-mode .barra-progresso-fundo {
     align-items: flex-end; /* Alinha o conteúdo verticalmente na base */
     gap: 10px;
 }
-
-
 
 .btn-base {
     background: transparent;
@@ -658,7 +636,6 @@ body.dark-mode .barra-progresso-fundo {
     transform: scale(1.1);
 }
 
-
 .modal-poster-detalhes {
     display: flex;
     flex-wrap: wrap;
@@ -666,54 +643,85 @@ body.dark-mode .barra-progresso-fundo {
     margin: 20px 0;
 }
 
+/* Coluna da Direita (Texto + Botões) */
+#modal-detalhes-rapidos {
+    display: flex;
+    flex-direction: column; /* Organiza em coluna vertical */
+    flex-grow: 1;
+}
+
 #modal-poster {
     max-width: 200px;
     border-radius: var(--raio-borda);
 }
 
-.modal-gerenciamento-compacto {
+/* Container dos botões (Sempre no rodapé da coluna) */
+.modal-actions-row {
     display: flex;
-    gap: 15px;
-    margin: 15px 0;
-    padding: 15px;
-    background-color: var(--cor-fundo);
-    border-radius: var(--raio-borda);
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: space-between;
+    gap: 10px;
+    margin-top: auto; /* 🛑 A MÁGICA: Empurra os botões para o fundo */
+    padding-top: 15px;
+    align-items: center; /* Alinha verticalmente */
 }
 
-.modal-select-compacto {
-    flex-grow: 0;
-    min-width: 150px;
-    padding: 8px;
-    background-color: var(--cor-card-fundo);
-    color: var(--cor-texto-principal);
-    border: 1px solid var(--cor-borda);
-    border-radius: 4px;
+body.dark-mode .modal-actions-row {
+    border-top-color: #444;
 }
 
-.btn-remover {
-    background-color: #f44336;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    width: auto;
-    min-width: fit-content;
-    white-space: nowrap;
-    flex-shrink: 0;
-    display: inline-flex;
+/* Estilo Base dos Botões do Modal */
+.btn-modal-action {
+    display: flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
+    
+    /* 🛑 TAMANHO REDUZIDO E FIXO AO CONTEÚDO */
+    padding: 6px 14px;      /* Altura menor */
+    font-size: 0.9em;       /* Fonte levemente menor */
+    width: fit-content;     /* Largura se adapta ao texto, não estica */
+    
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.btn-remover:hover {
-    background-color: #d32f2f;
-    color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+.btn-modal-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Botão Concluir (Verde) */
+.btn-modal-concluir {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    text-shadow: var(--sombra-texto-contorno);
+}
+
+/* Botão Excluir (Vermelho / Lixo) */
+.btn-modal-excluir {
+    background-color: #ff5252;
+    padding: 6px 10px; /* Um pouco mais quadrado para o ícone */
+}
+
+.btn-modal-excluir svg {
+    width: 18px; /* Ícone levemente menor */
+    height: 18px;
+}
+
+/* Responsivo para celular */
+@media (max-width: 600px) {
+    .modal-actions-row {
+        justify-content: center;
+        margin-top: 15px;
+        width: 100%;
+    }
+    
+    .btn-modal-action {
+        width: 100%; /* Botões ocupam largura total no celular */
+    }
 }
 
 .modal-trailer-container {
@@ -771,6 +779,7 @@ body.dark-mode .barra-progresso-fundo {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     line-height: 1;
     padding-top: 2px;
+    text-shadow: var(--sombra-texto-contorno);
 }
 
 .stat-info {
@@ -782,6 +791,7 @@ body.dark-mode .barra-progresso-fundo {
     font-size: 1.5em;
     font-weight: bold;
     color: var(--cor-primaria);
+    
 }
 
 .stat-label {
@@ -845,25 +855,15 @@ body.dark-mode .barra-progresso-fundo {
 .toast {
     /* Removemos position: fixed, pois o pai (#toast-container) já controla a posição */
     position: relative; 
-    
     padding: 12px 24px;
     border-radius: 50px;
-    
-    /* ESTILO VISUAL (Texto Branco + Borda Preta) */
     color: #fff;
     font-weight: bold;
     font-size: 1rem;
     letter-spacing: 0.5px;
-    
     /* Borda Preta no Texto */
-    text-shadow: 
-       -1px -1px 0 #000,  
-        1px -1px 0 #000,
-       -1px  1px 0 #000,
-        1px  1px 0 #000;
-    
+    text-shadow: var(--sombra-texto-contorno);
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    
     /* Animação simplificada (só desliza pra cima, sem centralizar) */
     animation: slide-in-right 0.3s forwards;
 }
@@ -1033,16 +1033,6 @@ body.dark-mode .view-btn:hover:not(.active) {
     }
 }
 
-#campo-busca,
-.view-mode-toggle,
-#filtro-status,
-#ordenacao-catalogo,
-.btn-voltar-home {
-    height: 42px !important;
-    box-sizing: border-box;
-    vertical-align: middle;
-}
-
 /* ==========================================================================
    SISTEMA DE FAVORITOS (Refinado)
    ========================================================================== */
@@ -1074,12 +1064,7 @@ body.dark-mode .view-btn:hover:not(.active) {
     
     box-shadow: 0 3px 6px rgba(0,0,0,0.6);
     z-index: 10;
-    text-shadow: 
-       -1px -1px 0 #000,  
-        1px -1px 0 #000,
-       -1px  1px 0 #000,
-        1px  1px 0 #000;
-
+    text-shadow: var(--sombra-texto-contorno);
     animation: badgeAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
@@ -1096,22 +1081,14 @@ body.dark-mode .view-btn:hover:not(.active) {
 .btn-favorite:hover {
     background-color: #FFD700;
     color: white;
-    text-shadow: 
-       -1px -1px 0 #000,  
-        1px -1px 0 #000,
-       -1px  1px 0 #000,
-        1px  1px 0 #000;
+    text-shadow: var(--sombra-texto-contorno);
 }
 
 .btn-favorite.active {
     background-color: #FFD700;
     color: white;
     border-color: #FFD700;
-    text-shadow: 
-       -1px -1px 0 #000,  
-        1px -1px 0 #000,
-       -1px  1px 0 #000,
-        1px  1px 0 #000;
+    text-shadow: var(--sombra-texto-contorno);
 }
 
 @keyframes badgeAppear {
@@ -1402,6 +1379,21 @@ body.dark-mode .streaming-link:hover {
     .streaming-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     }
+}
+
+/* Utilitários para o Modal de Stats */
+.modal-pequeno {
+    max-width: 600px;
+}
+.titulo-centralizado {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.nota-rodape {
+    text-align: center;
+    font-size: 0.8em;
+    color: #fdfcfc;
+    margin-top: 20px;
 }
 
 /* ==========================================================================

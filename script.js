@@ -249,6 +249,11 @@ function adicionarAoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicia
 }
 
 function removerDoCatalogo(malId) {
+    // 👇 ADIÇÃO: Pergunta de segurança antes de apagar
+    if (!confirm("Tem certeza que deseja remover este anime? Todo o progresso será perdido.")) {
+        return; // Se clicar em "Cancelar", a função para aqui.
+    }
+
     if (catalogoPessoal.hasOwnProperty(malId)) {
         const animeTitulo = catalogoPessoal[malId].title;
         
@@ -600,7 +605,7 @@ function renderizarCardAnime(animeAPI, isSaved = false, savedData = {}, returnEl
     cardElement.dataset.malId = malId;
     cardElement.innerHTML = `
         ${favoriteBadge}
-        <img src="${posterUrl}" alt="Poster" class="card-poster" onerror="handleImageError(this)">
+        <img src="${posterUrl}" alt="Poster" class="card-poster" loading="lazy" onerror="handleImageError(this)">
         <div class="card-info" style="display: flex; flex-direction: column;">
             <h2 class="card-titulo">${titulo}</h2>
             <div class="card-status-pessoal" style="flex-grow: 1; display: flex; flex-direction: column;">
@@ -983,7 +988,7 @@ async function abrirModal(malId) {
             <div class="modal-poster-detalhes">
                 <img id="modal-poster" src="${anime.images.jpg.large_image_url}" alt="Poster">
                 
-                <div id="modal-detalhes-rapidos" style="display: flex; flex-direction: column;">
+                <div id="modal-detalhes-rapidos">
                     <div style="flex-grow: 1;">
                         <p><strong>Tipo:</strong> ${tipoMidia}</p>
                         <p><strong>Gêneros:</strong> ${generos}</p>
