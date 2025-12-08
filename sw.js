@@ -2,7 +2,7 @@
 // SERVICE WORKER (SW.JS)
 // ========================================================
 
-const CACHE_NAME = 'anime-catalog-v1.1'; // ⚠️ Mude este número para v2, v3... para forçar atualização
+const CACHE_NAME = 'anime-catalog-v1.2'; // ⚠️ Mude este número para v2, v3... para forçar atualização
 const URLS_TO_CACHE = [
   './',
   './index.html',

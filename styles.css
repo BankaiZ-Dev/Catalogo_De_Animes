@@ -1,23 +1,29 @@
 /* ==========================================================================
-   1. VARIÁVEIS E CORES (TEMA)
+   1. VARIÁVEIS CSS E TEMAS
    ========================================================================== */
 :root {
+    /* Cores Base */
     --cor-fundo: #f4f4f9;
     --cor-texto-principal: #333;
     --cor-texto-secundario: #666;
     --cor-card-fundo: #ffffff;
     --cor-borda: #ccc;
 
+    /* Cores de Marca */
     --cor-primaria: #d32f2f;
     --cor-primaria-hover: #b71c1c;
     --cor-acento: #2196F3;
 
+    /* Status */
     --status-concluido: #4CAF50;
     --status-andamento: #FF9800;
     --status-querover: #2196F3;
 
+    /* Layout */
     --largura-maxima: 1200px;
     --raio-borda: 8px;
+    
+    /* Sombras */
     --sombra-padrao: 0 4px 8px rgba(0, 0, 0, 0.1);
     --sombra-texto-contorno: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
@@ -29,7 +35,6 @@ body.dark-mode {
     --cor-card-fundo: #1e1e1e;
     --cor-borda: #444;
     --sombra-padrao: 0 4px 8px rgba(0, 0, 0, 0.5);
-    --sombra-texto-contorno: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
 
 /* ==========================================================================
@@ -63,6 +68,18 @@ button {
     padding-top: 0;
 }
 
+/* Classes Utilitárias */
+.oculto {
+    display: none !important;
+}
+
+.sem-animacao {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
+}
+
 /* ==========================================================================
    3. CABEÇALHO (HEADER)
    ========================================================================== */
@@ -86,6 +103,7 @@ button {
     font-size: 1.5em;
 }
 
+/* --- Utilitários do Cabeçalho --- */
 .cabecalho-utilitarios {
     display: flex;
     align-items: center;
@@ -96,14 +114,30 @@ button {
     display: none;
 }
 
-@media (min-width: 768px) {
-    .cabecalho-utilitarios p {
-        display: block;
-        font-size: 0.9em;
-    }
-    .cabecalho h1 {
-        font-size: 1.8em;
-    }
+/* --- Botões de Backup --- */
+.botoes-backup {
+    display: flex;
+    gap: 10px;
+    margin-right: 15px;
+}
+
+.btn-icon-header {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2em;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    color: white;
+}
+
+.btn-icon-header:hover {
+    background-color: rgba(255, 255, 255, 0.4);
 }
 
 /* --- Botão Dark Mode --- */
@@ -142,32 +176,6 @@ body.dark-mode #dark-mode-icon-btn::before {
     font-size: 1.2em;
 }
 
-/* --- Botões de Backup --- */
-.botoes-backup {
-    display: flex;
-    gap: 10px;
-    margin-right: 15px;
-}
-
-.btn-icon-header {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1.2em;
-    width: 35px;
-    height: 35px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
-    color: white;
-}
-
-.btn-icon-header:hover {
-    background-color: rgba(255, 255, 255, 0.4);
-}
-
 /* ==========================================================================
    4. BARRA DE FERRAMENTAS
    ========================================================================== */
@@ -184,7 +192,7 @@ body.dark-mode #dark-mode-icon-btn::before {
     border-bottom: 1px solid var(--cor-borda);
 }
 
-/* Botão Voltar ao Catálogo */
+/* --- Botão Voltar --- */
 .btn-voltar-home {
     background-color: var(--cor-acento);
     color: white;
@@ -206,15 +214,7 @@ body.dark-mode #dark-mode-icon-btn::before {
     transform: translateY(-1px);
 }
 
-@media (max-width: 600px) {
-    .btn-voltar-home {
-        width: 100%;
-        justify-content: center;
-        order: -1;
-        margin-bottom: 10px;
-    }
-}
-
+/* --- Campo de Busca --- */
 .busca-input-container {
     position: relative;
     flex-grow: 1;
@@ -243,17 +243,6 @@ body.dark-mode #dark-mode-icon-btn::before {
     font-size: 1.2em;
     color: var(--cor-texto-secundario);
     cursor: pointer;
-}
-
-#filtro-status,
-#ordenacao-catalogo {
-    padding: 10px;
-    border: 1px solid var(--cor-borda);
-    border-radius: var(--raio-borda);
-    background-color: var(--cor-card-fundo);
-    color: var(--cor-texto-principal);
-    cursor: pointer;
-    height: 42px;
 }
 
 /* --- Resultados da Busca (Dropdown) --- */
@@ -298,24 +287,71 @@ body.dark-mode .resultado-item.ativo {
     margin-right: 10px;
 }
 
+/* --- Filtros e Ordenação --- */
+#filtro-status,
+#ordenacao-catalogo {
+    padding: 10px;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-borda);
+    background-color: var(--cor-card-fundo);
+    color: var(--cor-texto-principal);
+    cursor: pointer;
+    height: 42px;
+}
+
+/* --- Botões de Modo de Visualização --- */
+.view-mode-toggle {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-borda);
+    overflow: hidden;
+    background-color: var(--cor-card-fundo);
+    margin-right: 15px;
+    height: 42px;
+}
+
+.view-btn {
+    height: 100%;
+    padding: 0 12px;
+    border: none;
+    border-right: 1px solid var(--cor-borda);
+    background: transparent;
+    cursor: pointer;
+    color: var(--cor-texto-secundario);
+    transition: all 0.2s;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.view-btn:last-child {
+    border-right: none;
+}
+
+.view-btn.active {
+    background-color: var(--cor-primaria);
+    color: white;
+}
+
+.view-btn:hover:not(.active) {
+    background-color: rgba(0,0,0,0.05);
+}
+
+body.dark-mode .view-btn:hover:not(.active) {
+    background-color: rgba(255,255,255,0.1);
+}
+
 /* ==========================================================================
-   5. LISTA DE CARDS
+   5. CARDS DE ANIME
    ========================================================================== */
+
+/* --- Grid de Cards --- */
 .lista-cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 20px;
-}
-
-@keyframes aparecerSuave {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 /* --- Estrutura do Card --- */
@@ -334,17 +370,20 @@ body.dark-mode .resultado-item.ativo {
     transform: translateY(-2px);
 }
 
-/* Cores da borda lateral conforme status */
+/* Cores da borda por status */
 .status-concluido {
     --cor-atual: var(--status-concluido);
 }
+
 .status-em-andamento {
     --cor-atual: var(--status-andamento);
 }
+
 .status-quero-ver {
     --cor-atual: var(--status-querover);
 }
 
+/* --- Imagem do Poster --- */
 .card-poster {
     width: 170px;
     height: 260px;
@@ -352,6 +391,30 @@ body.dark-mode .resultado-item.ativo {
     flex-shrink: 0;
 }
 
+/* --- Badge de Favorito --- */
+.favorite-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000;
+    border: 2px solid #000000;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    line-height: 1;
+    padding-top: 2px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.6);
+    z-index: 10;
+    text-shadow: var(--sombra-texto-contorno);
+    animation: badgeAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* --- Conteúdo do Card --- */
 .card-info {
     padding: 15px;
     display: flex;
@@ -420,19 +483,16 @@ body.dark-mode .tag-tipo {
     color: #fff;
 }
 
-/* --- Controles de Progresso (Inline) --- */
-
-/* 1. O Container da linha inteira */
+/* --- Sistema de Progresso --- */
 .progresso-linha-topo {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 5px; /* Diminuí o gap para caber mais coisa */
+    gap: 5px;
     width: 100%;
     max-width: 100%;
 }
 
-/* 2. O Texto "Ep 100..." */
 .progresso-texto-inline {
     font-weight: bold;
     font-size: 0.9em;
@@ -442,32 +502,25 @@ body.dark-mode .tag-tipo {
     overflow: hidden;
     text-overflow: ellipsis;
     flex: 1;
-    min-width: 0; /* Essencial para não estourar flexbox */
+    min-width: 0;
 }
 
-/* 3. O Bloco de Botões (Fixo) */
 .controle-individual {
     display: flex;
     align-items: center;
     border: 1px solid var(--cor-borda);
     border-radius: 4px;
     background-color: var(--cor-card-fundo);
-
-    /* TRAVA: Não deixa esse bloco encolher nem esticar */
     flex-shrink: 0;
     flex-grow: 0;
 }
 
-/* 4. Botões (+ e -) Compactos */
 .btn-progresso {
     background: var(--cor-fundo);
     border: none;
     color: var(--cor-texto-principal);
-
-    /* Tamanho fixo e um pouco menor para economizar tela */
     width: 25px;
     height: 25px;
-
     cursor: pointer;
     font-weight: bold;
     display: flex;
@@ -480,12 +533,9 @@ body.dark-mode .tag-tipo {
     background-color: rgba(0, 0, 0, 0.1);
 }
 
-/* 5. Input Numérico Compacto */
 .input-progresso-base {
-    /* 40px cabe "999" tranquilo. 50px estava desperdiçando espaço */
     width: 40px;
     height: 28px;
-
     text-align: center;
     border: none;
     border-left: 1px solid var(--cor-borda);
@@ -523,17 +573,14 @@ body.dark-mode .barra-progresso-fundo {
     transition: width 0.4s ease-in-out;
 }
 
-/* --- Rodapé do Card (Ações) --- */
+/* --- Ações do Card --- */
 .card-acoes-compactas {
-    margin-top: auto; /* Empurra para o final */
-
-    /* 🛑 ADICIONANDO DIVISÃO E ESPAÇAMENTO */
+    margin-top: auto;
     padding-top: 10px;
     border-top: 1px solid var(--cor-borda);
-
     display: flex;
-    justify-content: space-between; /* Empurra a data para a esquerda e o botão para a direita */
-    align-items: flex-end; /* Alinha o conteúdo verticalmente na base */
+    justify-content: space-between;
+    align-items: flex-end;
     gap: 10px;
 }
 
@@ -565,8 +612,100 @@ body.dark-mode .barra-progresso-fundo {
     color: white;
 }
 
+.btn-favorite {
+    color: #FFD700;
+    border-color: #FFD700;
+    font-size: 1.3em;
+    line-height: 1;
+    padding-top: 2px;
+    text-shadow: none;
+    transition: all 0.2s;
+}
+
+.btn-favorite:hover {
+    background-color: #FFD700;
+    color: white;
+    text-shadow: var(--sombra-texto-contorno);
+}
+
+.btn-favorite.active {
+    background-color: #FFD700;
+    color: white;
+    border-color: #FFD700;
+    text-shadow: var(--sombra-texto-contorno);
+}
+
 /* ==========================================================================
-   6. PAGINAÇÃO E MODAIS
+   6. MODOS DE VISUALIZAÇÃO
+   ========================================================================== */
+
+/* --- Modo Compacto --- */
+.lista-cards.compact-view {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+.lista-cards.compact-view .card-anime {
+    flex-direction: column;
+}
+
+.lista-cards.compact-view .card-poster {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.lista-cards.compact-view .card-titulo {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3em;
+    height: 2.6em;
+    margin-bottom: 5px;
+}
+
+.lista-cards.compact-view .progresso-texto-inline {
+    font-size: 0.8em;
+    letter-spacing: -0.5px;
+}
+
+.lista-cards.compact-view .progresso-linha-topo {
+    gap: 2px;
+}
+
+.lista-cards.compact-view .btn-progresso {
+    width: 22px;
+}
+
+.lista-cards.compact-view .input-progresso-base {
+    width: 35px;
+    font-size: 0.85em;
+}
+
+/* --- Modo Lista --- */
+.lista-cards.list-view {
+    grid-template-columns: 1fr;
+}
+
+.lista-cards.list-view .card-anime {
+    flex-direction: row;
+    max-height: 220px;
+    align-items: center;
+}
+
+.lista-cards.list-view .card-poster {
+    width: 130px;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lista-cards.list-view .card-info {
+    padding-left: 20px;
+}
+
+/* ==========================================================================
+   7. PAGINAÇÃO
    ========================================================================== */
 #paginacao-container {
     display: flex;
@@ -595,7 +734,11 @@ body.dark-mode .barra-progresso-fundo {
     font-weight: bold;
 }
 
-/* --- Modais --- */
+/* ==========================================================================
+   8. MODAIS
+   ========================================================================== */
+
+/* --- Estrutura Base do Modal --- */
 .modal {
     position: fixed;
     z-index: 2000;
@@ -618,6 +761,10 @@ body.dark-mode .barra-progresso-fundo {
     color: var(--cor-texto-principal);
 }
 
+.modal-pequeno {
+    max-width: 600px;
+}
+
 .fechar-btn {
     position: absolute;
     top: 15px;
@@ -636,6 +783,7 @@ body.dark-mode .barra-progresso-fundo {
     transform: scale(1.1);
 }
 
+/* --- Layout do Modal --- */
 .modal-poster-detalhes {
     display: flex;
     flex-wrap: wrap;
@@ -643,43 +791,34 @@ body.dark-mode .barra-progresso-fundo {
     margin: 20px 0;
 }
 
-/* Coluna da Direita (Texto + Botões) */
-#modal-detalhes-rapidos {
-    display: flex;
-    flex-direction: column; /* Organiza em coluna vertical */
-    flex-grow: 1;
-}
-
 #modal-poster {
     max-width: 200px;
     border-radius: var(--raio-borda);
 }
 
-/* Container dos botões (Sempre no rodapé da coluna) */
+#modal-detalhes-rapidos {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+/* --- Ações do Modal --- */
 .modal-actions-row {
     display: flex;
     gap: 10px;
-    margin-top: auto; /* 🛑 A MÁGICA: Empurra os botões para o fundo */
+    margin-top: auto;
     padding-top: 15px;
-    align-items: center; /* Alinha verticalmente */
+    align-items: center;
 }
 
-body.dark-mode .modal-actions-row {
-    border-top-color: #444;
-}
-
-/* Estilo Base dos Botões do Modal */
 .btn-modal-action {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    
-    /* 🛑 TAMANHO REDUZIDO E FIXO AO CONTEÚDO */
-    padding: 6px 14px;      /* Altura menor */
-    font-size: 0.9em;       /* Fonte levemente menor */
-    width: fit-content;     /* Largura se adapta ao texto, não estica */
-    
+    padding: 6px 14px;
+    font-size: 0.9em;
+    width: fit-content;
     border-radius: 6px;
     border: none;
     cursor: pointer;
@@ -694,429 +833,22 @@ body.dark-mode .modal-actions-row {
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-/* Botão Concluir (Verde) */
 .btn-modal-concluir {
     background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
     text-shadow: var(--sombra-texto-contorno);
 }
 
-/* Botão Excluir (Vermelho / Lixo) */
 .btn-modal-excluir {
     background-color: #ff5252;
-    padding: 6px 10px; /* Um pouco mais quadrado para o ícone */
+    padding: 6px 10px;
 }
 
 .btn-modal-excluir svg {
-    width: 18px; /* Ícone levemente menor */
+    width: 18px;
     height: 18px;
 }
 
-/* Responsivo para celular */
-@media (max-width: 600px) {
-    .modal-actions-row {
-        justify-content: center;
-        margin-top: 15px;
-        width: 100%;
-    }
-    
-    .btn-modal-action {
-        width: 100%; /* Botões ocupam largura total no celular */
-    }
-}
-
-.modal-trailer-container {
-    position: relative;
-    padding-bottom: 56.25%;
-    height: 0;
-    overflow: hidden;
-    margin-bottom: 20px;
-    border-radius: var(--raio-borda);
-    background: black;
-}
-
-.modal-trailer-container iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-/* --- Estatísticas (Stats) --- */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 10px;
-}
-
-.stat-card {
-    background-color: var(--cor-fundo);
-    padding: 20px;
-    border-radius: var(--raio-borda);
-    border: 1px solid var(--cor-borda);
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s;
-}
-
-.stat-card:hover {
-    transform: translateY(-3px);
-    border-color: var(--cor-primaria);
-}
-
-.stat-icon {
-    font-size: 2.2em;
-    background-color: var(--cor-card-fundo);
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    line-height: 1;
-    padding-top: 2px;
-    text-shadow: var(--sombra-texto-contorno);
-}
-
-.stat-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.stat-valor {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: var(--cor-primaria);
-    
-}
-
-.stat-label {
-    font-size: 0.85em;
-    color: var(--cor-texto-secundario);
-    text-transform: uppercase;
-}
-
-/* ==========================================================================
-   7. UTILITÁRIOS (LOADING E TOAST)
-   ========================================================================== */
-#global-loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 3000;
-}
-
-.spinner {
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid var(--cor-primaria);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin-bottom: 15px;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.loading-text {
-    color: white;
-    font-weight: bold;
-}
-
-/* --- Toast Notification --- */
-#toast-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 4000;
-}
-
-.toast {
-    /* Removemos position: fixed, pois o pai (#toast-container) já controla a posição */
-    position: relative; 
-    padding: 12px 24px;
-    border-radius: 50px;
-    color: #fff;
-    font-weight: bold;
-    font-size: 1rem;
-    letter-spacing: 0.5px;
-    /* Borda Preta no Texto */
-    text-shadow: var(--sombra-texto-contorno);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    /* Animação simplificada (só desliza pra cima, sem centralizar) */
-    animation: slide-in-right 0.3s forwards;
-}
-
-.toast.error, 
-.toast.fav-remove { 
-    background-color: #ff5252;
-}
-
-.toast.fav-add {
-    background-color: #FFC107; 
-}
-
-.toast.success {
-    background-color: var(--status-concluido);
-}
-
-.toast.info {
-    background-color: var(--status-querover);
-}
-.toast.warning {
-    background-color: var(--status-andamento);
-}
-
-@keyframes slide-in-right {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes fade-out {
-    to { opacity: 0; transform: translateX(20px); }
-}
-
-/* CLASSE PARA EVITAR PULO NO UPDATE */
-.sem-animacao {
-    animation: none !important;
-    transform: none !important;
-    opacity: 1 !important;
-    transition: none !important;
-}
-
-/* CLASSE UTILITÁRIA PARA VISIBILIDADE */
-.oculto {
-    display: none !important;
-}
-
-/* ==========================================================================
-   MODOS DE VISUALIZAÇÃO (SEU CÓDIGO)
-   ========================================================================== */
-
-/* Botões de alternância */
-.view-mode-toggle {
-    display: flex;
-    gap: 0;
-    border: 1px solid var(--cor-borda);
-    border-radius: var(--raio-borda);
-    overflow: hidden;
-    background-color: var(--cor-card-fundo);
-    margin-right: 15px;
-    height: 42px; 
-}
-
-.view-btn {
-    height: 100%;
-    padding: 0 12px;
-    border: none;
-    border-right: 1px solid var(--cor-borda);
-    background: transparent;
-    cursor: pointer;
-    color: var(--cor-texto-secundario);
-    transition: all 0.2s;
-    font-size: 1.1em;
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-}
-
-.view-btn:last-child {
-    border-right: none;
-}
-
-.view-btn.active {
-    background-color: var(--cor-primaria);
-    color: white;
-}
-
-.view-btn:hover:not(.active) {
-    background-color: rgba(0,0,0,0.05);
-}
-
-body.dark-mode .view-btn:hover:not(.active) {
-    background-color: rgba(255,255,255,0.1);
-}
-
-/* Modo Compacto */
-.lista-cards.compact-view {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 15px;
-}
-
-.lista-cards.compact-view .card-anime {
-    flex-direction: column;
-}
-
-.lista-cards.compact-view .card-poster {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-}
-
-.lista-cards.compact-view .card-titulo {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    line-height: 1.3em;
-    height: 2.6em; 
-    margin-bottom: 5px;
-}
-
-.lista-cards.compact-view .progresso-texto-inline {
-    font-size: 0.8em;
-    letter-spacing: -0.5px;
-}
-
-.lista-cards.compact-view .progresso-linha-topo {
-    gap: 2px;
-}
-
-.lista-cards.compact-view .btn-progresso {
-    width: 22px;
-}
-
-.lista-cards.compact-view .input-progresso-base {
-    width: 35px;
-    font-size: 0.85em;
-}
-
-/* Modo Lista */
-.lista-cards.list-view {
-    grid-template-columns: 1fr;
-}
-.lista-cards.list-view .card-anime {
-    flex-direction: row;
-    max-height: 220px;
-    align-items: center;
-}
-.lista-cards.list-view .card-poster {
-    width: 130px;
-    height: 100%;
-    object-fit: cover;
-}
-
-.lista-cards.list-view .card-info {
-    padding-left: 20px;
-}
-
-/* Responsivo mobile */
-@media (max-width: 768px) {
-    .view-mode-toggle {
-        width: 100%;
-        margin-bottom: 10px;
-        margin-right: 0;
-    }
-    .view-btn {
-        flex: 1;
-    }
-}
-
-/* ==========================================================================
-   SISTEMA DE FAVORITOS (Refinado)
-   ========================================================================== */
-
-/* Badge de favorito (Selo no canto da imagem) */
-.favorite-badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    
-    /* Fundo Gradiente */
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    color: #000; 
-    
-    /* Borda Preta SEMPRE (Claro e Escuro) */
-    border: 2px solid #000000; 
-    
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-    font-size: 1.2em;
-    line-height: 1;
-    padding-top: 2px; 
-    
-    box-shadow: 0 3px 6px rgba(0,0,0,0.6);
-    z-index: 10;
-    text-shadow: var(--sombra-texto-contorno);
-    animation: badgeAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-.btn-favorite {
-    color: #FFD700;
-    border-color: #FFD700;
-    font-size: 1.3em;
-    line-height: 1;
-    padding-top: 2px;
-    text-shadow: none; 
-    transition: all 0.2s;
-}
-
-.btn-favorite:hover {
-    background-color: #FFD700;
-    color: white;
-    text-shadow: var(--sombra-texto-contorno);
-}
-
-.btn-favorite.active {
-    background-color: #FFD700;
-    color: white;
-    border-color: #FFD700;
-    text-shadow: var(--sombra-texto-contorno);
-}
-
-@keyframes badgeAppear {
-    from {
-        transform: scale(0) rotate(-180deg);
-        opacity: 0;
-    }
-    to {
-        transform: scale(1) rotate(0deg);
-        opacity: 1;
-    }
-}
-
-@keyframes badgeDisappear {
-    from {
-        transform: scale(1) rotate(0deg);
-        opacity: 1;
-    }
-    to {
-        transform: scale(0) rotate(180deg);
-        opacity: 0;
-    }
-}
-
-/* ==========================================================================
-   SISTEMA DE ABAS DO MODAL
-   ========================================================================== */
-
+/* --- Sistema de Abas --- */
 .modal-tabs {
     display: flex;
     border-bottom: 2px solid #ddd;
@@ -1165,43 +897,46 @@ body.dark-mode .tab-button.ativo {
     border-bottom-color: #ff6b6b;
 }
 
-/* Conteúdo das Abas */
+/* --- Conteúdo das Abas --- */
 .modal-tab-conteudo {
     margin: 20px 0;
 }
 
 .tab-content {
-    display: none; 
+    display: none;
     animation: fadeIn 0.3s ease-in;
-}
-
-.tab-content.oculto {
-    display: none !important;
 }
 
 .tab-content.ativo {
     display: block;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* Aba: Trailer */
+.modal-trailer-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border-radius: var(--raio-borda);
+    background: black;
 }
 
-/* Trailer sem disponível */
+.modal-trailer-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
 .trailer-indisponivel {
     padding: 40px 20px;
     text-align: center;
     background-color: #f5f5f5;
     border-radius: 8px;
-    color: #000; 
-    font-weight: bold
+    color: #000;
+    font-weight: bold;
 }
 
 body.dark-mode .trailer-indisponivel {
@@ -1214,7 +949,7 @@ body.dark-mode .trailer-indisponivel {
     font-size: 1.1em;
 }
 
-/* Conteúdo Sinopse */
+/* Aba: Sinopse */
 .sinopse-texto {
     line-height: 1.6;
     color: #555;
@@ -1225,23 +960,7 @@ body.dark-mode .sinopse-texto {
     color: #ccc;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-    .modal-tabs {
-        gap: 5px;
-    }
-
-    .tab-button {
-        padding: 10px 15px;
-        font-size: 0.9em;
-    }
-}
-
-/* ==========================================================================
-   ADICIONE ESTE CSS NO FINAL DO SEU STYLES.CSS
-   SISTEMA DE STREAMING - ABA DO MODAL
-   ========================================================================== */
-
+/* Aba: Streaming */
 .streaming-container {
     padding: 10px 0;
 }
@@ -1311,7 +1030,6 @@ body.dark-mode .streaming-link:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
-/* Link Oficial (Verde com gradiente) */
 .streaming-link.oficial {
     background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
     color: white;
@@ -1324,7 +1042,6 @@ body.dark-mode .streaming-link:hover {
     box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
 }
 
-/* Ícone da plataforma */
 .streaming-icon {
     width: 24px;
     height: 24px;
@@ -1336,11 +1053,10 @@ body.dark-mode .streaming-link:hover {
 .streaming-nome {
     flex-grow: 1;
     font-size: 0.85em;
-    white-space: nowrap;        
-    text-overflow: ellipsis; 
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
-/* Badge "OFICIAL" */
 .streaming-badge {
     position: absolute;
     top: 4px;
@@ -1354,8 +1070,381 @@ body.dark-mode .streaming-link:hover {
     letter-spacing: 0.5px;
 }
 
-/* Responsividade para mobile */
+/* --- Estatísticas (Stats) --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.stat-card {
+    background-color: var(--cor-fundo);
+    padding: 20px;
+    border-radius: var(--raio-borda);
+    border: 1px solid var(--cor-borda);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--cor-primaria);
+}
+
+.stat-icon {
+    font-size: 2.2em;
+    background-color: var(--cor-card-fundo);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    line-height: 1;
+    padding-top: 2px;
+    text-shadow: var(--sombra-texto-contorno);
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-valor {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--cor-primaria);
+}
+
+.stat-label {
+    font-size: 0.85em;
+    color: var(--cor-texto-secundario);
+    text-transform: uppercase;
+}
+
+/* --- Utilitários do Modal --- */
+.titulo-centralizado {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.nota-rodape {
+    text-align: center;
+    font-size: 0.8em;
+    color: #fdfcfc;
+    margin-top: 20px;
+}
+
+/* ==========================================================================
+   9. NOTIFICAÇÕES E FEEDBACK
+   ========================================================================== */
+
+/* --- Toast Notifications --- */
+#toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 4000;
+}
+
+.toast {
+    position: relative;
+    padding: 12px 24px;
+    border-radius: 50px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    text-shadow: var(--sombra-texto-contorno);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: slide-in-right 0.3s forwards;
+}
+
+.toast.error,
+.toast.fav-remove {
+    background-color: #ff5252;
+}
+
+.toast.fav-add {
+    background-color: #FFC107;
+}
+
+.toast.success {
+    background-color: var(--status-concluido);
+}
+
+.toast.info {
+    background-color: var(--status-querover);
+}
+
+.toast.warning {
+    background-color: var(--status-andamento);
+}
+
+/* --- Notificação de Atualização PWA --- */
+.update-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    z-index: 3500;
+    animation: slideInUp 0.4s ease-out;
+    max-width: 350px;
+}
+
+.update-notification.saindo {
+    animation: slideOutDown 0.4s ease-in forwards;
+}
+
+.update-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.update-icon {
+    font-size: 1.8em;
+    flex-shrink: 0;
+    animation: spin 2s linear infinite;
+}
+
+.update-text {
+    flex: 1;
+}
+
+.update-text strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 1em;
+}
+
+.update-text p {
+    margin: 0;
+    font-size: 0.85em;
+    opacity: 0.95;
+}
+
+.update-buttons {
+    display: flex;
+    gap: 8px;
+    margin-left: 10px;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.btn-atualizar-agora,
+.btn-atualizar-depois {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 600;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-atualizar-agora {
+    background: white;
+    color: #667eea;
+}
+
+.btn-atualizar-agora:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-atualizar-depois {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.btn-atualizar-depois:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* --- Loading Overlay --- */
+#global-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid var(--cor-primaria);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+.loading-text {
+    color: white;
+    font-weight: bold;
+}
+
+/* ==========================================================================
+   10. ANIMAÇÕES
+   ========================================================================== */
+@keyframes aparecerSuave {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes slide-in-right {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fade-out {
+    to { opacity: 0; transform: translateX(20px); }
+}
+
+@keyframes badgeAppear {
+    from {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+@keyframes badgeDisappear {
+    from {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    to {
+        transform: scale(0) rotate(180deg);
+        opacity: 0;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutDown {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(400px);
+        opacity: 0;
+    }
+}
+
+/* ==========================================================================
+   11. RESPONSIVIDADE
+   ========================================================================== */
+
+/* Desktop */
+@media (min-width: 768px) {
+    .cabecalho-utilitarios p {
+        display: block;
+        font-size: 0.9em;
+    }
+    
+    .cabecalho h1 {
+        font-size: 1.8em;
+    }
+}
+
+/* Tablets e Mobile */
+@media (max-width: 768px) {
+    .view-mode-toggle {
+        width: 100%;
+        margin-bottom: 10px;
+        margin-right: 0;
+    }
+    
+    .view-btn {
+        flex: 1;
+    }
+}
+
+/* Mobile */
 @media (max-width: 600px) {
+    .btn-voltar-home {
+        width: 100%;
+        justify-content: center;
+        order: -1;
+        margin-bottom: 10px;
+    }
+    
+    .modal-actions-row {
+        justify-content: center;
+        margin-top: 15px;
+        width: 100%;
+    }
+    
+    .btn-modal-action {
+        width: 100%;
+    }
+    
+    .modal-tabs {
+        gap: 5px;
+    }
+    
+    .tab-button {
+        padding: 10px 15px;
+        font-size: 0.9em;
+    }
+    
     .streaming-grid {
         grid-template-columns: 1fr;
     }
@@ -1372,167 +1461,33 @@ body.dark-mode .streaming-link:hover {
     .streaming-nome {
         font-size: 0.9em;
     }
+    
+    .update-notification {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+    }
+    
+    .update-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .update-buttons {
+        margin-left: 0;
+        flex-direction: row;
+        width: 100%;
+    }
+    
+    .btn-atualizar-agora,
+    .btn-atualizar-depois {
+        flex: 1;
+    }
 }
 
-/* Ajuste para telas médias */
+/* Tablets médios */
 @media (min-width: 601px) and (max-width: 900px) {
     .streaming-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     }
-}
-
-/* Utilitários para o Modal de Stats */
-.modal-pequeno {
-    max-width: 600px;
-}
-.titulo-centralizado {
-    text-align: center;
-    margin-bottom: 20px;
-}
-.nota-rodape {
-    text-align: center;
-    font-size: 0.8em;
-    color: #fdfcfc;
-    margin-top: 20px;
-}
-
-/* ==========================================================================
-   NOTIFICAÇÃO DE ATUALIZAÇÃO PWA
-   ========================================================================== */
-
-.update-notification {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  z-index: 3500;
-  animation: slideInUp 0.4s ease-out;
-  max-width: 350px;
-}
-
-@keyframes slideInUp {
-  from {
-    transform: translateY(400px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slideOutDown {
-  from {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(400px);
-    opacity: 0;
-  }
-}
-
-.update-notification.saindo {
-  animation: slideOutDown 0.4s ease-in forwards;
-}
-
-.update-content {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.update-icon {
-  font-size: 1.8em;
-  flex-shrink: 0;
-  animation: spin 2s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.update-text {
-  flex: 1;
-}
-
-.update-text strong {
-  display: block;
-  margin-bottom: 4px;
-  font-size: 1em;
-}
-
-.update-text p {
-  margin: 0;
-  font-size: 0.85em;
-  opacity: 0.95;
-}
-
-.update-buttons {
-  display: flex;
-  gap: 8px;
-  margin-left: 10px;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-
-.btn-atualizar-agora,
-.btn-atualizar-depois {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.85em;
-  font-weight: 600;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
-.btn-atualizar-agora {
-  background: white;
-  color: #667eea;
-}
-
-.btn-atualizar-agora:hover {
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.btn-atualizar-depois {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-}
-
-.btn-atualizar-depois:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* Responsivo */
-@media (max-width: 600px) {
-  .update-notification {
-    left: 10px;
-    right: 10px;
-    max-width: none;
-  }
-
-  .update-content {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .update-buttons {
-    margin-left: 0;
-    flex-direction: row;
-    width: 100%;
-  }
-
-  .btn-atualizar-agora,
-  .btn-atualizar-depois {
-    flex: 1;
-  }
 }
