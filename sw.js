@@ -2,10 +2,11 @@
 // SERVICE WORKER (SW.JS)
 // ========================================================
 
-const CACHE_NAME = 'anime-catalog-v1.2'; // ⚠️ Mude este número para v2, v3... para forçar atualização
+const CACHE_NAME = 'anime-catalog-v1.3';
 const URLS_TO_CACHE = [
   './',
   './index.html',
+  './dados.js',
   './script.js',
   './styles.css',
   './manifest.json',
@@ -21,7 +22,6 @@ self.addEventListener('install', (event) => {
         return cache.addAll(URLS_TO_CACHE);
       })
   );
-  // 🛑 REMOVI O self.skipWaiting() DAQUI para respeitar o botão do usuário
 });
 
 // 2. MENSAGENS: Escutar o botão "Atualizar Agora"
@@ -56,11 +56,9 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
       .then((cachedResponse) => {
-        // Se achou no cache, retorna ele
         if (cachedResponse) {
           return cachedResponse;
         }
-        // Se não, busca na rede
         return fetch(event.request);
       })
   );

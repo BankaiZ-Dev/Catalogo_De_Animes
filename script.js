@@ -1,13 +1,25 @@
 // ========================================================
-// 1. CONFIGURAÇÕES E REFERÊNCIAS GLOBAIS (DOM)
+// CATÁLOGO DE ANIMES - SCRIPT REORGANIZADO
+// ========================================================
+// Estrutura:
+// 1. Referências DOM
+// 2. Estado da Aplicação
+// 3. Funções Auxiliares
+// 4. Storage & Modo Escuro
+// 5. CRUD do Catálogo
+// 6. Renderização de Cards
+// 7. Busca e API
+// 8. Modais
+// 9. Sistema de Favoritos
+// 10. Modo de Visualização
+// 11. PWA & Service Worker
+// 12. Event Listeners
+// 13. Inicialização
 // ========================================================
 
-const PLACEHOLDER_IMAGE = "https://placehold.co/170x260?text=Sem+Poster";
-const JIKAN_API_URL = 'https://api.jikan.moe/v4/anime';
-const LOCAL_STORAGE_KEY = 'meu_catalogo_animes_v2';
-const LOCAL_STORAGE_DARK_MODE_KEY = 'dark_mode_ativado';
-const LOCAL_STORAGE_VIEW_MODE_KEY = 'view_mode_preferido';
-const ANIME_LIMIT_PER_PAGE = 9;
+// ========================================================
+// 1. REFERÊNCIAS DO DOM
+// ========================================================
 
 // Elementos Principais
 const listaCards = document.querySelector('.lista-cards');
@@ -31,77 +43,19 @@ const modalInfo = document.getElementById('modal-info');
 const resultadosBuscaAPI = document.getElementById('resultados-busca-api');
 const toastContainer = document.getElementById('toast-container');
 
-// Estado da Aplicação
+// ========================================================
+// 2. ESTADO DA APLICAÇÃO
+// ========================================================
+
 let debounceTimer;
 let catalogoPessoal = {};
 let paginaAtual = 1;
 let termoBuscaAtual = '';
-
-// Mapas de Tradução
-const MAPA_GENEROS = {
-    "Action": "Ação", "Adventure": "Aventura", "Avant Garde": "Vanguarda", "Award Winning": "Premiado",
-    "Boys Love": "Boys Love (BL)", "Comedy": "Comédia", "Drama": "Drama", "Fantasy": "Fantasia",
-    "Girls Love": "Girls Love (GL)", "Gourmet": "Gourmet", "Horror": "Terror", "Mystery": "Mistério",
-    "Romance": "Romance", "Sci-Fi": "Ficção Científica", "Slice of Life": "Cotidiano", "Sports": "Esportes",
-    "Supernatural": "Sobrenatural", "Suspense": "Suspense", "Ecchi": "Ecchi", "Erotica": "Erótico",
-    "Hentai": "Hentai", "Adult Cast": "Elenco Adulto", "Anthropomorphic": "Antropomórfico", "CGDCT": "Garotas Fofas",
-    "Childcare": "Cuidado Infantil", "Combat Sports": "Esportes de Combate", "Delinquents": "Delinquentes",
-    "Detective": "Detetive", "Educational": "Educacional", "Gag Humor": "Humor Gag", "Gore": "Gore",
-    "Harem": "Harém", "High Stakes Game": "Jogos de Apostas", "Historical": "Histórico",
-    "Idols (Female)": "Idols (Feminino)", "Idols (Male)": "Idols (Masculino)", "Isekai": "Isekai",
-    "Iyashikei": "Iyashikei", "Love Polygon": "Triângulo Amoroso", "Magical Sex Shift": "Mudança de Sexo",
-    "Mahou Shoujo": "Garota Mágica", "Martial Arts": "Artes Marciais", "Mecha": "Mecha", "Medical": "Médico",
-    "Military": "Militar", "Music": "Música", "Mythology": "Mitologia", "Organized Crime": "Crime Organizado",
-    "Otaku Culture": "Cultura Otaku", "Parody": "Paródia", "Performing Arts": "Artes Performáticas",
-    "Pets": "Pets", "Psychological": "Psicológico", "Racing": "Corrida", "Reincarnation": "Reencarnação",
-    "Reverse Harem": "Harém Reverso", "Romantic Subtext": "Subtexto Romântico", "Samurai": "Samurai",
-    "School": "Escolar", "Showbiz": "Showbiz", "Space": "Espaço", "Strategy Game": "Jogos de Estratégia",
-    "Super Power": "Super Poderes", "Survival": "Sobrevivência", "Team Sports": "Esportes de Equipe",
-    "Time Travel": "Viagem no Tempo", "Vampire": "Vampiros", "Video Game": "Games", "Visual Arts": "Artes Visuais",
-    "Workplace": "Trabalho", "Josei": "Josei", "Kids": "Infantil", "Seinen": "Seinen", "Shoujo": "Shoujo",
-    "Shounen": "Shounen"
-};
-
-const MAPA_TIPOS_MIDIA = {
-    "TV": "Série (TV)", "Movie": "Filme", "OVA": "OVA", "Special": "Especial",
-    "ONA": "Web (ONA)", "Music": "Musical", "Unknown": "Desconhecido", "TV Special": "Especial de TV"
-};
-
-const PLATAFORMAS_STREAMING = {
-    crunchyroll: {
-        nome: 'Crunchyroll',
-        baseUrl: 'https://www.crunchyroll.com/search?q=',
-        icon: 'https://logo.clearbit.com/crunchyroll.com',
-        cor: '#f47521'
-    },
-    netflix: {
-        nome: 'Netflix',
-        baseUrl: 'https://www.netflix.com/search?q=',
-        icon: 'https://logo.clearbit.com/netflix.com',
-        cor: '#e50914'
-    },
-    prime: {
-        nome: 'Prime Video',
-        baseUrl: 'https://www.primevideo.com/search/ref=atv_nb_sr?phrase=',
-        icon: 'https://logo.clearbit.com/amazon.com',
-        cor: '#00a8e1'
-    },
-    hbomax: {
-        nome: 'HBO Max',
-        baseUrl: 'https://max.com/search?q=',
-        icon: 'https://logo.clearbit.com/max.com',
-        cor: '#b202ff'
-    },
-    disney: {
-        nome: 'Disney+',
-        baseUrl: 'https://www.disneyplus.com/search?q=',
-        icon: 'https://logo.clearbit.com/disneyplus.com',
-        cor: '#113ccf'
-    },
-};
+let currentViewMode = 'grid';
+let newWorker; // Para notificação de atualização
 
 // ========================================================
-// 2. FUNÇÕES AUXILIARES
+// 3. FUNÇÕES AUXILIARES
 // ========================================================
 
 function debounce(func, delay) {
@@ -117,7 +71,7 @@ function debounce(func, delay) {
 
 function handleImageError(imageElement) {
     imageElement.onerror = null;
-    imageElement.src = PLACEHOLDER_IMAGE;
+    imageElement.src = CONFIG.PLACEHOLDER_IMAGE;
 }
 
 function showGlobalLoading(message = 'Carregando...') {
@@ -168,14 +122,14 @@ async function traduzirSinopse(text) {
 }
 
 // ========================================================
-// 3. STORAGE & MODO ESCURO
+// 4. STORAGE & MODO ESCURO
 // ========================================================
 
 function carregarCatalogo() { 
-    const data = localStorage.getItem(LOCAL_STORAGE_KEY); 
+    const data = localStorage.getItem(STORAGE_KEYS.CATALOGO); 
     if (data) {
         catalogoPessoal = JSON.parse(data);
-        // Migração automática para garantir que o campo 'favorite' exista
+        // Migração automática - garante que campo 'favorite' existe
         Object.keys(catalogoPessoal).forEach(malId => {
             if (!catalogoPessoal[malId].hasOwnProperty('favorite')) {
                 catalogoPessoal[malId].favorite = false;
@@ -186,22 +140,59 @@ function carregarCatalogo() {
 }
 
 function salvarCatalogo() {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(catalogoPessoal));
+    localStorage.setItem(STORAGE_KEYS.CATALOGO, JSON.stringify(catalogoPessoal));
 }
 
 function toggleDarkMode() {
     const isDarkMode = document.body.classList.toggle('dark-mode');
-    localStorage.setItem(LOCAL_STORAGE_DARK_MODE_KEY, isDarkMode ? 'true' : 'false');
+    localStorage.setItem(STORAGE_KEYS.DARK_MODE, isDarkMode ? 'true' : 'false');
 }
 
 function aplicarModoEscuroInicial() {
-    const isDarkMode = localStorage.getItem(LOCAL_STORAGE_DARK_MODE_KEY) === 'true';
+    const isDarkMode = localStorage.getItem(STORAGE_KEYS.DARK_MODE) === 'true';
     if (isDarkMode) document.body.classList.add('dark-mode');
     else document.body.classList.remove('dark-mode');
 }
 
+function exportarBackup() {
+    if (Object.keys(catalogoPessoal).length === 0) return showToast("Catálogo vazio!", "info");
+    const dadosJSON = JSON.stringify(catalogoPessoal, null, 2);
+    const blob = new Blob([dadosJSON], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `backup_animes_${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("Backup baixado!", "success");
+}
+
+function importarBackup(event) {
+    const arquivo = event.target.files[0];
+    if (!arquivo) return;
+    const leitor = new FileReader();
+    leitor.onload = function(e) {
+        try {
+            const dados = JSON.parse(e.target.result);
+            if (typeof dados !== 'object') throw new Error();
+            if (confirm("Isso substituirá seu catálogo atual. Continuar?")) {
+                catalogoPessoal = dados;
+                salvarCatalogo();
+                carregarAnimesSalvos();
+                showToast("Restaurado!", "success");
+            }
+        } catch (error) {
+            showToast("Arquivo inválido.", "error");
+        }
+    };
+    leitor.readAsText(arquivo);
+    event.target.value = '';
+}
+
 // ========================================================
-// 4. LÓGICA PRINCIPAL (CRUD ANIME)
+// 5. CRUD DO CATÁLOGO
 // ========================================================
 
 function adicionarRapido(malId, tituloEncoded, posterUrl, maxEpisodes, type, year) {
@@ -249,15 +240,13 @@ function adicionarAoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicia
 }
 
 function removerDoCatalogo(malId) {
-    // 👇 ADIÇÃO: Pergunta de segurança antes de apagar
     if (!confirm("Tem certeza que deseja remover este anime? Todo o progresso será perdido.")) {
-        return; // Se clicar em "Cancelar", a função para aqui.
+        return;
     }
 
     if (catalogoPessoal.hasOwnProperty(malId)) {
         const animeTitulo = catalogoPessoal[malId].title;
         
-        // 1. Guarda dados para recriar o card "vazio" se necessário
         const dadosParaReset = {
             mal_id: malId,
             title: catalogoPessoal[malId].title,
@@ -267,30 +256,24 @@ function removerDoCatalogo(malId) {
             year: catalogoPessoal[malId].year
         };
 
-        // 2. Remove do banco de dados
         delete catalogoPessoal[malId];
         salvarCatalogo();
 
-        // 3. DECISÃO INTELIGENTE DE INTERFACE
         const card = document.querySelector(`.card-anime[data-mal-id="${malId}"]`);
         const isSearchMode = campoBusca.value.trim().length > 0 || (resultadosBuscaAPI && !resultadosBuscaAPI.classList.contains('oculto'));
 
         if (isSearchMode) {
-            // MODO BUSCA: Não remove o card, apenas substitui pelo botão de "Adicionar"
             if (card) {
-                // Gera um card novo "virgem" (não salvo)
                 const novoCardElement = renderizarCardAnime(dadosParaReset, false, {}, true);
                 card.replaceWith(novoCardElement);
             }
         } else {
-            // MODO CATÁLOGO: Remove o card da tela pois ele não existe mais na lista
             if (card) {
                 card.style.transition = 'opacity 0.3s, transform 0.3s';
                 card.style.opacity = '0';
                 card.style.transform = 'scale(0.9)';
                 setTimeout(() => card.remove(), 300);
             }
-            // Se a lista ficar vazia, recarrega para mostrar a mensagem de vazio
             if (Object.keys(catalogoPessoal).length === 0) {
                 setTimeout(() => carregarAnimesSalvos(), 300);
             }
@@ -329,70 +312,15 @@ function updateProgressoDisplay(malId, season, episode, maxEpisodes) {
     }
 }
 
-function concluirAnimeRapido(malId) {
-    if (catalogoPessoal.hasOwnProperty(malId)) {
-        const anime = catalogoPessoal[malId];
-        
-        // 1. Atualiza Dados (Memória)
-        // Se tiver total de episódios, usa ele. Se não, mantém o que tem ou define um padrão.
-        if (anime.maxEpisodes) {
-            anime.episode = anime.maxEpisodes;
-        }
-        anime.status = 'Concluído'; // Força o status
-        
-        // 2. Salva
-        salvarCatalogo();
-        
-        // 3. ATUALIZAÇÃO VISUAL FORÇADA (DOM)
-        const card = document.querySelector(`.card-anime[data-mal-id="${malId}"]`);
-        
-        if (card) {
-            // A. Atualiza Inputs e Textos de Progresso
-            const inputElement = document.getElementById(`episode-input-${malId}`);
-            if (inputElement) inputElement.value = anime.episode;
-
-            const progressoTexto = document.getElementById(`ep-atual-${malId}`);
-            if (progressoTexto) {
-                const episodesTotal = anime.maxEpisodes ? ` / ${anime.maxEpisodes}` : '';
-                progressoTexto.textContent = `Ep ${anime.episode}${episodesTotal}`;
-            }
-
-            // B. Atualiza Barra de Progresso (Cheia)
-            const barra = document.getElementById(`bar-prog-${malId}`);
-            if (barra) {
-                barra.style.width = '100%';
-            }
-
-            // C. Atualiza Cores e Etiqueta (Status)
-            // Remove todas as classes antigas para garantir
-            card.classList.remove('status-quero-ver', 'status-em-andamento');
-            card.classList.add('status-concluido');
-
-            const etiqueta = card.querySelector('.etiqueta-status');
-            if (etiqueta) {
-                etiqueta.classList.remove('status-quero-ver', 'status-em-andamento');
-                etiqueta.classList.add('status-concluido');
-                etiqueta.textContent = 'Concluído ✅';
-            }
-        }
-        
-        // 4. Feedback e Fechamento
-        showToast('Anime marcado como Concluído! 🎉', 'success');
-        fecharModal();
-    }
-}
-
 function quickUpdate(malId, change) {
     if (!catalogoPessoal.hasOwnProperty(malId)) return;
     const savedData = catalogoPessoal[malId];
     const statusBefore = savedData.status;
 
-    // 1. Cálculos de Episódio
     let newValue = savedData.episode + change;
     if (newValue < 0) newValue = 0;
     savedData.episode = newValue;
 
-    // 2. Lógica de Status Automático
     if (savedData.episode === 0) savedData.status = 'Quero Ver';
     else if (savedData.maxEpisodes && savedData.episode >= savedData.maxEpisodes) {
         savedData.status = 'Concluído';
@@ -403,21 +331,17 @@ function quickUpdate(malId, change) {
 
     salvarCatalogo();
 
-    // 3. Atualização VISUAL (Progresso)
     const card = document.querySelector(`.card-anime[data-mal-id="${malId}"]`);
 
-    // Atualiza input numérico
     const inputElement = document.getElementById(`episode-input-${malId}`);
     if (inputElement) inputElement.value = savedData.episode;
 
-    // Atualiza texto de progresso
     const progressoTexto = document.getElementById(`ep-atual-${malId}`);
     if (progressoTexto) {
         const episodesTotal = savedData.maxEpisodes ? ` / ${savedData.maxEpisodes}` : '';
         progressoTexto.textContent = `Ep ${savedData.episode}${episodesTotal}`;
     }
 
-    // Atualiza Barra de Progresso
     const barra = document.getElementById(`bar-prog-${malId}`);
     if (barra && savedData.maxEpisodes > 0) {
         let pct = (savedData.episode / savedData.maxEpisodes) * 100;
@@ -425,50 +349,36 @@ function quickUpdate(malId, change) {
         barra.style.width = `${pct}%`;
     }
 
-    // 4. Se o Status mudou
     if (savedData.status !== statusBefore) {
-
         const filtroAtual = filtroStatus ? filtroStatus.value : 'todos';
         let deveSairDaTela = false;
 
-        // Regras para saber se deve esconder o card
         if (filtroAtual === 'favoritos') {
-            // Se estiver vendo favoritos, só esconde se deixar de ser favorito
             if (!savedData.favorite) deveSairDaTela = true;
         } else if (filtroAtual !== 'todos' && filtroAtual !== savedData.status) {
-            // Filtros normais: se o status novo não bate com o filtro atual, esconde
             deveSairDaTela = true;
         }
 
         if (deveSairDaTela) {
             if (card) {
-                // Animação de saída
                 card.style.transition = "opacity 0.5s, transform 0.5s";
                 card.style.opacity = "0";
                 card.style.transform = "scale(0.95)";
                 
                 setTimeout(() => {
-                    // 🛑 O SEGREDO ESTÁ AQUI:
-                    // Não usamos remove(). Usamos 'oculto'.
                     card.classList.add('oculto');
-                    card.style.display = 'none'; // Garante que saia do fluxo
-                    
-                    // Reseta estilos para quando ele voltar a aparecer em outro filtro
+                    card.style.display = 'none';
                     card.style.opacity = "";
                     card.style.transform = "";
-                    
-                    // Atualiza a aparência dele "nos bastidores" para quando reaparecer estar com a cor certa
                     atualizarVisualDoCard(card, savedData);
                 }, 500);
             }
         } else {
-            // Se o card continua na tela, atualiza o visual imediatamente
             if (card) {
                 atualizarVisualDoCard(card, savedData);
             }
         }
 
-        // Feedback Visual (Toast)
         let tipoToast = 'info';
         if (savedData.status === 'Concluído') tipoToast = 'success';
         else if (savedData.status === 'Em Andamento') tipoToast = 'warning';
@@ -477,11 +387,9 @@ function quickUpdate(malId, change) {
     }
 }
 
-// 👇 Função auxiliar para não repetir código e atualizar as cores
 function atualizarVisualDoCard(card, savedData) {
     const statusInfo = getStatusData(savedData.status);
     
-    // Remove as classes de status antigas e adiciona a nova
     card.classList.remove('status-concluido', 'status-em-andamento', 'status-quero-ver');
     card.classList.add(statusInfo.class);
 
@@ -507,8 +415,52 @@ function decrementarEpisodio(malId) {
     quickUpdate(malId, -1);
 }
 
+function concluirAnimeRapido(malId) {
+    if (catalogoPessoal.hasOwnProperty(malId)) {
+        const anime = catalogoPessoal[malId];
+        
+        if (anime.maxEpisodes) {
+            anime.episode = anime.maxEpisodes;
+        }
+        anime.status = 'Concluído';
+        
+        salvarCatalogo();
+        
+        const card = document.querySelector(`.card-anime[data-mal-id="${malId}"]`);
+        
+        if (card) {
+            const inputElement = document.getElementById(`episode-input-${malId}`);
+            if (inputElement) inputElement.value = anime.episode;
+
+            const progressoTexto = document.getElementById(`ep-atual-${malId}`);
+            if (progressoTexto) {
+                const episodesTotal = anime.maxEpisodes ? ` / ${anime.maxEpisodes}` : '';
+                progressoTexto.textContent = `Ep ${anime.episode}${episodesTotal}`;
+            }
+
+            const barra = document.getElementById(`bar-prog-${malId}`);
+            if (barra) {
+                barra.style.width = '100%';
+            }
+
+            card.classList.remove('status-quero-ver', 'status-em-andamento');
+            card.classList.add('status-concluido');
+
+            const etiqueta = card.querySelector('.etiqueta-status');
+            if (etiqueta) {
+                etiqueta.classList.remove('status-quero-ver', 'status-em-andamento');
+                etiqueta.classList.add('status-concluido');
+                etiqueta.textContent = 'Concluído ✅';
+            }
+        }
+        
+        showToast('Anime marcado como Concluído! 🎉', 'success');
+        fecharModal();
+    }
+}
+
 // ========================================================
-// 5. RENDERIZAÇÃO DE CARDS
+// 6. RENDERIZAÇÃO DE CARDS
 // ========================================================
 
 function getStatusData(status) {
@@ -526,17 +478,17 @@ function renderizarCardAnime(animeAPI, isSaved = false, savedData = {}, returnEl
     const malId = animeAPI.mal_id;
     const isSavedFinal = catalogoPessoal.hasOwnProperty(malId);
     const finalSavedData = isSavedFinal ? catalogoPessoal[malId] : savedData;
-    const posterUrl = animeAPI.images?.jpg?.image_url || finalSavedData.poster || PLACEHOLDER_IMAGE;
+    const posterUrl = animeAPI.images?.jpg?.image_url || finalSavedData.poster || CONFIG.PLACEHOLDER_IMAGE;
     const titulo = animeAPI.title_english || animeAPI.title;
     const tituloEncoded = encodeURIComponent(titulo).replace(/'/g, "%27");
     
-    // 💡 Aprimoramento: Substituir o caractere especial por um SVG para melhor estilo.
     const detalhesBtn = `
         <button onclick="abrirModal(${malId})" class="btn-base btn-detalhes btn-icone-acao" title="Detalhes/Gerenciar">
             <svg class="icone-acao-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width: 18px; height: 18px;">
                 <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
             </svg>
         </button>`;
+    
     const favoriteBadge = (isSavedFinal && finalSavedData.favorite) ? '<div class="favorite-badge" title="Favorito">⭐</div>' : '';
     const tipoTraduzido = MAPA_TIPOS_MIDIA[animeAPI.type || finalSavedData.type || 'TV'] || (animeAPI.type || 'TV');
     const anoAnime = animeAPI.year || (animeAPI.aired && animeAPI.aired.prop && animeAPI.aired.prop.from ? animeAPI.aired.prop.from.year : null) || finalSavedData.year || '----';
@@ -582,7 +534,6 @@ function renderizarCardAnime(animeAPI, isSaved = false, savedData = {}, returnEl
                 ${detalhesBtn}
             </div>`;
     } else {
-        const maxEpisodes = animeAPI.episodes || null;
         const textoEpisodios = animeAPI.episodes ? `${animeAPI.episodes} Episódios` : 'Episódios: N/A';
         statusHTML = `
             <p class="card-destaque-info">${textoEpisodios}</p>
@@ -613,8 +564,7 @@ function renderizarCardAnime(animeAPI, isSaved = false, savedData = {}, returnEl
             </div>
         </div>`;
     
-    if (returnElement) 
-        return cardElement;
+    if (returnElement) return cardElement;
     listaCards.appendChild(cardElement);
 }
 
@@ -687,10 +637,10 @@ function filtrarAnimesSalvos() {
             card.classList.add('oculto');
         }
     });
-}
+}   
 
 // ========================================================
-// 6. BUSCA E API
+// 7. BUSCA E API
 // ========================================================
 
 async function buscarAnimes(query, page = 1) {
@@ -715,7 +665,7 @@ async function buscarAnimes(query, page = 1) {
     if (btnVoltarCatalogo) btnVoltarCatalogo.classList.remove('oculto');
 
     try {
-        const response = await fetch(`${JIKAN_API_URL}?q=${encodeURIComponent(query)}&limit=${ANIME_LIMIT_PER_PAGE}&page=${page}`);
+        const response = await fetch(`${CONFIG.JIKAN_API_URL}?q=${encodeURIComponent(query)}&limit=${CONFIG.ANIME_LIMIT_PER_PAGE}&page=${page}`);
         if (!response.ok) throw new Error(`Erro HTTP!`);
         const data = await response.json();
 
@@ -755,7 +705,7 @@ async function buscarAnimesEmTempoReal() {
     }
 
     try {
-        const response = await fetch(`${JIKAN_API_URL}?q=${encodeURIComponent(query)}&limit=7`);
+        const response = await fetch(`${CONFIG.JIKAN_API_URL}?q=${encodeURIComponent(query)}&limit=7`);
         if (!response.ok) return;
         const data = await response.json();
         if (data.data && data.data.length > 0) {
@@ -763,7 +713,7 @@ async function buscarAnimesEmTempoReal() {
             data.data.forEach(anime => {
                 html += `
                     <div class="resultado-item" onclick="selecionarSugestao(${anime.mal_id}, '${(anime.title_english || anime.title).replace(/'/g, "\\'")}')">
-                        <img src="${anime.images.jpg.small_image_url || PLACEHOLDER_IMAGE}" class="resultado-imagem">
+                        <img src="${anime.images.jpg.small_image_url || CONFIG.PLACEHOLDER_IMAGE}" class="resultado-imagem">
                         <span class="resultado-titulo">${anime.title_english || anime.title}</span>
                     </div>`;
             });
@@ -774,6 +724,7 @@ async function buscarAnimesEmTempoReal() {
         resultadosBuscaAPI.classList.add('oculto');
     }
 }
+
 const buscarAnimesEmTempoRealDebounced = debounce(buscarAnimesEmTempoReal, 400);
 
 function selecionarSugestao(malId, titulo) {
@@ -802,7 +753,7 @@ function resetarInterfaceDeBusca() {
 }
 
 // ========================================================
-// 7. MODAIS
+// 8. MODAIS & STREAMING
 // ========================================================
 
 function fecharModal() {
@@ -812,18 +763,11 @@ function fecharModal() {
     if (modalInfo) modalInfo.innerHTML = '';
 }
 
-// ========================================================
-// 2. FUNÇÃO PRINCIPAL - OBTER LINKS DE STREAMING
-// ========================================================
 async function obterLinksStreaming(animeData) {
     try {
-        // Pega o melhor título para buscar
         const tituloParaBusca = animeData.title_english || animeData.title;
-        
-        // Array para guardar todos os links
         const todosOsLinks = [];
         
-        // 1. PRIMEIRO: Links oficiais do MAL (quando disponíveis)
         if (animeData.streaming && animeData.streaming.length > 0) {
             animeData.streaming.forEach(stream => {
                 todosOsLinks.push({
@@ -835,11 +779,8 @@ async function obterLinksStreaming(animeData) {
             });
         }
         
-        // 2. SEGUNDO: Links de busca para todas as plataformas
         Object.values(PLATAFORMAS_STREAMING).forEach(plataforma => {
-            // Construir URL: base + nome do anime
             const urlBusca = plataforma.baseUrl + encodeURIComponent(tituloParaBusca);
-            
             todosOsLinks.push({
                 nome: plataforma.nome,
                 url: urlBusca,
@@ -850,45 +791,51 @@ async function obterLinksStreaming(animeData) {
         });
         
         return todosOsLinks;
-        
     } catch (error) {
         console.error('Erro ao obter links de streaming:', error);
         return [];
     }
 }
 
-// Função auxiliar para pegar ícone da plataforma oficial
 function obterIconePlataforma(nomePlataforma) {
     const nome = nomePlataforma.toLowerCase();
-    if (nome.includes('crunchyroll')) return 'https://logo.clearbit.com/crunchyroll.com';
-    if (nome.includes('netflix')) return 'https://logo.clearbit.com/netflix.com';
-    if (nome.includes('funimation')) return 'https://logo.clearbit.com/funimation.com';
-    if (nome.includes('amazon') || nome.includes('prime')) return 'https://logo.clearbit.com/amazon.com';
-    return 'https://logo.clearbit.com/' + nome.replace(/\s+/g, '') + '.com';
+    let domain = '';
+
+    if (nome.includes('crunchyroll')) domain = 'crunchyroll.com';
+    else if (nome.includes('netflix')) domain = 'netflix.com';
+    else if (nome.includes('funimation')) domain = 'funimation.com';
+    else if (nome.includes('amazon') || nome.includes('prime')) domain = 'primevideo.com';
+    else if (nome.includes('disney')) domain = 'disneyplus.com';
+    else if (nome.includes('hbo') || nome.includes('max')) domain = 'max.com';
+    else if (nome.includes('hulu')) domain = 'hulu.com';
+    else {
+        domain = nome.replace(/\s+/g, '') + '.com';
+    }
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
 }
 
-// ========================================================
-// 3. RENDERIZAR HTML DA ABA DE STREAMING
-// ========================================================
 function renderizarAbaStreaming(links) {
-    // Separar por tipo
     const linksOficiais = links.filter(link => link.tipo === 'oficial');
     const linksBusca = links.filter(link => link.tipo === 'busca');
     
     let html = '<div class="streaming-container">';
     
-    // Se tiver links oficiais, mostrar primeiro
     if (linksOficiais.length > 0) {
         html += `
             <div class="streaming-section">
-                <h3 class="streaming-titulo">✅ Disponível Oficialmente</h3>
-                <p class="streaming-descricao">Links diretos do MyAnimeList</p>
+                <h3 class="streaming-titulo">✅ Licenciamento Oficial</h3>
+                <p class="streaming-descricao">
+                    Links registrados no banco de dados global.
+                    <br>
+                    <span style="font-size: 0.85em; color: var(--cor-primaria);">
+                        ⚠️ Nota: Podem redirecionar para a tela inicial se não estiverem disponíveis no Brasil.
+                    </span>
+                </p>
                 <div class="streaming-grid">
                     ${linksOficiais.map(link => `
                         <a href="${link.url}" target="_blank" class="streaming-link oficial" rel="noopener noreferrer">
                             <img src="${link.icon}" alt="${link.nome}" class="streaming-icon" onerror="this.style.display='none'">
                             <span class="streaming-nome">${link.nome}</span>
-                            <span class="streaming-badge">OFICIAL</span>
                         </a>
                     `).join('')}
                 </div>
@@ -896,7 +843,6 @@ function renderizarAbaStreaming(links) {
         `;
     }
     
-    // Sempre mostrar opções de busca
     html += `
         <div class="streaming-section">
             <h3 class="streaming-titulo">🔍 Buscar nas Plataformas</h3>
@@ -916,6 +862,32 @@ function renderizarAbaStreaming(links) {
     return html;
 }
 
+function mudarAba(event, nomeAba) {
+    const modal = event.target.closest('.modal-conteudo');
+    
+    modal.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('ativo'));
+    modal.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('oculto');
+        content.classList.remove('ativo');
+    });
+
+    if (nomeAba !== 'trailer') {
+        const trailerContainer = modal.querySelector('#trailer iframe');
+        if (trailerContainer) {
+            const urlAtual = trailerContainer.src;
+            trailerContainer.src = ''; 
+            trailerContainer.src = urlAtual;
+        }
+    }
+
+    event.target.classList.add('ativo');
+    const conteudoAlvo = modal.querySelector('#' + nomeAba);
+    if (conteudoAlvo) {
+        conteudoAlvo.classList.remove('oculto');
+        conteudoAlvo.classList.add('ativo');
+    }
+}
+
 async function abrirModal(malId) {
     if (modalInfo) modalInfo.innerHTML = `
         <div style="text-align:center; padding: 50px 0;">
@@ -925,7 +897,7 @@ async function abrirModal(malId) {
     if (animeModal) animeModal.classList.remove('oculto');
 
     try {
-        const response = await fetch(`${JIKAN_API_URL}/${malId}/full`);
+        const response = await fetch(`${CONFIG.JIKAN_API_URL}/${malId}/full`);
         if (!response.ok) throw new Error('Falha API');
         const data = await response.json();
         const anime = data.data;
@@ -939,13 +911,8 @@ async function abrirModal(malId) {
 
         const isSaved = catalogoPessoal.hasOwnProperty(malId);
         
-        // ==========================================================
-        // 🛑 MUDANÇA AQUI: Layout dos botões de ação
-        // ==========================================================
         let acoesHTML = '';
-        
         if (isSaved) {
-            // Se já está salvo: Botão Concluir + Botão Lixo
             acoesHTML = `
                 <div class="modal-actions-row">
                     <button onclick="concluirAnimeRapido(${malId})" class="btn-modal-action btn-modal-concluir" title="Marcar como Concluído">
@@ -959,14 +926,8 @@ async function abrirModal(malId) {
                     </button>
                 </div>
             `;
-        } else {
-            // Se não está salvo: Botão normal de adicionar (Opcional colocar aqui ou deixar só no card)
-            // Para manter o padrão, vamos deixar vazio ou colocar um botão "Adicionar Agora" se quiser
-            // Por enquanto deixei vazio pois o usuário geralmente adiciona pelo card, 
-            // mas se quiser adicionar pelo modal, me avise!
         }
 
-        // ⭐ Obter links de streaming
         const linksStreaming = await obterLinksStreaming(anime);
         const streamingHTML = renderizarAbaStreaming(linksStreaming);
 
@@ -996,7 +957,6 @@ async function abrirModal(malId) {
                         <p><strong>Status:</strong> ${statusTraduzido}</p>
                         <p><strong>Lançado em:</strong> ${anoLancamento}</p>
                     </div>
-
                     ${acoesHTML}
                 </div>
             </div>
@@ -1028,84 +988,8 @@ async function abrirModal(malId) {
 }
 
 // ========================================================
-// NOVA FUNÇÃO GENÉRICA PARA ABAS (COM CORREÇÃO DE ÁUDIO)
+// 8b. ESTATÍSTICAS & ALEATORIEDADE
 // ========================================================
-function mudarAba(event, nomeAba) {
-    // 1. Encontra o modal pai
-    const modal = event.target.closest('.modal-conteudo');
-    
-    // 2. Remove 'ativo' dos botões
-    modal.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('ativo'));
-    
-    // 3. Esconde todos os conteúdos
-    modal.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('oculto');
-        content.classList.remove('ativo');
-    });
-
-    // 4. TRUQUE DO YOUTUBE: Parar o vídeo se sair da aba do trailer
-    // Se a aba clicada NÃO for a de trailer, procuramos o iframe e resetamos ele
-    if (nomeAba !== 'trailer') {
-        const trailerContainer = modal.querySelector('#trailer iframe');
-        if (trailerContainer) {
-            // Resetar o SRC força o vídeo a parar
-            const urlAtual = trailerContainer.src;
-            trailerContainer.src = ''; 
-            trailerContainer.src = urlAtual;
-        }
-    }
-
-    // 5. Ativa o botão clicado
-    event.target.classList.add('ativo');
-
-    // 6. Mostra o conteúdo desejado
-    const conteudoAlvo = modal.querySelector('#' + nomeAba);
-    if (conteudoAlvo) {
-        conteudoAlvo.classList.remove('oculto');
-        conteudoAlvo.classList.add('ativo'); // Adiciona classe ativo para garantir display block
-    }
-}
-
-// ========================================================
-// 8. EXTRAS E EVENTOS
-// ========================================================
-
-function exportarBackup() {
-    if (Object.keys(catalogoPessoal).length === 0) return showToast("Catálogo vazio!", "info");
-    const dadosJSON = JSON.stringify(catalogoPessoal, null, 2);
-    const blob = new Blob([dadosJSON], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `backup_animes_${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast("Backup baixado!", "success");
-}
-
-function importarBackup(event) {
-    const arquivo = event.target.files[0];
-    if (!arquivo) return;
-    const leitor = new FileReader();
-    leitor.onload = function(e) {
-        try {
-            const dados = JSON.parse(e.target.result);
-            if (typeof dados !== 'object') throw new Error();
-            if (confirm("Isso substituirá seu catálogo atual. Continuar?")) {
-                catalogoPessoal = dados;
-                salvarCatalogo();
-                carregarAnimesSalvos();
-                showToast("Restaurado!", "success");
-            }
-        } catch (error) {
-            showToast("Arquivo inválido.", "error");
-        }
-    };
-    leitor.readAsText(arquivo);
-    event.target.value = '';
-}
 
 function calcularEstatisticas() {
     const animes = Object.values(catalogoPessoal);
@@ -1143,34 +1027,12 @@ function sugerirAnimeAleatorio() {
     }, 600);
 }
 
-// Modo de visualização
-let currentViewMode = 'grid';
-
-function setViewMode(mode) {
-    currentViewMode = mode;
-    localStorage.setItem(LOCAL_STORAGE_VIEW_MODE_KEY, mode);
-    
-    // Remover todas as classes de visualização
-    listaCards.classList.remove('compact-view', 'list-view');
-    
-    // Adicionar a classe apropriada
-    if (mode === 'compact') listaCards.classList.add('compact-view');
-    else if (mode === 'list') listaCards.classList.add('list-view');
-    
-    // Atualizar botões ativos
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.view === mode);
-    });
-}
-
-function aplicarModoVisualizacaoInicial() {
-    const savedMode = localStorage.getItem(LOCAL_STORAGE_VIEW_MODE_KEY) || 'grid';
-    setViewMode(savedMode);
-}
+// ========================================================
+// 9. SISTEMA DE FAVORITOS
+// ========================================================
 
 function toggleFavorite(malId) {
     if (catalogoPessoal.hasOwnProperty(malId)) {
-        // 1. Atualiza dados
         catalogoPessoal[malId].favorite = !catalogoPessoal[malId].favorite;
         const isFavorite = catalogoPessoal[malId].favorite;
         salvarCatalogo();
@@ -1178,26 +1040,20 @@ function toggleFavorite(malId) {
         const card = document.querySelector(`.card-anime[data-mal-id="${malId}"]`);
         if (!card) return;
 
-        // 2. Atualiza botão
         const btn = card.querySelector('.btn-favorite');
         if (btn) {
             btn.classList.toggle('active', isFavorite);
             btn.title = isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos';
         }
 
-        // 3. Atualiza Badge COM ANIMAÇÃO
         let badge = card.querySelector('.favorite-badge');
-        
         if (isFavorite && !badge) {
-            // Cria e a animação do CSS roda automaticamente
             card.insertAdjacentHTML('afterbegin', '<div class="favorite-badge" title="Favorito">⭐</div>');
         } else if (!isFavorite && badge) {
-            // Anima saída via JS e depois remove
             badge.style.animation = 'badgeDisappear 0.3s ease-out forwards';
             setTimeout(() => badge.remove(), 300); 
         }
 
-        // 4. Lógica de visibilidade do card (Filtro)
         const deveSair = filtroStatus?.value === 'favoritos' && !isFavorite;
         if (deveSair) {
             card.style.transition = 'opacity 0.3s, transform 0.3s';
@@ -1206,63 +1062,77 @@ function toggleFavorite(malId) {
 
             setTimeout(() => {
                 card.classList.add('oculto');
-                card.style.cssText = ''; // Reseta estilos inline
+                card.style.cssText = '';
             }, 300);
         }
 
-        // 5. Feedback
         showToast(
-            isFavorite ? '⭐ Adicionado aos favoritos!' : '❌ Removido dos favoritos',
+            isFavorite ? '⭐ Adicionado aos favoritos!' : '✗ Removido dos favoritos',
             isFavorite ? 'fav-add' : 'fav-remove'
         );
     }
 }
 
 // ========================================================
-// PWA: SISTEMA DE ATUALIZAÇÃO
+// 10. MODO DE VISUALIZAÇÃO
 // ========================================================
 
-let newWorker; // Variável global para guardar o worker que está esperando
-
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => {
-                console.log('✅ Service Worker registrado:', reg);
-
-                // A. Se já tem um worker esperando (atualização baixada em background)
-                if (reg.waiting) {
-                    newWorker = reg.waiting;
-                    showUpdateNotification();
-                }
-
-                // B. Se encontrar uma atualização nova agora
-                reg.addEventListener('updatefound', () => {
-                    newWorker = reg.installing;
-                    
-                    newWorker.addEventListener('statechange', () => {
-                        // Se o estado mudou para 'installed' e já existe um controller,
-                        // significa que é uma atualização, não a primeira instalação.
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            showUpdateNotification();
-                        }
-                    });
-                });
-            })
-            .catch(err => console.error('❌ Erro SW:', err));
-    });
-
-    // C. Quando a atualização for aplicada (após clicar no botão), recarrega a página
-    let refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (refreshing) return;
-        refreshing = true;
-        localStorage.setItem('app_updated', 'true');
-        window.location.reload();
+function setViewMode(mode) {
+    currentViewMode = mode;
+    localStorage.setItem(STORAGE_KEYS.VIEW_MODE, mode);
+    
+    listaCards.classList.remove('compact-view', 'list-view');
+    
+    if (mode === 'compact') listaCards.classList.add('compact-view');
+    else if (mode === 'list') listaCards.classList.add('list-view');
+    
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === mode);
     });
 }
 
-// --- FUNÇÕES VISUAIS DA NOTIFICAÇÃO ---
+function aplicarModoVisualizacaoInicial() {
+    const savedMode = localStorage.getItem(STORAGE_KEYS.VIEW_MODE) || 'grid';
+    setViewMode(savedMode);
+}
+
+// ========================================================
+// 11. PWA & SERVICE WORKER
+// ========================================================
+
+function setupServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => {
+                    console.log('✅ Service Worker registrado:', reg);
+
+                    if (reg.waiting) {
+                        newWorker = reg.waiting;
+                        showUpdateNotification();
+                    }
+
+                    reg.addEventListener('updatefound', () => {
+                        newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                showUpdateNotification();
+                            }
+                        });
+                    });
+                })
+                .catch(err => console.error('❌ Erro SW:', err));
+        });
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (refreshing) return;
+            refreshing = true;
+            localStorage.setItem('app_updated', 'true');
+            window.location.reload();
+        });
+    }
+}
 
 function showUpdateNotification() {
     const updateToast = document.getElementById('update-toast');
@@ -1271,20 +1141,15 @@ function showUpdateNotification() {
 
     if (!updateToast) return;
 
-    // Remove classe oculto para mostrar
     updateToast.classList.remove('oculto');
 
-    // Clique: Atualizar Agora
     btnAgora.onclick = () => {
         if (newWorker) {
-            // Manda sinal para o SW pular a espera e ativar
             newWorker.postMessage({ type: 'SKIP_WAITING' });
-            // O evento 'controllerchange' lá em cima vai recarregar a página
         }
         hideUpdateNotification();
     };
 
-    // Clique: Depois
     btnDepois.onclick = () => {
         hideUpdateNotification();
     };
@@ -1294,41 +1159,34 @@ function hideUpdateNotification() {
     const updateToast = document.getElementById('update-toast');
     if (!updateToast) return;
 
-    updateToast.classList.add('saindo'); // Animação de saída CSS
+    updateToast.classList.add('saindo');
     setTimeout(() => {
         updateToast.classList.add('oculto');
         updateToast.classList.remove('saindo');
     }, 400);
 }
 
+// ========================================================
+// 12. EVENT LISTENERS
+// ========================================================
+
 function setupListeners() {
-    // --- Dark Mode ---
+    // Dark Mode
     const btnDarkMode = document.getElementById('dark-mode-icon-btn');
-    if (btnDarkMode) {
-        btnDarkMode.addEventListener('click', toggleDarkMode);
-    }
+    if (btnDarkMode) btnDarkMode.addEventListener('click', toggleDarkMode);
 
-    if (btnAnterior) {
-        btnAnterior.addEventListener('click', () => mudarPagina(-1));
-    }
-    
-    if (btnProxima) {
-        btnProxima.addEventListener('click', () => mudarPagina(1));
-    }
+    // Paginação
+    if (btnAnterior) btnAnterior.addEventListener('click', () => mudarPagina(-1));
+    if (btnProxima) btnProxima.addEventListener('click', () => mudarPagina(1));
 
-    // --- Campo de Busca ---
+    // Busca
     if (campoBusca) {
-        // Mostra/Oculta o botão 'X' de limpar
         campoBusca.addEventListener('input', function() {
             if (limparBuscaBtn) {
                 limparBuscaBtn.classList.toggle('oculto', this.value.trim().length === 0);
             }
         });
-
-        // Busca em tempo real (Sugestões)
         campoBusca.addEventListener('input', buscarAnimesEmTempoRealDebounced);
-
-        // Busca completa ao apertar Enter
         campoBusca.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -1337,33 +1195,27 @@ function setupListeners() {
         });
     }
 
-    // --- Botões de Controle de Interface ---
+    // Controles
     if (limparBuscaBtn) limparBuscaBtn.addEventListener('click', limparTextoBusca);
     if (btnVoltarCatalogo) btnVoltarCatalogo.addEventListener('click', resetarInterfaceDeBusca);
     if (filtroStatus) filtroStatus.addEventListener('change', filtrarAnimesSalvos);
     if (ordenacaoSelect) ordenacaoSelect.addEventListener('change', carregarAnimesSalvos);
 
-    // --- Fechamento de Modais ao Clicar Fora (Window) ---
+    // Modais
     window.addEventListener('click', (e) => {
-        // Fechar Modal de Detalhes
         if (e.target === animeModal) fecharModal();
-        
-        // Fechar Modal de Estatísticas
         if (e.target === document.getElementById('stats-modal')) {
             document.getElementById('stats-modal').classList.add('oculto');
         }
-        
-        // Fechar Dropdown de busca se clicar fora
         if (resultadosBuscaAPI && campoBusca && !campoBusca.contains(e.target) && !resultadosBuscaAPI.contains(e.target)) {
             resultadosBuscaAPI.classList.add('oculto');
         }
     });
 
-    // --- Botões dos Modais ---
     const closeBtn = document.querySelector('#fechar-modal-detalhes');
     if (closeBtn) closeBtn.addEventListener('click', fecharModal);
 
-    // --- Backup (Exportar/Importar) ---
+    // Backup
     const btnExportar = document.getElementById('btn-exportar');
     if (btnExportar) btnExportar.addEventListener('click', exportarBackup);
 
@@ -1374,36 +1226,47 @@ function setupListeners() {
         inputImportar.addEventListener('change', importarBackup);
     }
 
-    // --- Estatísticas e Roleta ---
+    // Stats
     const btnStats = document.getElementById('btn-stats');
     if (btnStats) btnStats.addEventListener('click', calcularEstatisticas);
 
     const btnFecharStats = document.getElementById('fechar-stats');
     if (btnFecharStats) btnFecharStats.addEventListener('click', () => document.getElementById('stats-modal').classList.add('oculto'));
 
+    // Roleta
     const btnRoleta = document.getElementById('btn-roleta');
     if (btnRoleta) btnRoleta.addEventListener('click', sugerirAnimeAleatorio);
 
+    // Modos de visualização
     document.querySelectorAll('.view-btn').forEach(btn => {
         btn.addEventListener('click', () => setViewMode(btn.dataset.view));
     });
 }
 
 // ========================================================
-// INICIALIZAÇÃO
+// 13. INICIALIZAÇÃO
 // ========================================================
+
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Inicializando aplicação...');
+    
+    // Carrega preferências
     aplicarModoEscuroInicial();
+    aplicarModoVisualizacaoInicial();
+    
+    // Carrega dados
     carregarCatalogo();
     carregarAnimesSalvos();
+    
+    // Configura eventos
     setupListeners();
-    aplicarModoVisualizacaoInicial();
-    // 🛑 VERIFICAÇÃO DE SUCESSO DA ATUALIZAÇÃO
+    setupServiceWorker();
+    
+    // Verifica se teve atualização
     if (localStorage.getItem('app_updated')) {
-        // Mostra o Toast de sucesso
         showToast('✅ App atualizado para a versão mais recente!', 'success');
-        
-        // Remove o lembrete para não mostrar de novo se der F5 normal
         localStorage.removeItem('app_updated');
     }
+    
+    console.log('✅ Aplicação pronta!');
 });
