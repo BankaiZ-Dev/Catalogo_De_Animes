@@ -565,9 +565,10 @@ function renderizarCardAnime(animeAPI, isSaved = false, savedData = {}, returnEl
                 <span>Lançado em: ${anoAnime}</span>
             </div>
             <div class="card-acoes-compactas">
-                <button onclick="adicionarRapido(${malId}, '${tituloEncoded}', '${posterUrl}', ${animeAPI.episodes}, '${animeAPI.type}', '${anoAnime}')" class="btn-base btn-flag-adicionar" title="Adicionar a Quero Ver">
-                    <svg class="icone-acao-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
-                        <path d="M14.4 6L14 4H5V21H7V14H12.6L13 16H20V6H14.4Z" />
+                <button onclick="adicionarRapido(${malId}, '${tituloEncoded}', '${posterUrl}', ${animeAPI.episodes}, '${animeAPI.type}', '${anoAnime}')" class="btn-add-destaque" title="Adicionar a Quero Ver">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
                 </button>
                 ${detalhesBtn}
@@ -1244,6 +1245,11 @@ function setupListeners() {
             }
         });
     }
+
+    DOM.busca.botaoBuscar?.addEventListener('click', () => {
+        const termo = DOM.busca.campo.value;
+        buscarAnimes(termo);
+    });
 
     // Controles
     DOM.busca.botaoLimpar?.addEventListener('click', limparTextoBusca);

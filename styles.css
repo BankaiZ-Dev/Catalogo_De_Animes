@@ -35,6 +35,7 @@ body.dark-mode {
     --cor-card-fundo: #1e1e1e;
     --cor-borda: #444;
     --sombra-padrao: 0 4px 8px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
 }
 
 /* ==========================================================================
@@ -223,7 +224,7 @@ body.dark-mode #dark-mode-icon-btn::before {
 
 #campo-busca {
     width: 100%;
-    padding: 0 35px 0 15px;
+    padding: 0 85px 0 15px;
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
     background-color: var(--cor-card-fundo);
@@ -233,16 +234,53 @@ body.dark-mode #dark-mode-icon-btn::before {
     line-height: 42px;
 }
 
+#campo-busca:focus {
+    border-color: var(--cor-primaria);
+    outline: none;
+}
+
 .limpar-busca-btn {
     position: absolute;
-    right: 10px;
+    right: 45px;
     top: 50%;
     transform: translateY(-50%);
     background: none;
     border: none;
-    font-size: 1.2em;
+    font-size: 1.5em;
     color: var(--cor-texto-secundario);
     cursor: pointer;
+    width: 30px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.limpar-busca-btn:hover {
+    color: #ff5252;
+}
+
+.btn-buscar-lupa {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 45px;
+    background: transparent;
+    border: none;
+    color: var(--cor-texto-secundario);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0 var(--raio-borda) var(--raio-borda) 0;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.btn-buscar-lupa:hover {
+    color: var(--cor-primaria);
+    background-color: rgba(0,0,0,0.05);
 }
 
 /* --- Resultados da Busca (Dropdown) --- */
@@ -290,13 +328,58 @@ body.dark-mode .resultado-item.ativo {
 /* --- Filtros e Ordenação --- */
 #filtro-status,
 #ordenacao-catalogo {
-    padding: 10px;
+    height: 42px;
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
     background-color: var(--cor-card-fundo);
     color: var(--cor-texto-principal);
+    font-size: 0.95em;
     cursor: pointer;
-    height: 42px;
+    transition: all 0.2s ease-in-out;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+    padding: 0 45px 0 15px; 
+}
+
+#filtro-status:hover,
+#ordenacao-catalogo:hover {
+    border-color: var(--cor-primaria);
+    background-color: #f9f9f9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+#filtro-status:focus,
+#ordenacao-catalogo:focus {
+    border-color: var(--cor-primaria);
+    outline: none;
+}
+
+#filtro-status option,
+#ordenacao-catalogo option {
+    background-color: var(--cor-card-fundo);
+    color: var(--cor-texto-principal);
+}
+
+body.dark-mode #filtro-status,
+body.dark-mode #ordenacao-catalogo {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-color: var(--cor-card-fundo);
+    color: var(--cor-texto-principal);
+}
+
+body.dark-mode #filtro-status:hover,
+body.dark-mode #ordenacao-catalogo:hover {
+    background-color: #333333;
+    border-color: var(--cor-primaria);
+    color: #ffffff;
 }
 
 /* --- Botões de Modo de Visualização --- */
@@ -602,14 +685,38 @@ body.dark-mode .barra-progresso-fundo {
     background-color: var(--cor-fundo);
 }
 
-.btn-flag-adicionar {
-    color: var(--status-concluido);
-    border-color: var(--status-concluido);
+/* --- Novo Botão de Adicionar Moderno --- */
+.btn-add-destaque {
+    background: linear-gradient(135deg, var(--status-querover) 0%, #1976D2 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(33, 150, 243, 0.4);
+    
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
 }
 
-.btn-flag-adicionar:hover {
-    background-color: var(--status-concluido);
-    color: white;
+.btn-add-destaque:hover {
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: 0 6px 15px rgba(33, 150, 243, 0.6);
+}
+
+.btn-add-destaque:active {
+    transform: scale(0.95);
+}
+
+.btn-add-destaque svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.5;
 }
 
 .btn-favorite {
