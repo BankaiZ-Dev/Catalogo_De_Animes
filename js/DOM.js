@@ -17,6 +17,7 @@ const DOM = {
     busca: {
         campo: document.getElementById('campo-busca'),
         botaoLimpar: document.getElementById('limpar-busca-btn'),
+        botaoBuscar: document.getElementById('btn-buscar-lupa'),
         resultados: document.getElementById('resultados-busca-api'),
         botaoVoltar: document.getElementById('btn-voltar-catalogo')
     },
@@ -63,7 +64,8 @@ const DOM = {
         botaoImportar: document.getElementById('btn-importar'),
         inputImportar: document.getElementById('input-importar'),
         botaoStats: document.getElementById('btn-stats'),
-        botaoRoleta: document.getElementById('btn-roleta')
+        botaoRoleta: document.getElementById('btn-roleta'),
+        botaoTopo: document.getElementById('btn-topo')
     },
 
     // ========================================================

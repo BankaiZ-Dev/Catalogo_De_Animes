@@ -2,28 +2,23 @@
    1. VARIÁVEIS CSS E TEMAS
    ========================================================================== */
 :root {
-    /* Cores Base */
     --cor-fundo: #f4f4f9;
     --cor-texto-principal: #333;
     --cor-texto-secundario: #666;
     --cor-card-fundo: #ffffff;
     --cor-borda: #ccc;
 
-    /* Cores de Marca */
     --cor-primaria: #d32f2f;
     --cor-primaria-hover: #b71c1c;
     --cor-acento: #2196F3;
 
-    /* Status */
     --status-concluido: #4CAF50;
     --status-andamento: #FF9800;
     --status-querover: #2196F3;
 
-    /* Layout */
     --largura-maxima: 1200px;
     --raio-borda: 8px;
-    
-    /* Sombras */
+
     --sombra-padrao: 0 4px 8px rgba(0, 0, 0, 0.1);
     --sombra-texto-contorno: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
@@ -69,7 +64,6 @@ button {
     padding-top: 0;
 }
 
-/* Classes Utilitárias */
 .oculto {
     display: none !important;
 }
@@ -104,7 +98,6 @@ button {
     font-size: 1.5em;
 }
 
-/* --- Utilitários do Cabeçalho --- */
 .cabecalho-utilitarios {
     display: flex;
     align-items: center;
@@ -115,7 +108,6 @@ button {
     display: none;
 }
 
-/* --- Botões de Backup --- */
 .botoes-backup {
     display: flex;
     gap: 10px;
@@ -141,7 +133,6 @@ button {
     background-color: rgba(255, 255, 255, 0.4);
 }
 
-/* --- Botão Dark Mode --- */
 #dark-mode-icon-btn {
     width: 40px;
     height: 40px;
@@ -181,9 +172,9 @@ body.dark-mode #dark-mode-icon-btn::before {
    4. BARRA DE FERRAMENTAS
    ========================================================================== */
 .barra-ferramentas {
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    position: relative;
+    top: auto;
+    z-index: 5;
     background-color: var(--cor-fundo);
     display: flex;
     flex-wrap: wrap;
@@ -193,7 +184,6 @@ body.dark-mode #dark-mode-icon-btn::before {
     border-bottom: 1px solid var(--cor-borda);
 }
 
-/* --- Botão Voltar --- */
 .btn-voltar-home {
     background-color: var(--cor-acento);
     color: white;
@@ -215,7 +205,6 @@ body.dark-mode #dark-mode-icon-btn::before {
     transform: translateY(-1px);
 }
 
-/* --- Campo de Busca --- */
 .busca-input-container {
     position: relative;
     flex-grow: 1;
@@ -276,6 +265,7 @@ body.dark-mode #dark-mode-icon-btn::before {
     justify-content: center;
     border-radius: 0 var(--raio-borda) var(--raio-borda) 0;
     transition: color 0.2s, background-color 0.2s;
+    z-index: 10;
 }
 
 .btn-buscar-lupa:hover {
@@ -283,7 +273,10 @@ body.dark-mode #dark-mode-icon-btn::before {
     background-color: rgba(0,0,0,0.05);
 }
 
-/* --- Resultados da Busca (Dropdown) --- */
+.btn-buscar-lupa svg {
+    pointer-events: none;
+}
+
 #resultados-busca-api {
     position: absolute;
     top: 100%;
@@ -325,7 +318,6 @@ body.dark-mode .resultado-item.ativo {
     margin-right: 10px;
 }
 
-/* --- Filtros e Ordenação --- */
 #filtro-status,
 #ordenacao-catalogo {
     height: 42px;
@@ -382,7 +374,6 @@ body.dark-mode #ordenacao-catalogo:hover {
     color: #ffffff;
 }
 
-/* --- Botões de Modo de Visualização --- */
 .view-mode-toggle {
     display: flex;
     gap: 0;
@@ -430,14 +421,12 @@ body.dark-mode .view-btn:hover:not(.active) {
    5. CARDS DE ANIME
    ========================================================================== */
 
-/* --- Grid de Cards --- */
 .lista-cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 20px;
 }
 
-/* --- Estrutura do Card --- */
 .card-anime {
     background-color: var(--cor-card-fundo);
     border-radius: var(--raio-borda);
@@ -453,7 +442,6 @@ body.dark-mode .view-btn:hover:not(.active) {
     transform: translateY(-2px);
 }
 
-/* Cores da borda por status */
 .status-concluido {
     --cor-atual: var(--status-concluido);
 }
@@ -466,7 +454,6 @@ body.dark-mode .view-btn:hover:not(.active) {
     --cor-atual: var(--status-querover);
 }
 
-/* --- Imagem do Poster --- */
 .card-poster {
     width: 170px;
     height: 260px;
@@ -474,7 +461,6 @@ body.dark-mode .view-btn:hover:not(.active) {
     flex-shrink: 0;
 }
 
-/* --- Badge de Favorito --- */
 .favorite-badge {
     position: absolute;
     top: 10px;
@@ -497,7 +483,6 @@ body.dark-mode .view-btn:hover:not(.active) {
     animation: badgeAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/* --- Conteúdo do Card --- */
 .card-info {
     padding: 15px;
     display: flex;
@@ -566,7 +551,6 @@ body.dark-mode .tag-tipo {
     color: #fff;
 }
 
-/* --- Sistema de Progresso --- */
 .progresso-linha-topo {
     display: flex;
     justify-content: space-between;
@@ -656,7 +640,6 @@ body.dark-mode .barra-progresso-fundo {
     transition: width 0.4s ease-in-out;
 }
 
-/* --- Ações do Card --- */
 .card-acoes-compactas {
     margin-top: auto;
     padding-top: 10px;
@@ -685,7 +668,6 @@ body.dark-mode .barra-progresso-fundo {
     background-color: var(--cor-fundo);
 }
 
-/* --- Novo Botão de Adicionar Moderno --- */
 .btn-add-destaque {
     background: linear-gradient(135deg, var(--status-querover) 0%, #1976D2 100%);
     color: white;
@@ -746,7 +728,6 @@ body.dark-mode .barra-progresso-fundo {
    6. MODOS DE VISUALIZAÇÃO
    ========================================================================== */
 
-/* --- Modo Compacto --- */
 .lista-cards.compact-view {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 15px;
@@ -822,7 +803,6 @@ body.dark-mode .barra-progresso-fundo {
     padding: 30px 0;
 }
 
-/* Estilo APENAS para os botões Anterior/Próxima */
 #btn-anterior,
 #btn-proxima {
     padding: 8px 16px;
@@ -847,18 +827,16 @@ body.dark-mode .barra-progresso-fundo {
     opacity: 0.7;
 }
 
-/* Container dos números */
 .paginacao-numeros {
     display: flex;
     gap: 5px;
     align-items: center;
 }
 
-/* Botões numéricos (agora o estilo vai pegar!) */
 .btn-pagina-numero {
     padding: 6px 12px;
     border: 1px solid var(--cor-borda);
-    background-color: var(--cor-card-fundo); /* Fundo branco/escuro */
+    background-color: var(--cor-card-fundo);
     cursor: pointer;
     border-radius: 4px;
     color: var(--cor-texto-principal);
@@ -867,14 +845,12 @@ body.dark-mode .barra-progresso-fundo {
     transition: all 0.2s;
 }
 
-/* Hover: Fica com a cor da marca */
 .btn-pagina-numero:hover {
     border-color: var(--cor-primaria);
     color: var(--cor-primaria);
     background-color: rgba(0, 0, 0, 0.05);
 }
 
-/* Ativo: Fundo preenchido com a cor da marca */
 .btn-pagina-numero.ativo {
     background-color: var(--cor-primaria);
     color: white;
@@ -892,27 +868,31 @@ body.dark-mode .barra-progresso-fundo {
    8. MODAIS
    ========================================================================== */
 
-/* --- Estrutura Base do Modal --- */
-.modal {
-    position: fixed;
-    z-index: 2000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    overflow: auto;
+.modal-dialog {
+    background-color: var(--cor-card-fundo);
+    color: var(--cor-texto-principal);
+    border: none;
+    border-radius: var(--raio-borda);
     padding: 20px;
+    max-width: 800px;
+    width: 90%;
+    margin: auto; 
+    position: fixed;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.3s ease, transform 0.3s ease, display 0.3s allow-discrete;
 }
 
-.modal-conteudo {
-    background-color: var(--cor-card-fundo);
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: var(--raio-borda);
-    max-width: 800px;
-    position: relative;
-    color: var(--cor-texto-principal);
+.modal-dialog[open] {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.modal-dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    animation: fadeInBackdrop 0.3s ease-out;
 }
 
 .modal-pequeno {
@@ -927,9 +907,16 @@ body.dark-mode .barra-progresso-fundo {
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 5px 10px;
+    width: 30px;
+    height: 30px;
     cursor: pointer;
     font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    padding: 0;
+    z-index: 10;
 }
 
 .fechar-btn:hover {
@@ -937,7 +924,6 @@ body.dark-mode .barra-progresso-fundo {
     transform: scale(1.1);
 }
 
-/* --- Layout do Modal --- */
 .modal-poster-detalhes {
     display: flex;
     flex-wrap: wrap;
@@ -956,7 +942,6 @@ body.dark-mode .barra-progresso-fundo {
     flex-grow: 1;
 }
 
-/* --- Ações do Modal --- */
 .modal-actions-row {
     display: flex;
     gap: 10px;
@@ -1002,7 +987,6 @@ body.dark-mode .barra-progresso-fundo {
     height: 18px;
 }
 
-/* --- Sistema de Abas --- */
 .modal-tabs {
     display: flex;
     border-bottom: 2px solid #ddd;
@@ -1051,7 +1035,6 @@ body.dark-mode .tab-button.ativo {
     border-bottom-color: #ff6b6b;
 }
 
-/* --- Conteúdo das Abas --- */
 .modal-tab-conteudo {
     margin: 20px 0;
 }
@@ -1065,7 +1048,6 @@ body.dark-mode .tab-button.ativo {
     display: block;
 }
 
-/* Aba: Trailer */
 .modal-trailer-container {
     position: relative;
     padding-bottom: 56.25%;
@@ -1103,7 +1085,6 @@ body.dark-mode .trailer-indisponivel {
     font-size: 1.1em;
 }
 
-/* Aba: Sinopse */
 .sinopse-texto {
     line-height: 1.6;
     color: #555;
@@ -1114,7 +1095,6 @@ body.dark-mode .sinopse-texto {
     color: #ccc;
 }
 
-/* Aba: Streaming */
 .streaming-container {
     padding: 10px 0;
 }
@@ -1224,7 +1204,6 @@ body.dark-mode .streaming-link:hover {
     letter-spacing: 0.5px;
 }
 
-/* --- Estatísticas (Stats) --- */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1281,7 +1260,6 @@ body.dark-mode .streaming-link:hover {
     text-transform: uppercase;
 }
 
-/* --- Utilitários do Modal --- */
 .titulo-centralizado {
     text-align: center;
     margin-bottom: 20px;
@@ -1298,15 +1276,34 @@ body.dark-mode .streaming-link:hover {
    9. NOTIFICAÇÕES E FEEDBACK
    ========================================================================== */
 
-/* --- Toast Notifications --- */
 #toast-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    z-index: 4000;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    top: auto; 
+    left: auto;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: max-content;
+    max-width: 80vw;
+    height: auto;
+    overflow: visible;
+}
+
+#toast-container:popover-open {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    top: auto;
+    left: auto;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .toast {
@@ -1343,7 +1340,18 @@ body.dark-mode .streaming-link:hover {
     background-color: var(--status-andamento);
 }
 
-/* --- Notificação de Atualização PWA --- */
+.toast.roleta {
+    background-color: #7B1FA2; 
+    color: white;
+    border-left: 5px solid #E1BEE7;
+    box-shadow: 0 4px 15px rgba(123, 31, 162, 0.4);
+}
+
+.toast.roleta .toast-icon {
+    font-size: 1.2em;
+    margin-right: 8px;
+}
+
 .update-notification {
     position: fixed;
     bottom: 20px;
@@ -1429,7 +1437,6 @@ body.dark-mode .streaming-link:hover {
     background: rgba(255, 255, 255, 0.3);
 }
 
-/* --- Loading Overlay --- */
 #global-loading-overlay {
     position: fixed;
     top: 0;
@@ -1520,6 +1527,11 @@ body.dark-mode .streaming-link:hover {
     }
 }
 
+@keyframes fadeInBackdrop {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 @keyframes slideInUp {
     from {
         transform: translateY(400px);
@@ -1543,7 +1555,49 @@ body.dark-mode .streaming-link:hover {
 }
 
 /* ==========================================================================
-   11. RESPONSIVIDADE
+   11. RODAPÉ
+   ========================================================================== */
+
+.btn-topo {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 45px;
+    height: 45px;
+    background-color: var(--cor-primaria);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 99;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-topo.visivel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.btn-topo:hover {
+    background-color: var(--cor-primaria-hover);
+    transform: translateY(-3px);
+}
+
+.btn-topo svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* ==========================================================================
+   12. RESPONSIVIDADE
    ========================================================================== */
 
 /* Desktop */
@@ -1651,6 +1705,13 @@ body.dark-mode .streaming-link:hover {
         padding: 5px 8px;
         font-size: 0.9em;
         min-width: 30px;
+    }
+
+    .btn-topo {
+        bottom: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
     }
 }
 

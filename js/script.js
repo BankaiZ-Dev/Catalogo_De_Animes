@@ -4,16 +4,15 @@
 // Estrutura:
 // 1. Estado da Aplicação
 // 2. Funções Auxiliares
-// 3. Storage & Modo Escuro
-// 4. CRUD do Catálogo
-// 5. Renderização de Cards
-// 6. Busca e API
-// 7. Modais
-// 8. Sistema de Favoritos
-// 9. Modo de Visualização
-// 10. PWA & Service Worker
-// 11. Event Listeners
-// 12. Inicialização
+// 3. CRUD do Catálogo
+// 4. Renderização de Cards
+// 5. Busca e API
+// 6. Modais
+// 7. Sistema de Favoritos
+// 8. Modo de Visualização
+// 9. PWA & Service Worker
+// 10. Event Listeners
+// 11. Inicialização
 // ========================================================
 
 // ========================================================
@@ -21,7 +20,6 @@
 // ========================================================
 
 let debounceTimer;
-let catalogoPessoal = {};
 let paginaAtual = 1;
 let termoBuscaAtual = '';
 let currentViewMode = 'grid';
@@ -57,16 +55,33 @@ function hideGlobalLoading() {
 }
 
 function showToast(message, type = 'info') {
-    if (!DOM.notificacoes.toastContainer) return;
+    const container = DOM.notificacoes.toastContainer;
+    if (!container) return;
     
+    if (container.showPopover) {
+        try {
+            container.hidePopover(); 
+            container.showPopover();
+        } catch (e) {
+            container.showPopover();
+        }
+    }
+
     const toast = document.createElement('div');
-    toast.classList.add('toast', type);
+    toast.className = `toast ${type}`;
+
     toast.textContent = message;
-    DOM.notificacoes.toastContainer.appendChild(toast);
+    
+    container.appendChild(toast);
 
     setTimeout(() => {
         toast.style.animation = 'fade-out 0.5s forwards';
-        setTimeout(() => toast.remove(), 500);
+        setTimeout(() => {
+            toast.remove();
+            if (container.children.length === 0 && container.hidePopover) {
+                container.hidePopover();
+            }
+        }, 500);
     }, 3000);
 }
 
@@ -144,77 +159,7 @@ function renderizarNumerosPaginacao(paginaAtual, totalPaginas) {
 }
 
 // ========================================================
-// 3. STORAGE & MODO ESCURO
-// ========================================================
-
-function carregarCatalogo() { 
-    const data = localStorage.getItem(STORAGE_KEYS.CATALOGO); 
-    if (data) {
-        catalogoPessoal = JSON.parse(data);
-        // Migração automática - garante que campo 'favorite' existe
-        Object.keys(catalogoPessoal).forEach(malId => {
-            if (!catalogoPessoal[malId].hasOwnProperty('favorite')) {
-                catalogoPessoal[malId].favorite = false;
-            }
-        });
-        salvarCatalogo();
-    }
-}
-
-function salvarCatalogo() {
-    localStorage.setItem(STORAGE_KEYS.CATALOGO, JSON.stringify(catalogoPessoal));
-}
-
-function toggleDarkMode() {
-    const isDarkMode = document.body.classList.toggle('dark-mode');
-    localStorage.setItem(STORAGE_KEYS.DARK_MODE, isDarkMode ? 'true' : 'false');
-}
-
-function aplicarModoEscuroInicial() {
-    const isDarkMode = localStorage.getItem(STORAGE_KEYS.DARK_MODE) === 'true';
-    if (isDarkMode) document.body.classList.add('dark-mode');
-    else document.body.classList.remove('dark-mode');
-}
-
-function exportarBackup() {
-    if (Object.keys(catalogoPessoal).length === 0) return showToast("Catálogo vazio!", "info");
-    const dadosJSON = JSON.stringify(catalogoPessoal, null, 2);
-    const blob = new Blob([dadosJSON], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `backup_animes_${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast("Backup baixado!", "success");
-}
-
-function importarBackup(event) {
-    const arquivo = event.target.files[0];
-    if (!arquivo) return;
-    const leitor = new FileReader();
-    leitor.onload = function(e) {
-        try {
-            const dados = JSON.parse(e.target.result);
-            if (typeof dados !== 'object') throw new Error();
-            if (confirm("Isso substituirá seu catálogo atual. Continuar?")) {
-                catalogoPessoal = dados;
-                salvarCatalogo();
-                carregarAnimesSalvos();
-                showToast("Restaurado!", "success");
-            }
-        } catch (error) {
-            showToast("Arquivo inválido.", "error");
-        }
-    };
-    leitor.readAsText(arquivo);
-    event.target.value = '';
-}
-
-// ========================================================
-// 4. CRUD DO CATÁLOGO
+// 3. CRUD DO CATÁLOGO
 // ========================================================
 
 function adicionarRapido(malId, tituloEncoded, posterUrl, maxEpisodes, type, year) {
@@ -222,43 +167,62 @@ function adicionarRapido(malId, tituloEncoded, posterUrl, maxEpisodes, type, yea
     adicionarAoCatalogo(malId, titulo, posterUrl, maxEpisodes, 'Quero Ver', type, year);
 }
 
-function adicionarAoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial = 'Quero Ver', type = 'TV', year = '----') {
-    if (!catalogoPessoal.hasOwnProperty(malId)) {
-        catalogoPessoal[malId] = {
-            mal_id: malId,
-            title: titulo,
-            poster: posterUrl,
-            status: statusInicial,
-            episode: 0,
-            season: 1,
-            maxEpisodes: maxEpisodes,
-            dateAdded: new Date().toISOString(),
-            type: type,
-            year: year,
-            favorite: false
-        };
-        if (statusInicial === 'Concluído' && maxEpisodes) catalogoPessoal[malId].episode = maxEpisodes;
-        
-        salvarCatalogo();
-        showToast(`Anime adicionado como "${statusInicial}"!`, 'success');
+function salvarNovoAnimeNoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial, type, year) {
+    catalogoPessoal[malId] = {
+        mal_id: malId,
+        title: titulo,
+        poster: posterUrl,
+        status: statusInicial,
+        episode: 0,
+        season: 1,
+        maxEpisodes: maxEpisodes,
+        dateAdded: new Date().toISOString(),
+        type: type,
+        year: year,
+        favorite: false
+    };
+    if (statusInicial === 'Concluído' && maxEpisodes) catalogoPessoal[malId].episode = maxEpisodes;
+    salvarCatalogo();
+}
 
-        // Atualiza card in-place
-        const cardAntigo = getCardAnime(malId);
-        if (cardAntigo) {
-            const animeDados = {
-                mal_id: malId,
-                title: titulo,
-                images: { jpg: { image_url: posterUrl } },
-                episodes: maxEpisodes,
-                type: type,
-                year: year
-            };
-            const novoCard = renderizarCardAnime(animeDados, true, {}, true);
-            cardAntigo.replaceWith(novoCard);
-        }
-    } else {
-        showToast('Este anime já está no seu catálogo!', 'info');
+function atualizarEpisodioEStatus(malId, change) {
+    if (!catalogoPessoal.hasOwnProperty(malId)) return { statusChanged: false, savedData: null };
+    
+    const savedData = catalogoPessoal[malId];
+    const statusBefore = savedData.status;
+
+    let newValue = savedData.episode + change;
+    if (newValue < 0) newValue = 0;
+    savedData.episode = newValue;
+
+    if (savedData.episode === 0) savedData.status = 'Quero Ver';
+    else if (savedData.maxEpisodes && savedData.episode >= savedData.maxEpisodes) {
+        savedData.status = 'Concluído';
+        savedData.episode = savedData.maxEpisodes;
+    } else if (savedData.episode > 0) {
+        savedData.status = 'Em Andamento';
     }
+
+    salvarCatalogo();
+
+    return { 
+        statusChanged: savedData.status !== statusBefore,
+        savedData: savedData,
+        statusNovo: savedData.status
+    };
+}
+
+function adicionarAoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial = 'Quero Ver', type = 'TV', year = '----') {
+    if (catalogoPessoal.hasOwnProperty(malId)) {
+        showToast('Este anime já está no seu catálogo!', 'info');
+        return;
+    }
+
+    salvarNovoAnimeNoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial, type, year);
+
+    atualizarCardNaTela(malId, titulo, posterUrl, maxEpisodes, type, year);
+
+    showToast(`Anime adicionado como "${statusInicial}"!`, 'info');
 }
 
 function removerDoCatalogo(malId) {
@@ -301,7 +265,7 @@ function removerDoCatalogo(malId) {
             }
         }
 
-        showToast(`"${animeTitulo}" removido do catálogo.`, 'error');
+        showToast(`${animeTitulo} Removido do catálogo.`, 'error');
         fecharModal();
     }
 }
@@ -309,118 +273,35 @@ function removerDoCatalogo(malId) {
 function atualizarStatusAnime(malId, novoStatus) {
     if (catalogoPessoal.hasOwnProperty(malId)) {
         const anime = catalogoPessoal[malId];
+        const statusBefore = anime.status;
+        
         anime.status = novoStatus;
         if (novoStatus === 'Concluído' && anime.maxEpisodes) {
-            anime.episode = anime.maxEpisodes;
-            // SUBSTITUIÇÃO AQUI (Usa Helper do DOM.js)
-            const inputEp = getInputEpisodios(malId); 
-            if (inputEp) inputEp.value = anime.maxEpisodes;
-            updateProgressoDisplay(malId, anime.season, anime.episode, anime.maxEpisodes);
+             anime.episode = anime.maxEpisodes;
         }
         salvarCatalogo();
-        carregarAnimesSalvos();
-    }
-}
 
-function updateProgressoDisplay(malId, season, episode, maxEpisodes) {
-    const progressoElement = getTextoProgresso(malId);
-    if (progressoElement) progressoElement.textContent = `Ep ${episode}${maxEpisodes ? ` / ${maxEpisodes}` : ''}`;
-    
-    const barraElement = getBarraProgresso(malId);
-    if (barraElement && maxEpisodes && maxEpisodes > 0) {
-        let pct = (episode / maxEpisodes) * 100;
-        if (pct < 0) pct = 0;
-        if (pct > 100) pct = 100;
-        barraElement.style.width = `${pct}%`;
+        const statusChanged = (anime.status !== statusBefore);
+        const savedData = anime;
+        atualizarElementosDoCard(malId, savedData, statusChanged); 
+        
+        showToast(`Status de ${anime.title} atualizado para: ${novoStatus}`, 'info');
+        fecharModal();
     }
 }
 
 function quickUpdate(malId, change) {
-    if (!catalogoPessoal.hasOwnProperty(malId)) return;
-    const savedData = catalogoPessoal[malId];
-    const statusBefore = savedData.status;
+    const resultado = atualizarEpisodioEStatus(malId, change);
 
-    let newValue = savedData.episode + change;
-    if (newValue < 0) newValue = 0;
-    savedData.episode = newValue;
+    if (!resultado.savedData) return;
 
-    if (savedData.episode === 0) savedData.status = 'Quero Ver';
-    else if (savedData.maxEpisodes && savedData.episode >= savedData.maxEpisodes) {
-        savedData.status = 'Concluído';
-        savedData.episode = savedData.maxEpisodes;
-    } else if (savedData.episode > 0) {
-        savedData.status = 'Em Andamento';
-    }
+    atualizarElementosDoCard(malId, resultado.savedData, resultado.statusChanged); 
 
-    salvarCatalogo();
-
-    const card = getCardAnime(malId);
-
-    const inputElement = getInputEpisodios(malId);
-    if (inputElement) inputElement.value = savedData.episode;
-
-    const progressoTexto = getTextoProgresso(malId);
-    if (progressoTexto) {
-        const episodesTotal = savedData.maxEpisodes ? ` / ${savedData.maxEpisodes}` : '';
-        progressoTexto.textContent = `Ep ${savedData.episode}${episodesTotal}`;
-    }
-
-    const barra = getBarraProgresso(malId);
-    if (barra && savedData.maxEpisodes > 0) {
-        let pct = (savedData.episode / savedData.maxEpisodes) * 100;
-        if (pct > 100) pct = 100;
-        barra.style.width = `${pct}%`;
-    }
-
-    if (savedData.status !== statusBefore) {
-        const filtroAtual = DOM.filtros.status ? DOM.filtros.status.value : 'todos';
-        let deveSairDaTela = false;
-
-        if (filtroAtual === 'favoritos') {
-            if (!savedData.favorite) deveSairDaTela = true;
-        } else if (filtroAtual !== 'todos' && filtroAtual !== savedData.status) {
-            deveSairDaTela = true;
-        }
-
-        if (deveSairDaTela) {
-            if (card) {
-                card.style.transition = "opacity 0.5s, transform 0.5s";
-                card.style.opacity = "0";
-                card.style.transform = "scale(0.95)";
-                
-                setTimeout(() => {
-                    card.classList.add('oculto');
-                    card.style.display = 'none';
-                    card.style.opacity = "";
-                    card.style.transform = "";
-                    atualizarVisualDoCard(card, savedData);
-                }, 500);
-            }
-        } else {
-            if (card) {
-                atualizarVisualDoCard(card, savedData);
-            }
-        }
-
+    if (resultado.statusChanged) {
         let tipoToast = 'info';
-        if (savedData.status === 'Concluído') tipoToast = 'success';
-        else if (savedData.status === 'Em Andamento') tipoToast = 'warning';
-
-        showToast(`Status atualizado para: ${savedData.status}`, tipoToast);
-    }
-}
-
-function atualizarVisualDoCard(card, savedData) {
-    const statusInfo = getStatusData(savedData.status);
-    
-    card.classList.remove('status-concluido', 'status-em-andamento', 'status-quero-ver');
-    card.classList.add(statusInfo.class);
-
-    const etiqueta = card.querySelector('.etiqueta-status');
-    if (etiqueta) {
-        etiqueta.classList.remove('status-concluido', 'status-em-andamento', 'status-quero-ver');
-        etiqueta.classList.add(statusInfo.class);
-        etiqueta.textContent = statusInfo.label;
+        if (resultado.statusNovo === 'Concluído') tipoToast = 'success';
+        else if (resultado.statusNovo === 'Em Andamento') tipoToast = 'warning';
+        showToast(`Status atualizado para: ${resultado.statusNovo}`, tipoToast);
     }
 }
 
@@ -441,49 +322,25 @@ function decrementarEpisodio(malId) {
 function concluirAnimeRapido(malId) {
     if (catalogoPessoal.hasOwnProperty(malId)) {
         const anime = catalogoPessoal[malId];
+        const statusAnterior = anime.status; 
         
         if (anime.maxEpisodes) {
             anime.episode = anime.maxEpisodes;
         }
         anime.status = 'Concluído';
         
-        salvarCatalogo();
+        salvarCatalogo(); 
         
-        const card = getCardAnime(malId);
-        
-        if (card) {
-            const inputElement = getInputEpisodios(malId);
-            if (inputElement) inputElement.value = anime.episode;
+        const statusMudou = (statusAnterior !== 'Concluído');
+        atualizarElementosDoCard(malId, anime, statusMudou);
 
-            const progressoTexto = getTextoProgresso(malId);
-            if (progressoTexto) {
-                const episodesTotal = anime.maxEpisodes ? ` / ${anime.maxEpisodes}` : '';
-                progressoTexto.textContent = `Ep ${anime.episode}${episodesTotal}`;
-            }
-
-            const barra = getBarraProgresso(malId);
-            if (barra) {
-                barra.style.width = '100%';
-            }
-
-            card.classList.remove('status-quero-ver', 'status-em-andamento');
-            card.classList.add('status-concluido');
-
-            const etiqueta = card.querySelector('.etiqueta-status');
-            if (etiqueta) {
-                etiqueta.classList.remove('status-quero-ver', 'status-em-andamento');
-                etiqueta.classList.add('status-concluido');
-                etiqueta.textContent = 'Concluído ✅';
-            }
-        }
-        
         showToast('Anime marcado como Concluído! 🎉', 'success');
         fecharModal();
     }
 }
 
 // ========================================================
-// 5. RENDERIZAÇÃO DE CARDS
+// 4. RENDERIZAÇÃO DE CARDS
 // ========================================================
 
 function getStatusData(status) {
@@ -494,6 +351,95 @@ function getStatusData(status) {
             return { class: 'status-em-andamento', label: 'Em Andamento 🟠' };
         default:
             return { class: 'status-quero-ver', label: 'Quero Ver 📘' };
+    }
+}
+
+function atualizarVisualDoCard(card, savedData) {
+    const statusInfo = getStatusData(savedData.status);
+    
+    card.classList.remove('status-concluido', 'status-em-andamento', 'status-quero-ver');
+    card.classList.add(statusInfo.class);
+
+    const etiqueta = card.querySelector('.etiqueta-status');
+    if (etiqueta) {
+        etiqueta.classList.remove('status-concluido', 'status-em-andamento', 'status-quero-ver');
+        etiqueta.classList.add(statusInfo.class);
+        etiqueta.textContent = statusInfo.label;
+    }
+}
+
+function atualizarCardNaTela(malId, titulo, posterUrl, maxEpisodes, type, year) {
+    const cardAntigo = getCardAnime(malId);
+    if (cardAntigo) {
+        const savedData = catalogoPessoal[malId]; 
+
+        const animeDadosAPI = {
+            mal_id: malId,
+            title: titulo,
+            images: { jpg: { image_url: posterUrl } },
+            episodes: maxEpisodes,
+            type: type,
+            year: year
+        };
+        
+        const novoCard = renderizarCardAnime(animeDadosAPI, true, savedData, true);
+        
+        cardAntigo.replaceWith(novoCard);
+    }
+}
+
+function atualizarElementosDoCard(malId, savedData, statusChanged) {
+    const card = getCardAnime(malId);
+    const inputElement = getInputEpisodios(malId);
+    if (inputElement) inputElement.value = savedData.episode;
+
+    updateProgressoDisplay(malId, savedData.episode, savedData.maxEpisodes)
+
+    if (statusChanged) {
+        const filtroAtual = DOM.filtros.status ? DOM.filtros.status.value : 'todos';
+        let deveSairDaTela = false;
+        
+        if (filtroAtual === 'favoritos') {
+            if (!savedData.favorite) deveSairDaTela = true;
+        } else if (filtroAtual !== 'todos' && filtroAtual !== savedData.status) {
+            deveSairDaTela = true;
+        }
+
+        if (deveSairDaTela) {
+            if (card) {
+                card.style.transition = "opacity 0.5s, transform 0.5s";
+                card.style.opacity = "0";
+                card.style.transform = "scale(0.95)";
+                
+                setTimeout(() => {
+                    card.classList.add('oculto');
+                    card.style.display = 'none';
+                    card.style.opacity = "";
+                    card.style.transform = "";
+                    atualizarVisualDoCard(card, savedData); 
+                }, 500);
+            }
+        } else {
+            if (card) {
+                atualizarVisualDoCard(card, savedData); 
+            }
+        }
+    }
+}
+
+function updateProgressoDisplay(malId, episode, maxEpisodes) {
+    const progressoTexto = getTextoProgresso(malId);
+    const barra = getBarraProgresso(malId);
+    
+    if (progressoTexto) {
+        const episodesTotal = maxEpisodes ? ` / ${maxEpisodes}` : '';
+        progressoTexto.textContent = `Ep ${episode}${episodesTotal}`;
+    }
+
+    if (barra && maxEpisodes > 0) {
+        let pct = (episode / maxEpisodes) * 100;
+        if (pct > 100) pct = 100;
+        barra.style.width = `${pct}%`;
     }
 }
 
@@ -665,7 +611,7 @@ function filtrarAnimesSalvos() {
 }  
 
 // ========================================================
-// 6. BUSCA E API
+// 5. BUSCA E API
 // ========================================================
 
 async function buscarAnimes(query, page = 1) {
@@ -782,14 +728,17 @@ function resetarInterfaceDeBusca() {
 }
 
 // ========================================================
-// 7. MODAIS & STREAMING
+// 6. MODAIS & STREAMING
 // ========================================================
 
 function fecharModal() {
-    DOM.modais.anime?.classList.add('oculto');
-    const iframe = DOM.modais.anime?.querySelector('iframe');
-    if (iframe) iframe.src = '';
-    DOM.modais.animeInfo && (DOM.modais.animeInfo.innerHTML = '');
+    const modal = DOM.modais.anime;
+    if (modal) {
+        modal.close();
+        const iframe = modal.querySelector('iframe');
+        if (iframe) iframe.src = '';
+        DOM.modais.animeInfo && (DOM.modais.animeInfo.innerHTML = '');
+    }
 }
 
 async function obterLinksStreaming(animeData) {
@@ -890,7 +839,7 @@ function renderizarAbaStreaming(links) {
 }
 
 function mudarAba(event, nomeAba) {
-    const modal = event.target.closest('.modal-conteudo');
+    const modal = event.target.closest('dialog');
     
     modal.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('ativo'));
     modal.querySelectorAll('.tab-content').forEach(content => {
@@ -923,7 +872,10 @@ async function abrirModal(malId) {
             <div class="spinner" style="border-top-color: #3f51b5; margin: 0 auto 15px auto;"></div>
             <p class="loading-text modal-loading-text-content">Carregando detalhes...</p>
         </div>`;
-    if (animeModal) animeModal.classList.remove('oculto');
+    if (animeModal) {
+        animeModal.showModal();
+        animeModal.scrollTop = 0;
+    }
 
     try {
         const response = await fetch(`${CONFIG.JIKAN_API_URL}/${malId}/full`);
@@ -938,17 +890,13 @@ async function abrirModal(malId) {
 
         if (catalogoPessoal.hasOwnProperty(malId)) {
             const salvo = catalogoPessoal[malId];
-            // Se o salvo estiver ruim E o novo estiver bom
             if ((!salvo.year || salvo.year === '----' || salvo.year === 'undefined') && anoLancamento !== 'N/A') {
                 
-                // 1. Atualiza no banco de dados
                 salvo.year = anoLancamento;
                 salvarCatalogo();
                 
-                // 2. Atualiza o card que está atrás do modal imediatamente
                 const card = getCardAnime(malId);
                 if (card) {
-                    // Procura o span que tem o ano e atualiza o texto
                     const spans = card.querySelectorAll('.card-meta-info span');
                     spans.forEach(span => {
                         if (span.textContent.includes('Lançado em:') || span.textContent.includes('----')) {
@@ -1042,7 +990,7 @@ async function abrirModal(malId) {
 }
 
 // ========================================================
-// 7b. ESTATÍSTICAS & ALEATORIEDADE
+// 6b. ESTATÍSTICAS & ALEATORIEDADE
 // ========================================================
 
 function calcularEstatisticas() {
@@ -1065,24 +1013,33 @@ function calcularEstatisticas() {
     DOM.statsValores.tempoTotal.textContent = (dias > 0 ? `${dias}d ` : '') + `${horas}h`;
     DOM.statsValores.concluidos.textContent = totalConcluidos;
     
-    DOM.modais.stats?.classList.remove('oculto');
+    DOM.modais.stats?.showModal();
 }
 
 function sugerirAnimeAleatorio() {
     const animesCandidatos = Object.values(catalogoPessoal).filter(anime => anime.status === 'Quero Ver');
-    if (animesCandidatos.length === 0) return showToast("Lista 'Quero Ver' vazia!", "info");
     
-    showGlobalLoading("Sorteando...");
+    if (animesCandidatos.length === 0) {
+        return showToast("Lista 'Quero Ver' vazia! Adicione animes para sortear.", "info");
+    }
+    
+    showGlobalLoading("🎲 Rolando os dados...");
+    
     setTimeout(() => {
         const index = Math.floor(Math.random() * animesCandidatos.length);
+        const animeSorteado = animesCandidatos[index];
+
         hideGlobalLoading();
-        abrirModal(animesCandidatos[index].mal_id);
-        showToast(`Sorteado!`, "success");
-    }, 600);
+        
+        abrirModal(animeSorteado.mal_id);
+        
+        showToast(`🎲 Sorteado: ${animeSorteado.title}`, "roleta");
+        
+    }, 800);
 }
 
 // ========================================================
-// 8. SISTEMA DE FAVORITOS
+// 7. SISTEMA DE FAVORITOS
 // ========================================================
 
 function toggleFavorite(malId) {
@@ -1133,7 +1090,7 @@ function toggleFavorite(malId) {
 
 function setViewMode(mode) {
     currentViewMode = mode;
-    localStorage.setItem(STORAGE_KEYS.VIEW_MODE, mode);
+    salvarModoVisualizacao(mode);
     
     DOM.cards.lista.classList.remove('compact-view', 'list-view');
     
@@ -1146,12 +1103,12 @@ function setViewMode(mode) {
 }
 
 function aplicarModoVisualizacaoInicial() {
-    const savedMode = localStorage.getItem(STORAGE_KEYS.VIEW_MODE) || 'grid';
+    const savedMode = carregarModoVisualizacao();
     setViewMode(savedMode);
 }
 
 // ========================================================
-// 10. PWA & SERVICE WORKER
+// 9. PWA & SERVICE WORKER
 // ========================================================
 
 function setupServiceWorker() {
@@ -1221,7 +1178,7 @@ function hideUpdateNotification() {
 }
 
 // ========================================================
-// 11. EVENT LISTENERS
+// 10. EVENT LISTENERS
 // ========================================================
 
 function setupListeners() {
@@ -1258,41 +1215,61 @@ function setupListeners() {
     DOM.filtros.ordenacao?.addEventListener('change', carregarAnimesSalvos);
 
     // Modais
-    window.addEventListener('click', (e) => {
-        if (e.target === DOM.modais.anime) fecharModal();
-        if (e.target === DOM.modais.stats) {
-            DOM.modais.stats.classList.add('oculto');
-        }
-        if (DOM.busca.resultados && DOM.busca.campo && !DOM.busca.campo.contains(e.target) && !DOM.busca.resultados.contains(e.target)) {
-            DOM.busca.resultados.classList.add('oculto');
-        }
+    const dialogs = document.querySelectorAll('dialog');
+    dialogs.forEach(dialog => {
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) {
+                dialog.close();
+            }
+        });
     });
 
     DOM.modais.animeFecharBtn?.addEventListener('click', fecharModal);
-
-    // Backup
     DOM.acoesGlobais.botaoExportar?.addEventListener('click', exportarBackup);
 
+    // Importação/Exportação
     if (DOM.acoesGlobais.botaoImportar && DOM.acoesGlobais.inputImportar) {
         DOM.acoesGlobais.botaoImportar.addEventListener('click', () => DOM.acoesGlobais.inputImportar.click());
         DOM.acoesGlobais.inputImportar.addEventListener('change', importarBackup);
     }
 
-    // Stats
+    // Estatísticas & Roleta
     DOM.acoesGlobais.botaoStats?.addEventListener('click', calcularEstatisticas);
-    DOM.modais.statsFecharBtn?.addEventListener('click', () => DOM.modais.stats.classList.add('oculto'));
-
-    // Roleta
+    DOM.modais.statsFecharBtn?.addEventListener('click', () => DOM.modais.stats.close());;
     DOM.acoesGlobais.botaoRoleta?.addEventListener('click', sugerirAnimeAleatorio);
 
-    // Modos de visualização
+    // Modo de Visualização
     DOM.visualizacao.botoes.forEach(btn => {
         btn.addEventListener('click', () => setViewMode(btn.dataset.view));
     });
+
+    // Botão Voltar ao Topo
+    const btnTopo = DOM.acoesGlobais.botaoTopo;
+    if (btnTopo) {
+        let ticking = false;
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    if (window.scrollY > 300) {
+                        btnTopo.classList.add('visivel');
+                    } else {
+                        btnTopo.classList.remove('visivel');
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        btnTopo.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
 }
 
 // ========================================================
-// 12. INICIALIZAÇÃO
+// 11. INICIALIZAÇÃO
 // ========================================================
 
 document.addEventListener('DOMContentLoaded', () => {

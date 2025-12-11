@@ -1,20 +1,36 @@
 {
   "name": "Catálogo de Animes",
   "short_name": "Animes",
+  "description": "Seu catálogo pessoal de animes com estatísticas e muito mais!",
   "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#1a1a1a",
   "theme_color": "#ff4081",
   "icons": [
     {
-      "src": "icon-192.png",     
+      "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

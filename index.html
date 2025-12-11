@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Catálogo Pessoal de Animes</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff4081">
@@ -33,7 +33,6 @@
         <div class="cabecalho-conteudo">
             <h1>Minha Lista de Animes</h1>
             <div class="cabecalho-utilitarios">
-                <p>Organize o que você já viu e o que planeja assistir!</p>
 
                 <div class="botoes-backup">
                     <button id="btn-exportar" title="Baixar Backup (Salvar)" aria-label="Exportar catálogo" class="btn-icon-header">⬇️</button>
@@ -94,69 +93,73 @@
         <div class="lista-cards"></div>
 
         <div id="paginacao-container" class="oculto">
-            <button id="btn-anterior" disabled>❮ Anterior</button>
+            <button id="btn-anterior" disabled>❮</button>
             <div id="numeros-paginacao" class="paginacao-numeros"></div>
-            <button id="btn-proxima">Próxima ❯</button>
+            <button id="btn-proxima">❯</button>
         </div>
 
     </main>
 
-    <div id="anime-modal" class="modal oculto">
-        <div class="modal-conteudo">
-            <span class="fechar-btn" id="fechar-modal-detalhes">&times;</span>
-            <div id="modal-info"></div>
-        </div>
-    </div>
+    <dialog id="anime-modal" class="modal-dialog">
+        <button class="fechar-btn" id="fechar-modal-detalhes">&times;</button>
+        <div id="modal-info"></div>
+    </dialog>
 
-    <div id="stats-modal" class="modal oculto">
-        <div class="modal-conteudo modal-pequeno">
-            <span class="fechar-btn" id="fechar-stats">&times;</span>
-            <h2 class="titulo-centralizado">Suas Estatísticas 📈</h2>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">📚</div>
-                    <div class="stat-info">
-                        <span class="stat-valor" id="stat-total-animes">0</span>
-                        <span class="stat-label">Animes na Lista</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📺</div>
-                    <div class="stat-info">
-                        <span class="stat-valor" id="stat-total-eps">0</span>
-                        <span class="stat-label">Episódios Vistos</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">⏳</div>
-                    <div class="stat-info">
-                        <span class="stat-valor" id="stat-tempo-total">0h</span>
-                        <span class="stat-label">Tempo Assistido</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">✅</div>
-                    <div class="stat-info">
-                        <span class="stat-valor" id="stat-concluidos">0</span>
-                        <span class="stat-label">Animes Concluídos</span>
-                    </div>
+    <dialog id="stats-modal" class="modal-dialog modal-pequeno">
+        <button class="fechar-btn" id="fechar-stats">&times;</button>
+        <h2 class="titulo-centralizado">Suas Estatísticas 📈</h2>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📚</div>
+                <div class="stat-info">
+                    <span class="stat-valor" id="stat-total-animes">0</span>
+                    <span class="stat-label">Animes na Lista</span>
                 </div>
             </div>
-
-            <p class="nota-rodape">
-                *Estimativa baseada em 24min por episódio.
-            </p>
+            <div class="stat-card">
+                <div class="stat-icon">📺</div>
+                <div class="stat-info">
+                    <span class="stat-valor" id="stat-total-eps">0</span>
+                    <span class="stat-label">Episódios Vistos</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-info">
+                    <span class="stat-valor" id="stat-tempo-total">0h</span>
+                    <span class="stat-label">Tempo Assistido</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <span class="stat-valor" id="stat-concluidos">0</span>
+                    <span class="stat-label">Animes Concluídos</span>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div id="toast-container"></div>
+        <p class="nota-rodape">
+            *Estimativa baseada em 24min por episódio.
+        </p>
+    </dialog>
 
-    <script src="dados.js"></script>
+    <button id="btn-topo" class="btn-topo" aria-label="Voltar ao topo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </button>
 
-    <script src="DOM.js"></script>
+    <div id="toast-container" popover="manual"></div>
 
-    <script src="script.js"></script>
+    <script src="js/dados.js"></script>
+
+    <script src="js/DOM.js"></script>
+
+    <script src="js/storage.js"></script>
+
+    <script src="js/script.js"></script>
 
     <div id="update-toast" class="update-notification oculto">
         <div class="update-content">
