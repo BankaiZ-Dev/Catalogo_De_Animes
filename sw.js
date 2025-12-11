@@ -1,16 +1,18 @@
 // ========================================================
-// SERVICE WORKER (SW.JS)
+// SERVICE WORKER
 // ========================================================
 
-const CACHE_NAME = 'anime-catalog-v1.3';
+const CACHE_NAME = 'anime-catalog-v1.4';
 const URLS_TO_CACHE = [
   './',
   './index.html',
   './dados.js',
+  './DOM.js',
   './script.js',
   './styles.css',
   './manifest.json',
-  './icon.png'
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 // 1. INSTALAÇÃO: Cachear arquivos iniciais

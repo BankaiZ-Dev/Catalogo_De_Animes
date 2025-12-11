@@ -2,49 +2,22 @@
 // CATÁLOGO DE ANIMES - SCRIPT REORGANIZADO
 // ========================================================
 // Estrutura:
-// 1. Referências DOM
-// 2. Estado da Aplicação
-// 3. Funções Auxiliares
-// 4. Storage & Modo Escuro
-// 5. CRUD do Catálogo
-// 6. Renderização de Cards
-// 7. Busca e API
-// 8. Modais
-// 9. Sistema de Favoritos
-// 10. Modo de Visualização
-// 11. PWA & Service Worker
-// 12. Event Listeners
-// 13. Inicialização
+// 1. Estado da Aplicação
+// 2. Funções Auxiliares
+// 3. Storage & Modo Escuro
+// 4. CRUD do Catálogo
+// 5. Renderização de Cards
+// 6. Busca e API
+// 7. Modais
+// 8. Sistema de Favoritos
+// 9. Modo de Visualização
+// 10. PWA & Service Worker
+// 11. Event Listeners
+// 12. Inicialização
 // ========================================================
 
 // ========================================================
-// 1. REFERÊNCIAS DO DOM
-// ========================================================
-
-// Elementos Principais
-const listaCards = document.querySelector('.lista-cards');
-const campoBusca = document.getElementById('campo-busca');
-const limparBuscaBtn = document.getElementById('limpar-busca-btn');
-const btnVoltarCatalogo = document.getElementById('btn-voltar-catalogo');
-const filtroStatus = document.getElementById('filtro-status');
-const ordenacaoSelect = document.getElementById('ordenacao-catalogo');
-
-// Paginação
-const containerPagina = document.getElementById('paginacao-container');
-const btnAnterior = document.getElementById('btn-anterior');
-const btnProxima = document.getElementById('btn-proxima');
-const indicadorPagina = document.getElementById('indicador-pagina');
-
-// Overlays e Modais
-const globalLoadingOverlay = document.getElementById('global-loading-overlay');
-const loadingTextElement = document.querySelector('#global-loading-overlay .loading-text');
-const animeModal = document.getElementById('anime-modal');
-const modalInfo = document.getElementById('modal-info');
-const resultadosBuscaAPI = document.getElementById('resultados-busca-api');
-const toastContainer = document.getElementById('toast-container');
-
-// ========================================================
-// 2. ESTADO DA APLICAÇÃO
+// 1. ESTADO DA APLICAÇÃO
 // ========================================================
 
 let debounceTimer;
@@ -52,10 +25,10 @@ let catalogoPessoal = {};
 let paginaAtual = 1;
 let termoBuscaAtual = '';
 let currentViewMode = 'grid';
-let newWorker; // Para notificação de atualização
+let newWorker;
 
 // ========================================================
-// 3. FUNÇÕES AUXILIARES
+// 2. FUNÇÕES AUXILIARES
 // ========================================================
 
 function debounce(func, delay) {
@@ -75,20 +48,21 @@ function handleImageError(imageElement) {
 }
 
 function showGlobalLoading(message = 'Carregando...') {
-    if (loadingTextElement) loadingTextElement.textContent = message;
-    if (globalLoadingOverlay) globalLoadingOverlay.classList.remove('oculto');
+    DOM.loading.texto && (DOM.loading.texto.textContent = message);
+    DOM.loading.overlay?.classList.remove('oculto');
 }
 
 function hideGlobalLoading() {
-    if (globalLoadingOverlay) globalLoadingOverlay.classList.add('oculto');
+    DOM.loading.overlay?.classList.add('oculto');
 }
 
 function showToast(message, type = 'info') {
-    if (!toastContainer) return;
+    if (!DOM.notificacoes.toastContainer) return;
+    
     const toast = document.createElement('div');
     toast.classList.add('toast', type);
     toast.textContent = message;
-    toastContainer.appendChild(toast);
+    DOM.notificacoes.toastContainer.appendChild(toast);
 
     setTimeout(() => {
         toast.style.animation = 'fade-out 0.5s forwards';
@@ -121,8 +95,56 @@ async function traduzirSinopse(text) {
     }
 }
 
+function renderizarNumerosPaginacao(paginaAtual, totalPaginas) {
+    const container = DOM.paginacao.numerosContainer;
+    if (!container) return;
+    
+    container.innerHTML = ''; 
+
+    const criarBotao = (num) => {
+        const btn = document.createElement('button');
+        btn.className = `btn-pagina-numero ${num === paginaAtual ? 'ativo' : ''}`;
+        btn.textContent = num;
+        btn.onclick = () => {
+            if (num !== paginaAtual) {
+                buscarAnimes(termoBuscaAtual, num);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
+        return btn;
+    };
+
+    const criarDots = () => {
+        const span = document.createElement('span');
+        span.className = 'paginacao-dots';
+        span.textContent = '...';
+        return span;
+    };
+
+    container.appendChild(criarBotao(1));
+
+    let inicio = Math.max(2, paginaAtual - 1);
+    let fim = Math.min(totalPaginas - 1, paginaAtual + 1);
+
+    if (inicio > 2) {
+        container.appendChild(criarDots());
+    }
+
+    for (let i = inicio; i <= fim; i++) {
+        container.appendChild(criarBotao(i));
+    }
+
+    if (fim < totalPaginas - 1) {
+        container.appendChild(criarDots());
+    }
+
+    if (totalPaginas > 1) {
+        container.appendChild(criarBotao(totalPaginas));
+    }
+}
+
 // ========================================================
-// 4. STORAGE & MODO ESCURO
+// 3. STORAGE & MODO ESCURO
 // ========================================================
 
 function carregarCatalogo() { 
@@ -192,7 +214,7 @@ function importarBackup(event) {
 }
 
 // ========================================================
-// 5. CRUD DO CATÁLOGO
+// 4. CRUD DO CATÁLOGO
 // ========================================================
 
 function adicionarRapido(malId, tituloEncoded, posterUrl, maxEpisodes, type, year) {
@@ -221,7 +243,7 @@ function adicionarAoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicia
         showToast(`Anime adicionado como "${statusInicial}"!`, 'success');
 
         // Atualiza card in-place
-        const cardAntigo = document.querySelector(`.card-anime[data-mal-id="${malId}"]`);
+        const cardAntigo = getCardAnime(malId);
         if (cardAntigo) {
             const animeDados = {
                 mal_id: malId,
@@ -259,8 +281,8 @@ function removerDoCatalogo(malId) {
         delete catalogoPessoal[malId];
         salvarCatalogo();
 
-        const card = document.querySelector(`.card-anime[data-mal-id="${malId}"]`);
-        const isSearchMode = campoBusca.value.trim().length > 0 || (resultadosBuscaAPI && !resultadosBuscaAPI.classList.contains('oculto'));
+        const card = getCardAnime(malId);
+        const isSearchMode = DOM.busca.campo.value.trim().length > 0 || (DOM.busca.resultados && !DOM.busca.resultados.classList.contains('oculto'));
 
         if (isSearchMode) {
             if (card) {
@@ -290,7 +312,8 @@ function atualizarStatusAnime(malId, novoStatus) {
         anime.status = novoStatus;
         if (novoStatus === 'Concluído' && anime.maxEpisodes) {
             anime.episode = anime.maxEpisodes;
-            const inputEp = document.getElementById(`episode-input-${malId}`);
+            // SUBSTITUIÇÃO AQUI (Usa Helper do DOM.js)
+            const inputEp = getInputEpisodios(malId); 
             if (inputEp) inputEp.value = anime.maxEpisodes;
             updateProgressoDisplay(malId, anime.season, anime.episode, anime.maxEpisodes);
         }
@@ -300,10 +323,10 @@ function atualizarStatusAnime(malId, novoStatus) {
 }
 
 function updateProgressoDisplay(malId, season, episode, maxEpisodes) {
-    const progressoElement = document.getElementById(`ep-atual-${malId}`);
+    const progressoElement = getTextoProgresso(malId);
     if (progressoElement) progressoElement.textContent = `Ep ${episode}${maxEpisodes ? ` / ${maxEpisodes}` : ''}`;
     
-    const barraElement = document.getElementById(`bar-prog-${malId}`);
+    const barraElement = getBarraProgresso(malId);
     if (barraElement && maxEpisodes && maxEpisodes > 0) {
         let pct = (episode / maxEpisodes) * 100;
         if (pct < 0) pct = 0;
@@ -331,18 +354,18 @@ function quickUpdate(malId, change) {
 
     salvarCatalogo();
 
-    const card = document.querySelector(`.card-anime[data-mal-id="${malId}"]`);
+    const card = getCardAnime(malId);
 
-    const inputElement = document.getElementById(`episode-input-${malId}`);
+    const inputElement = getInputEpisodios(malId);
     if (inputElement) inputElement.value = savedData.episode;
 
-    const progressoTexto = document.getElementById(`ep-atual-${malId}`);
+    const progressoTexto = getTextoProgresso(malId);
     if (progressoTexto) {
         const episodesTotal = savedData.maxEpisodes ? ` / ${savedData.maxEpisodes}` : '';
         progressoTexto.textContent = `Ep ${savedData.episode}${episodesTotal}`;
     }
 
-    const barra = document.getElementById(`bar-prog-${malId}`);
+    const barra = getBarraProgresso(malId);
     if (barra && savedData.maxEpisodes > 0) {
         let pct = (savedData.episode / savedData.maxEpisodes) * 100;
         if (pct > 100) pct = 100;
@@ -350,7 +373,7 @@ function quickUpdate(malId, change) {
     }
 
     if (savedData.status !== statusBefore) {
-        const filtroAtual = filtroStatus ? filtroStatus.value : 'todos';
+        const filtroAtual = DOM.filtros.status ? DOM.filtros.status.value : 'todos';
         let deveSairDaTela = false;
 
         if (filtroAtual === 'favoritos') {
@@ -426,19 +449,19 @@ function concluirAnimeRapido(malId) {
         
         salvarCatalogo();
         
-        const card = document.querySelector(`.card-anime[data-mal-id="${malId}"]`);
+        const card = getCardAnime(malId);
         
         if (card) {
-            const inputElement = document.getElementById(`episode-input-${malId}`);
+            const inputElement = getInputEpisodios(malId);
             if (inputElement) inputElement.value = anime.episode;
 
-            const progressoTexto = document.getElementById(`ep-atual-${malId}`);
+            const progressoTexto = getTextoProgresso(malId);
             if (progressoTexto) {
                 const episodesTotal = anime.maxEpisodes ? ` / ${anime.maxEpisodes}` : '';
                 progressoTexto.textContent = `Ep ${anime.episode}${episodesTotal}`;
             }
 
-            const barra = document.getElementById(`bar-prog-${malId}`);
+            const barra = getBarraProgresso(malId);
             if (barra) {
                 barra.style.width = '100%';
             }
@@ -460,7 +483,7 @@ function concluirAnimeRapido(malId) {
 }
 
 // ========================================================
-// 6. RENDERIZAÇÃO DE CARDS
+// 5. RENDERIZAÇÃO DE CARDS
 // ========================================================
 
 function getStatusData(status) {
@@ -565,29 +588,30 @@ function renderizarCardAnime(animeAPI, isSaved = false, savedData = {}, returnEl
         </div>`;
     
     if (returnElement) return cardElement;
-    listaCards.appendChild(cardElement);
+    DOM.cards.lista.appendChild(cardElement);
 }
 
 function carregarAnimesSalvos() {
-    listaCards.innerHTML = '';
+    DOM.cards.lista.innerHTML = '';
     termoBuscaAtual = '';
     paginaAtual = 1;
-    if (containerPagina) containerPagina.classList.add('oculto');
-    if (resultadosBuscaAPI) resultadosBuscaAPI.classList.add('oculto');
+    DOM.paginacao.container?.classList.add('oculto');
+    DOM.busca.resultados?.classList.add('oculto');
 
     let animesArray = Object.values(catalogoPessoal);
+    
     if (animesArray.length === 0) {
-        listaCards.innerHTML = '<h2 style="width:100%; text-align:center; padding: 40px;">Seu Catálogo está vazio.<br>Pesquise por um anime acima!</h2>';
-        if (filtroStatus) filtroStatus.classList.add('oculto');
-        if (ordenacaoSelect) ordenacaoSelect.classList.add('oculto');
+        DOM.cards.lista.innerHTML = '<h2 style="width:100%; text-align:center; padding: 40px;">Seu Catálogo está vazio.<br>Pesquise por um anime acima!</h2>';
+        DOM.filtros.status?.classList.add('oculto');
+        DOM.filtros.ordenacao?.classList.add('oculto');
         return;
     }
 
-    if (filtroStatus) filtroStatus.classList.remove('oculto');
-    if (ordenacaoSelect) ordenacaoSelect.classList.remove('oculto');
-    if (btnVoltarCatalogo) btnVoltarCatalogo.classList.add('oculto');
+    DOM.filtros.status?.classList.remove('oculto');
+    DOM.filtros.ordenacao?.classList.remove('oculto');
+    DOM.busca.botaoVoltar?.classList.add('oculto');
 
-    const tipoOrdenacao = ordenacaoSelect ? ordenacaoSelect.value : 'data-desc';
+    const tipoOrdenacao = DOM.filtros.ordenacao?.value || 'data-desc';
     animesArray.sort((a, b) => {
         switch (tipoOrdenacao) {
             case 'az': return a.title.localeCompare(b.title);
@@ -611,9 +635,9 @@ function carregarAnimesSalvos() {
 }
 
 function filtrarAnimesSalvos() {
-    const statusSelecionado = filtroStatus ? filtroStatus.value : 'todos';
-    const termoBusca = campoBusca ? campoBusca.value.toLowerCase() : '';
-    const cards = document.querySelectorAll('.lista-cards > .card-anime');
+    const statusSelecionado = DOM.filtros.status?.value || 'todos';
+    const termoBusca = DOM.busca.campo?.value.toLowerCase() || '';
+    const cards = DOM.cards.lista.querySelectorAll('.card-anime');
     
     cards.forEach(card => {
         const malId = card.dataset.malId;
@@ -637,32 +661,30 @@ function filtrarAnimesSalvos() {
             card.classList.add('oculto');
         }
     });
-}   
+}  
 
 // ========================================================
-// 7. BUSCA E API
+// 6. BUSCA E API
 // ========================================================
 
 async function buscarAnimes(query, page = 1) {
     showGlobalLoading(`Buscando página ${page}...`);
-    listaCards.innerHTML = '';
+    DOM.cards.lista.innerHTML = '';
     termoBuscaAtual = query;
     paginaAtual = page;
-    if (resultadosBuscaAPI) {
-        resultadosBuscaAPI.classList.add('oculto');
-        resultadosBuscaAPI.innerHTML = '';
-    }
+    DOM.busca.resultados?.classList.add('oculto');
+    DOM.busca.resultados && (DOM.busca.resultados.innerHTML = '');
 
     if (query.trim() === '') {
-        if (containerPagina) containerPagina.classList.add('oculto');
+        DOM.paginacao.container?.classList.add('oculto');
         carregarAnimesSalvos();
         hideGlobalLoading();
         return;
     }
 
-    if (filtroStatus) filtroStatus.classList.add('oculto');
-    if (ordenacaoSelect) ordenacaoSelect.classList.add('oculto');
-    if (btnVoltarCatalogo) btnVoltarCatalogo.classList.remove('oculto');
+    DOM.filtros.status?.classList.add('oculto');
+    DOM.filtros.ordenacao?.classList.add('oculto');
+    DOM.busca.botaoVoltar?.classList.remove('oculto');
 
     try {
         const response = await fetch(`${CONFIG.JIKAN_API_URL}?q=${encodeURIComponent(query)}&limit=${CONFIG.ANIME_LIMIT_PER_PAGE}&page=${page}`);
@@ -671,18 +693,20 @@ async function buscarAnimes(query, page = 1) {
 
         if (data.data && data.data.length > 0) {
             data.data.forEach(anime => renderizarCardAnime(anime));
-            if (containerPagina) {
-                containerPagina.classList.remove('oculto');
-                indicadorPagina.textContent = `Página ${page}`;
-                btnAnterior.disabled = (page === 1);
-                btnProxima.disabled = !data.pagination.has_next_page;
+            
+            if (DOM.paginacao.container) {
+                DOM.paginacao.container.classList.remove('oculto');
+                const totalPaginasAPI = data.pagination.last_visible_page || 1;
+                renderizarNumerosPaginacao(page, totalPaginasAPI);
+                DOM.paginacao.botaoAnterior.disabled = (page === 1);
+                DOM.paginacao.botaoProxima.disabled = !data.pagination.has_next_page;
             }
         } else {
-            listaCards.innerHTML = '<p style="text-align: center; width: 100%;">Nenhum anime encontrado.</p>';
-            if (containerPagina) containerPagina.classList.add('oculto');
+            DOM.cards.lista.innerHTML = '<p style="text-align: center; width: 100%;">Nenhum anime encontrado.</p>';
+            DOM.paginacao.container?.classList.add('oculto');
         }
     } catch (error) {
-        listaCards.innerHTML = '<p style="text-align: center; width: 100%;">Erro na conexão com a API.</p>';
+        DOM.cards.lista.innerHTML = '<p style="text-align: center; width: 100%;">Erro na conexão com a API.</p>';
     } finally {
         hideGlobalLoading();
     }
@@ -697,10 +721,11 @@ function mudarPagina(direcao) {
 }
 
 async function buscarAnimesEmTempoReal() {
-    if (!campoBusca || !resultadosBuscaAPI) return;
-    const query = campoBusca.value.trim();
+    if (!DOM.busca.campo || !DOM.busca.resultados) return;
+
+    const query = DOM.busca.campo.value.trim();
     if (query.length < 3 || (termoBuscaAtual && query === termoBuscaAtual)) {
-        resultadosBuscaAPI.classList.add('oculto');
+        DOM.busca.resultados.classList.add('oculto');
         return;
     }
 
@@ -708,6 +733,7 @@ async function buscarAnimesEmTempoReal() {
         const response = await fetch(`${CONFIG.JIKAN_API_URL}?q=${encodeURIComponent(query)}&limit=7`);
         if (!response.ok) return;
         const data = await response.json();
+        
         if (data.data && data.data.length > 0) {
             let html = '';
             data.data.forEach(anime => {
@@ -717,50 +743,52 @@ async function buscarAnimesEmTempoReal() {
                         <span class="resultado-titulo">${anime.title_english || anime.title}</span>
                     </div>`;
             });
-            resultadosBuscaAPI.innerHTML = html;
-            resultadosBuscaAPI.classList.remove('oculto');
-        } else resultadosBuscaAPI.classList.add('oculto');
+            DOM.busca.resultados.innerHTML = html;
+            DOM.busca.resultados.classList.remove('oculto');
+        } else {
+            DOM.busca.resultados.classList.add('oculto');
+        }
     } catch (error) {
-        resultadosBuscaAPI.classList.add('oculto');
+        DOM.busca.resultados.classList.add('oculto');
     }
 }
 
 const buscarAnimesEmTempoRealDebounced = debounce(buscarAnimesEmTempoReal, 400);
 
 function selecionarSugestao(malId, titulo) {
-    if (!resultadosBuscaAPI || !campoBusca) return;
-    resultadosBuscaAPI.classList.add('oculto');
-    resultadosBuscaAPI.innerHTML = '';
-    campoBusca.value = titulo;
+    if (!DOM.busca.resultados || !DOM.busca.campo) return;
+    DOM.busca.resultados.classList.add('oculto');
+    DOM.busca.resultados.innerHTML = '';
+    DOM.busca.campo.value = titulo;
     buscarAnimes(titulo);
 }
 
 function limparTextoBusca() {
-    if (campoBusca) {
-        campoBusca.value = '';
-        campoBusca.focus();
-        if (limparBuscaBtn) limparBuscaBtn.classList.add('oculto');
-        if (resultadosBuscaAPI) resultadosBuscaAPI.classList.add('oculto');
+    if (DOM.busca.campo) {
+        DOM.busca.campo.value = '';
+        DOM.busca.campo.focus();
+        DOM.busca.botaoLimpar?.classList.add('oculto');
+        DOM.busca.resultados?.classList.add('oculto');
     }
 }
 
 function resetarInterfaceDeBusca() {
-    if (campoBusca) campoBusca.value = '';
-    if (limparBuscaBtn) limparBuscaBtn.classList.add('oculto');
-    if (resultadosBuscaAPI) resultadosBuscaAPI.classList.add('oculto');
-    if (btnVoltarCatalogo) btnVoltarCatalogo.classList.add('oculto');
+    DOM.busca.campo && (DOM.busca.campo.value = '');
+    DOM.busca.botaoLimpar?.classList.add('oculto');
+    DOM.busca.resultados?.classList.add('oculto');
+    DOM.busca.botaoVoltar?.classList.add('oculto');
     carregarAnimesSalvos();
 }
 
 // ========================================================
-// 8. MODAIS & STREAMING
+// 7. MODAIS & STREAMING
 // ========================================================
 
 function fecharModal() {
-    if (animeModal) animeModal.classList.add('oculto');
-    const iframe = document.querySelector('#anime-modal iframe');
+    DOM.modais.anime?.classList.add('oculto');
+    const iframe = DOM.modais.anime?.querySelector('iframe');
     if (iframe) iframe.src = '';
-    if (modalInfo) modalInfo.innerHTML = '';
+    DOM.modais.animeInfo && (DOM.modais.animeInfo.innerHTML = '');
 }
 
 async function obterLinksStreaming(animeData) {
@@ -803,11 +831,9 @@ function obterIconePlataforma(nomePlataforma) {
 
     if (nome.includes('crunchyroll')) domain = 'crunchyroll.com';
     else if (nome.includes('netflix')) domain = 'netflix.com';
-    else if (nome.includes('funimation')) domain = 'funimation.com';
     else if (nome.includes('amazon') || nome.includes('prime')) domain = 'primevideo.com';
     else if (nome.includes('disney')) domain = 'disneyplus.com';
     else if (nome.includes('hbo') || nome.includes('max')) domain = 'max.com';
-    else if (nome.includes('hulu')) domain = 'hulu.com';
     else {
         domain = nome.replace(/\s+/g, '') + '.com';
     }
@@ -889,6 +915,8 @@ function mudarAba(event, nomeAba) {
 }
 
 async function abrirModal(malId) {
+    const animeModal = DOM.modais.anime;
+    const modalInfo = DOM.modais.animeInfo;
     if (modalInfo) modalInfo.innerHTML = `
         <div style="text-align:center; padding: 50px 0;">
             <div class="spinner" style="border-top-color: #3f51b5; margin: 0 auto 15px auto;"></div>
@@ -906,6 +934,31 @@ async function abrirModal(malId) {
         const anoLancamento = anime.year || anime.aired?.prop?.from?.year || 'N/A';
         const generos = traduzirListaGeneros(anime.genres);
         const tipoMidia = MAPA_TIPOS_MIDIA[anime.type] || anime.type || 'N/A';
+
+        if (catalogoPessoal.hasOwnProperty(malId)) {
+            const salvo = catalogoPessoal[malId];
+            // Se o salvo estiver ruim E o novo estiver bom
+            if ((!salvo.year || salvo.year === '----' || salvo.year === 'undefined') && anoLancamento !== 'N/A') {
+                
+                // 1. Atualiza no banco de dados
+                salvo.year = anoLancamento;
+                salvarCatalogo();
+                
+                // 2. Atualiza o card que está atrás do modal imediatamente
+                const card = getCardAnime(malId);
+                if (card) {
+                    // Procura o span que tem o ano e atualiza o texto
+                    const spans = card.querySelectorAll('.card-meta-info span');
+                    spans.forEach(span => {
+                        if (span.textContent.includes('Lançado em:') || span.textContent.includes('----')) {
+                            span.textContent = `Lançado em: ${anoLancamento}`;
+                        }
+                    });
+                }
+                console.log(`🔧 Ano do anime ${salvo.title} corrigido para ${anoLancamento}`);
+            }
+        }
+
         const statusTraduzido = anime.status === 'Finished Airing' ? 'Concluído' : anime.status === 'Currently Airing' ? 'Em Exibição' : anime.status;
         let trailerEmbedUrl = anime.trailer?.embed_url ? anime.trailer.embed_url.replace(/[?&]autoplay=1/gi, '') + '&rel=0' : null;
 
@@ -988,7 +1041,7 @@ async function abrirModal(malId) {
 }
 
 // ========================================================
-// 8b. ESTATÍSTICAS & ALEATORIEDADE
+// 7b. ESTATÍSTICAS & ALEATORIEDADE
 // ========================================================
 
 function calcularEstatisticas() {
@@ -1006,12 +1059,12 @@ function calcularEstatisticas() {
     const dias = Math.floor(minutos / 1440);
     const horas = Math.floor((minutos % 1440) / 60);
     
-    document.getElementById('stat-total-animes').textContent = totalAnimes;
-    document.getElementById('stat-total-eps').textContent = totalEps;
-    document.getElementById('stat-tempo-total').textContent = (dias > 0 ? `${dias}d ` : '') + `${horas}h`;
-    document.getElementById('stat-concluidos').textContent = totalConcluidos;
+    DOM.statsValores.totalAnimes.textContent = totalAnimes;
+    DOM.statsValores.totalEpisodios.textContent = totalEps;
+    DOM.statsValores.tempoTotal.textContent = (dias > 0 ? `${dias}d ` : '') + `${horas}h`;
+    DOM.statsValores.concluidos.textContent = totalConcluidos;
     
-    document.getElementById('stats-modal').classList.remove('oculto');
+    DOM.modais.stats?.classList.remove('oculto');
 }
 
 function sugerirAnimeAleatorio() {
@@ -1028,7 +1081,7 @@ function sugerirAnimeAleatorio() {
 }
 
 // ========================================================
-// 9. SISTEMA DE FAVORITOS
+// 8. SISTEMA DE FAVORITOS
 // ========================================================
 
 function toggleFavorite(malId) {
@@ -1037,7 +1090,7 @@ function toggleFavorite(malId) {
         const isFavorite = catalogoPessoal[malId].favorite;
         salvarCatalogo();
 
-        const card = document.querySelector(`.card-anime[data-mal-id="${malId}"]`);
+        const card = getCardAnime(malId);
         if (!card) return;
 
         const btn = card.querySelector('.btn-favorite');
@@ -1054,7 +1107,7 @@ function toggleFavorite(malId) {
             setTimeout(() => badge.remove(), 300); 
         }
 
-        const deveSair = filtroStatus?.value === 'favoritos' && !isFavorite;
+        const deveSair = DOM.filtros.status?.value === 'favoritos' && !isFavorite;
         if (deveSair) {
             card.style.transition = 'opacity 0.3s, transform 0.3s';
             card.style.opacity = '0';
@@ -1067,26 +1120,26 @@ function toggleFavorite(malId) {
         }
 
         showToast(
-            isFavorite ? '⭐ Adicionado aos favoritos!' : '✗ Removido dos favoritos',
+            isFavorite ? '⭐ Adicionado aos favoritos!' : '❌ Removido dos favoritos',
             isFavorite ? 'fav-add' : 'fav-remove'
         );
     }
 }
 
 // ========================================================
-// 10. MODO DE VISUALIZAÇÃO
+// 9. MODO DE VISUALIZAÇÃO
 // ========================================================
 
 function setViewMode(mode) {
     currentViewMode = mode;
     localStorage.setItem(STORAGE_KEYS.VIEW_MODE, mode);
     
-    listaCards.classList.remove('compact-view', 'list-view');
+    DOM.cards.lista.classList.remove('compact-view', 'list-view');
     
-    if (mode === 'compact') listaCards.classList.add('compact-view');
-    else if (mode === 'list') listaCards.classList.add('list-view');
+    if (mode === 'compact') DOM.cards.lista.classList.add('compact-view');
+    else if (mode === 'list') DOM.cards.lista.classList.add('list-view');
     
-    document.querySelectorAll('.view-btn').forEach(btn => {
+    DOM.visualizacao.botoes.forEach(btn => {
         btn.classList.toggle('active', btn.dataset.view === mode);
     });
 }
@@ -1097,7 +1150,7 @@ function aplicarModoVisualizacaoInicial() {
 }
 
 // ========================================================
-// 11. PWA & SERVICE WORKER
+// 10. PWA & SERVICE WORKER
 // ========================================================
 
 function setupServiceWorker() {
@@ -1135,9 +1188,9 @@ function setupServiceWorker() {
 }
 
 function showUpdateNotification() {
-    const updateToast = document.getElementById('update-toast');
-    const btnAgora = document.getElementById('update-btn-agora');
-    const btnDepois = document.getElementById('update-btn-depois');
+    const updateToast = DOM.notificacoes.pwaUpdateToast;
+    const btnAgora = DOM.notificacoes.pwaUpdateBtnAgora;
+    const btnDepois = DOM.notificacoes.pwaUpdateBtnDepois;
 
     if (!updateToast) return;
 
@@ -1156,7 +1209,7 @@ function showUpdateNotification() {
 }
 
 function hideUpdateNotification() {
-    const updateToast = document.getElementById('update-toast');
+    const updateToast = DOM.notificacoes.pwaUpdateToast;
     if (!updateToast) return;
 
     updateToast.classList.add('saindo');
@@ -1167,84 +1220,73 @@ function hideUpdateNotification() {
 }
 
 // ========================================================
-// 12. EVENT LISTENERS
+// 11. EVENT LISTENERS
 // ========================================================
 
 function setupListeners() {
     // Dark Mode
-    const btnDarkMode = document.getElementById('dark-mode-icon-btn');
-    if (btnDarkMode) btnDarkMode.addEventListener('click', toggleDarkMode);
+    DOM.acoesGlobais.botaoDarkMode?.addEventListener('click', toggleDarkMode);
 
     // Paginação
-    if (btnAnterior) btnAnterior.addEventListener('click', () => mudarPagina(-1));
-    if (btnProxima) btnProxima.addEventListener('click', () => mudarPagina(1));
+    DOM.paginacao.botaoAnterior?.addEventListener('click', () => mudarPagina(-1));
+    DOM.paginacao.botaoProxima?.addEventListener('click', () => mudarPagina(1));
 
     // Busca
-    if (campoBusca) {
-        campoBusca.addEventListener('input', function() {
-            if (limparBuscaBtn) {
-                limparBuscaBtn.classList.toggle('oculto', this.value.trim().length === 0);
-            }
+    if (DOM.busca.campo) {
+        DOM.busca.campo.addEventListener('input', function() {
+            DOM.busca.botaoLimpar?.classList.toggle('oculto', this.value.trim().length === 0);
         });
-        campoBusca.addEventListener('input', buscarAnimesEmTempoRealDebounced);
-        campoBusca.addEventListener('keypress', (e) => {
+        DOM.busca.campo.addEventListener('input', buscarAnimesEmTempoRealDebounced);
+        DOM.busca.campo.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                buscarAnimes(campoBusca.value);
+                buscarAnimes(DOM.busca.campo.value);
             }
         });
     }
 
     // Controles
-    if (limparBuscaBtn) limparBuscaBtn.addEventListener('click', limparTextoBusca);
-    if (btnVoltarCatalogo) btnVoltarCatalogo.addEventListener('click', resetarInterfaceDeBusca);
-    if (filtroStatus) filtroStatus.addEventListener('change', filtrarAnimesSalvos);
-    if (ordenacaoSelect) ordenacaoSelect.addEventListener('change', carregarAnimesSalvos);
+    DOM.busca.botaoLimpar?.addEventListener('click', limparTextoBusca);
+    DOM.busca.botaoVoltar?.addEventListener('click', resetarInterfaceDeBusca);
+    DOM.filtros.status?.addEventListener('change', filtrarAnimesSalvos);
+    DOM.filtros.ordenacao?.addEventListener('change', carregarAnimesSalvos);
 
     // Modais
     window.addEventListener('click', (e) => {
-        if (e.target === animeModal) fecharModal();
-        if (e.target === document.getElementById('stats-modal')) {
-            document.getElementById('stats-modal').classList.add('oculto');
+        if (e.target === DOM.modais.anime) fecharModal();
+        if (e.target === DOM.modais.stats) {
+            DOM.modais.stats.classList.add('oculto');
         }
-        if (resultadosBuscaAPI && campoBusca && !campoBusca.contains(e.target) && !resultadosBuscaAPI.contains(e.target)) {
-            resultadosBuscaAPI.classList.add('oculto');
+        if (DOM.busca.resultados && DOM.busca.campo && !DOM.busca.campo.contains(e.target) && !DOM.busca.resultados.contains(e.target)) {
+            DOM.busca.resultados.classList.add('oculto');
         }
     });
 
-    const closeBtn = document.querySelector('#fechar-modal-detalhes');
-    if (closeBtn) closeBtn.addEventListener('click', fecharModal);
+    DOM.modais.animeFecharBtn?.addEventListener('click', fecharModal);
 
     // Backup
-    const btnExportar = document.getElementById('btn-exportar');
-    if (btnExportar) btnExportar.addEventListener('click', exportarBackup);
+    DOM.acoesGlobais.botaoExportar?.addEventListener('click', exportarBackup);
 
-    const btnImportar = document.getElementById('btn-importar');
-    const inputImportar = document.getElementById('input-importar');
-    if (btnImportar && inputImportar) {
-        btnImportar.addEventListener('click', () => inputImportar.click());
-        inputImportar.addEventListener('change', importarBackup);
+    if (DOM.acoesGlobais.botaoImportar && DOM.acoesGlobais.inputImportar) {
+        DOM.acoesGlobais.botaoImportar.addEventListener('click', () => DOM.acoesGlobais.inputImportar.click());
+        DOM.acoesGlobais.inputImportar.addEventListener('change', importarBackup);
     }
 
     // Stats
-    const btnStats = document.getElementById('btn-stats');
-    if (btnStats) btnStats.addEventListener('click', calcularEstatisticas);
-
-    const btnFecharStats = document.getElementById('fechar-stats');
-    if (btnFecharStats) btnFecharStats.addEventListener('click', () => document.getElementById('stats-modal').classList.add('oculto'));
+    DOM.acoesGlobais.botaoStats?.addEventListener('click', calcularEstatisticas);
+    DOM.modais.statsFecharBtn?.addEventListener('click', () => DOM.modais.stats.classList.add('oculto'));
 
     // Roleta
-    const btnRoleta = document.getElementById('btn-roleta');
-    if (btnRoleta) btnRoleta.addEventListener('click', sugerirAnimeAleatorio);
+    DOM.acoesGlobais.botaoRoleta?.addEventListener('click', sugerirAnimeAleatorio);
 
     // Modos de visualização
-    document.querySelectorAll('.view-btn').forEach(btn => {
+    DOM.visualizacao.botoes.forEach(btn => {
         btn.addEventListener('click', () => setViewMode(btn.dataset.view));
     });
 }
 
 // ========================================================
-// 13. INICIALIZAÇÃO
+// 12. INICIALIZAÇÃO
 // ========================================================
 
 document.addEventListener('DOMContentLoaded', () => {

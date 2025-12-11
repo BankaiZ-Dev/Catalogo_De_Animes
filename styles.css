@@ -711,11 +711,13 @@ body.dark-mode .barra-progresso-fundo {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
     padding: 30px 0;
 }
 
-#paginacao-container button {
+/* Estilo APENAS para os botões Anterior/Próxima */
+#btn-anterior,
+#btn-proxima {
     padding: 8px 16px;
     background-color: var(--cor-primaria);
     color: white;
@@ -723,14 +725,59 @@ body.dark-mode .barra-progresso-fundo {
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
+    transition: background-color 0.2s;
 }
 
-#paginacao-container button:disabled {
+#btn-anterior:hover:not(:disabled),
+#btn-proxima:hover:not(:disabled) {
+    background-color: var(--cor-primaria-hover);
+}
+
+#btn-anterior:disabled,
+#btn-proxima:disabled {
     background-color: var(--cor-borda);
     cursor: not-allowed;
+    opacity: 0.7;
 }
 
-#indicador-pagina {
+/* Container dos números */
+.paginacao-numeros {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+/* Botões numéricos (agora o estilo vai pegar!) */
+.btn-pagina-numero {
+    padding: 6px 12px;
+    border: 1px solid var(--cor-borda);
+    background-color: var(--cor-card-fundo); /* Fundo branco/escuro */
+    cursor: pointer;
+    border-radius: 4px;
+    color: var(--cor-texto-principal);
+    min-width: 35px;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+/* Hover: Fica com a cor da marca */
+.btn-pagina-numero:hover {
+    border-color: var(--cor-primaria);
+    color: var(--cor-primaria);
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Ativo: Fundo preenchido com a cor da marca */
+.btn-pagina-numero.ativo {
+    background-color: var(--cor-primaria);
+    color: white;
+    border-color: var(--cor-primaria);
+    pointer-events: none;
+}
+
+.paginacao-dots {
+    color: var(--cor-texto-secundario);
+    padding: 0 5px;
     font-weight: bold;
 }
 
@@ -1482,6 +1529,21 @@ body.dark-mode .streaming-link:hover {
     .btn-atualizar-agora,
     .btn-atualizar-depois {
         flex: 1;
+    }
+
+    #paginacao-container { gap: 5px; }
+    
+    #btn-anterior, #btn-proxima {
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
+
+    .paginacao-numeros { gap: 3px; }
+    
+    .btn-pagina-numero {
+        padding: 5px 8px;
+        font-size: 0.9em;
+        min-width: 30px;
     }
 }
 
