@@ -174,7 +174,7 @@ body.dark-mode #dark-mode-icon-btn::before {
 .barra-ferramentas {
     position: relative;
     top: auto;
-    z-index: 5;
+    z-index: 100;
     background-color: var(--cor-fundo);
     display: flex;
     flex-wrap: wrap;
@@ -480,6 +480,11 @@ body.dark-mode .view-btn:hover:not(.active) {
     box-shadow: 0 3px 6px rgba(0,0,0,0.6);
     z-index: 10;
     text-shadow: var(--sombra-texto-contorno);
+    transform: scale(1);
+    opacity: 1;
+}
+
+.favorite-badge.animar-entrada {
     animation: badgeAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
@@ -1277,7 +1282,7 @@ body.dark-mode .streaming-link:hover {
    ========================================================================== */
 
 #toast-container {
-    display: flex;
+    display: none;
     flex-direction: column;
     gap: 10px;
     position: fixed;
@@ -1293,6 +1298,21 @@ body.dark-mode .streaming-link:hover {
     max-width: 80vw;
     height: auto;
     overflow: visible;
+    z-index: 9999;
+}
+
+#toast-container:not(:empty),
+#toast-container:popover-open {
+    display: flex;
+}
+
+#toast-container:popover-open {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    top: auto;
+    left: auto;
+    margin: 0;
 }
 
 #toast-container:popover-open {

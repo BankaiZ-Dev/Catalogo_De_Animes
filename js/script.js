@@ -57,19 +57,22 @@ function hideGlobalLoading() {
 function showToast(message, type = 'info') {
     const container = DOM.notificacoes.toastContainer;
     if (!container) return;
-    
-    if (container.showPopover) {
+
+    const suportaPopover = 'popover' in HTMLElement.prototype && 'showPopover' in container;
+
+    if (suportaPopover) {
         try {
             container.hidePopover(); 
             container.showPopover();
         } catch (e) {
-            container.showPopover();
         }
+    } else {
+        container.classList.remove('oculto');
+        container.style.display = 'flex';
     }
 
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-
     toast.textContent = message;
     
     container.appendChild(toast);
@@ -78,8 +81,13 @@ function showToast(message, type = 'info') {
         toast.style.animation = 'fade-out 0.5s forwards';
         setTimeout(() => {
             toast.remove();
-            if (container.children.length === 0 && container.hidePopover) {
-                container.hidePopover();
+            
+            if (container.children.length === 0) {
+                if (suportaPopover) {
+                    container.hidePopover();
+                } else {
+                    container.classList.add('oculto');
+                }
             }
         }, 500);
     }, 3000);
@@ -1058,8 +1066,16 @@ function toggleFavorite(malId) {
         }
 
         let badge = card.querySelector('.favorite-badge');
+        
         if (isFavorite && !badge) {
             card.insertAdjacentHTML('afterbegin', '<div class="favorite-badge" title="Favorito">⭐</div>');
+            
+            const novoBadge = card.querySelector('.favorite-badge');
+            
+            if (novoBadge) {
+                novoBadge.classList.add('animar-entrada');
+            }
+        
         } else if (!isFavorite && badge) {
             badge.style.animation = 'badgeDisappear 0.3s ease-out forwards';
             setTimeout(() => badge.remove(), 300); 

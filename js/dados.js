@@ -2,7 +2,6 @@
 // Responsável por: Constantes, Configurações e Mapas
 // ========================================================
 
-// 1. CONFIGURAÇÕES GLOBAIS
 const CONFIG = {
     PLACEHOLDER_IMAGE: "https://placehold.co/170x260?text=Sem+Poster",
     JIKAN_API_URL: 'https://api.jikan.moe/v4/anime',
@@ -15,7 +14,6 @@ const STORAGE_KEYS = {
     VIEW_MODE: 'view_mode_preferido'
 };
 
-// 2. MAPAS DE TRADUÇÃO E LISTAS
 const MAPA_GENEROS = {
     "Action": "Ação", "Adventure": "Aventura", "Avant Garde": "Vanguarda", "Award Winning": "Premiado",
     "Boys Love": "Boys Love (BL)", "Comedy": "Comédia", "Drama": "Drama", "Fantasy": "Fantasia",
