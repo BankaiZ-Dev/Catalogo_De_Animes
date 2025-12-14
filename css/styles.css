@@ -1381,7 +1381,7 @@ body.dark-mode .streaming-link:hover {
     border-radius: 12px;
     padding: 16px 20px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    z-index: 3500;
+    z-index: 9999;
     animation: slideInUp 0.4s ease-out;
     max-width: 350px;
 }
@@ -1694,6 +1694,8 @@ body.dark-mode .streaming-link:hover {
         left: 10px;
         right: 10px;
         max-width: none;
+        bottom: calc(20px + env(safe-area-inset-bottom));
+        border-radius: 12px;
     }
     
     .update-content {
@@ -1703,6 +1705,7 @@ body.dark-mode .streaming-link:hover {
     
     .update-buttons {
         margin-left: 0;
+        margin-top: 10px;
         flex-direction: row;
         width: 100%;
     }
