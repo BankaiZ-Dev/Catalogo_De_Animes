@@ -3,120 +3,30 @@
 // ========================================================
 // Estrutura:
 // 1. Estado da Aplicação
-// 2. Funções Auxiliares
-// 3. CRUD do Catálogo
-// 4. Renderização de Cards
-// 5. Busca e API
-// 6. Modais
-// 7. Sistema de Favoritos
-// 8. Modo de Visualização
-// 9. PWA & Service Worker
-// 10. Event Listeners
-// 11. Inicialização
+// 2. CRUD do Catálogo
+// 3. Renderização de Cards
+// 4. Busca e API
+// 5. Modais
+// 6. Sistema de Favoritos
+// 7. Modo de Visualização
+// 8. PWA & Service Worker
+// 9. Event Listeners
+// 10. Inicialização
 // ========================================================
 
 // ========================================================
 // 1. ESTADO DA APLICAÇÃO
 // ========================================================
 
-let debounceTimer;
 let paginaAtual = 1;
 let termoBuscaAtual = '';
 let currentViewMode = 'grid';
 let newWorker;
+let searchController = null;
 
 // ========================================================
-// 2. FUNÇÕES AUXILIARES
+// 2. CRUD DO CATÁLOGO
 // ========================================================
-
-function debounce(func, delay) {
-    return function() {
-        const context = this;
-        const args = arguments;
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            func.apply(context, args);
-        }, delay);
-    };
-}
-
-function handleImageError(imageElement) {
-    imageElement.onerror = null;
-    imageElement.src = CONFIG.PLACEHOLDER_IMAGE;
-}
-
-function showGlobalLoading(message = 'Carregando...') {
-    DOM.loading.texto && (DOM.loading.texto.textContent = message);
-    DOM.loading.overlay?.classList.remove('oculto');
-}
-
-function hideGlobalLoading() {
-    DOM.loading.overlay?.classList.add('oculto');
-}
-
-function showToast(message, type = 'info') {
-    const container = DOM.notificacoes.toastContainer;
-    if (!container) return;
-
-    const suportaPopover = 'popover' in HTMLElement.prototype && 'showPopover' in container;
-
-    if (suportaPopover) {
-        try {
-            container.hidePopover(); 
-            container.showPopover();
-        } catch (e) {
-        }
-    } else {
-        container.classList.remove('oculto');
-        container.style.display = 'flex';
-    }
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    
-    container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.animation = 'fade-out 0.5s forwards';
-        setTimeout(() => {
-            toast.remove();
-            
-            if (container.children.length === 0) {
-                if (suportaPopover) {
-                    container.hidePopover();
-                } else {
-                    container.classList.add('oculto');
-                }
-            }
-        }, 500);
-    }, 3000);
-}
-
-function traduzirListaGeneros(genresArray) {
-    if (!genresArray || genresArray.length === 0) return 'N/A';
-    return genresArray.map(g => MAPA_GENEROS[g.name] || g.name).join(', ');
-}
-
-async function traduzirSinopse(text) {
-    if (!text || text.length < 5) return text || "Sinopse não disponível.";
-    try {
-        const cleanText = text.replace(/\n/g, ' ').trim();
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt&dt=t&q=${encodeURIComponent(cleanText)}`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Erro Tradução');
-        const data = await response.json();
-        let translatedText = '';
-        if (data && data[0]) {
-            data[0].forEach(segment => {
-                if (segment[0]) translatedText += segment[0];
-            });
-        }
-        return translatedText || text;
-    } catch (error) {
-        return text;
-    }
-}
 
 function renderizarNumerosPaginacao(paginaAtual, totalPaginas) {
     const container = DOM.paginacao.numerosContainer;
@@ -165,10 +75,6 @@ function renderizarNumerosPaginacao(paginaAtual, totalPaginas) {
         container.appendChild(criarBotao(totalPaginas));
     }
 }
-
-// ========================================================
-// 3. CRUD DO CATÁLOGO
-// ========================================================
 
 function adicionarRapido(malId, tituloEncoded, posterUrl, maxEpisodes, type, year) {
     const titulo = decodeURIComponent(tituloEncoded);
@@ -348,7 +254,7 @@ function concluirAnimeRapido(malId) {
 }
 
 // ========================================================
-// 4. RENDERIZAÇÃO DE CARDS
+// 3. RENDERIZAÇÃO DE CARDS
 // ========================================================
 
 function getStatusData(status) {
@@ -619,7 +525,7 @@ function filtrarAnimesSalvos() {
 }  
 
 // ========================================================
-// 5. BUSCA E API
+// 4. BUSCA E API
 // ========================================================
 
 async function buscarAnimes(query, page = 1) {
@@ -679,21 +585,32 @@ async function buscarAnimesEmTempoReal() {
     if (!DOM.busca.campo || !DOM.busca.resultados) return;
 
     const query = DOM.busca.campo.value.trim();
+    
     if (query.length < 3 || (termoBuscaAtual && query === termoBuscaAtual)) {
         DOM.busca.resultados.classList.add('oculto');
         return;
     }
 
+    if (searchController) {
+        searchController.abort();
+    }
+    
+    searchController = new AbortController();
+
     try {
-        const response = await fetch(`${CONFIG.JIKAN_API_URL}?q=${encodeURIComponent(query)}&limit=7`);
+        const response = await fetch(`${CONFIG.JIKAN_API_URL}?q=${encodeURIComponent(query)}&limit=7`, {
+            signal: searchController.signal
+        });
+        
         if (!response.ok) return;
         const data = await response.json();
         
         if (data.data && data.data.length > 0) {
             let html = '';
             data.data.forEach(anime => {
+                const safeTitle = (anime.title_english || anime.title).replace(/'/g, "\\'");
                 html += `
-                    <div class="resultado-item" onclick="selecionarSugestao(${anime.mal_id}, '${(anime.title_english || anime.title).replace(/'/g, "\\'")}')">
+                    <div class="resultado-item" onclick="selecionarSugestao(${anime.mal_id}, '${safeTitle}')">
                         <img src="${anime.images.jpg.small_image_url || CONFIG.PLACEHOLDER_IMAGE}" class="resultado-imagem">
                         <span class="resultado-titulo">${anime.title_english || anime.title}</span>
                     </div>`;
@@ -704,7 +621,12 @@ async function buscarAnimesEmTempoReal() {
             DOM.busca.resultados.classList.add('oculto');
         }
     } catch (error) {
+        if (error.name === 'AbortError') {
+            console.log('🚫 Busca antiga cancelada para economizar dados.');
+            return;
+        }
         DOM.busca.resultados.classList.add('oculto');
+    } finally {
     }
 }
 
@@ -736,7 +658,7 @@ function resetarInterfaceDeBusca() {
 }
 
 // ========================================================
-// 6. MODAIS & STREAMING
+// 5. MODAIS & STREAMING
 // ========================================================
 
 function fecharModal() {
@@ -781,21 +703,6 @@ async function obterLinksStreaming(animeData) {
         console.error('Erro ao obter links de streaming:', error);
         return [];
     }
-}
-
-function obterIconePlataforma(nomePlataforma) {
-    const nome = nomePlataforma.toLowerCase();
-    let domain = '';
-
-    if (nome.includes('crunchyroll')) domain = 'crunchyroll.com';
-    else if (nome.includes('netflix')) domain = 'netflix.com';
-    else if (nome.includes('amazon') || nome.includes('prime')) domain = 'primevideo.com';
-    else if (nome.includes('disney')) domain = 'disneyplus.com';
-    else if (nome.includes('hbo') || nome.includes('max')) domain = 'max.com';
-    else {
-        domain = nome.replace(/\s+/g, '') + '.com';
-    }
-    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
 }
 
 function renderizarAbaStreaming(links) {
@@ -998,7 +905,7 @@ async function abrirModal(malId) {
 }
 
 // ========================================================
-// 6b. ESTATÍSTICAS & ALEATORIEDADE
+// 5b. ESTATÍSTICAS & ALEATORIEDADE
 // ========================================================
 
 function calcularEstatisticas() {
@@ -1047,7 +954,7 @@ function sugerirAnimeAleatorio() {
 }
 
 // ========================================================
-// 7. SISTEMA DE FAVORITOS
+// 6. SISTEMA DE FAVORITOS
 // ========================================================
 
 function toggleFavorite(malId) {
@@ -1101,7 +1008,7 @@ function toggleFavorite(malId) {
 }
 
 // ========================================================
-// 9. MODO DE VISUALIZAÇÃO
+// 7. MODO DE VISUALIZAÇÃO
 // ========================================================
 
 function setViewMode(mode) {
@@ -1124,7 +1031,7 @@ function aplicarModoVisualizacaoInicial() {
 }
 
 // ========================================================
-// 9. PWA & SERVICE WORKER
+// 8. PWA & SERVICE WORKER
 // ========================================================
 
 function setupServiceWorker() {
@@ -1194,7 +1101,7 @@ function hideUpdateNotification() {
 }
 
 // ========================================================
-// 10. EVENT LISTENERS
+// 9. EVENT LISTENERS
 // ========================================================
 
 function setupListeners() {
@@ -1211,18 +1118,82 @@ function setupListeners() {
             DOM.busca.botaoLimpar?.classList.toggle('oculto', this.value.trim().length === 0);
         });
         DOM.busca.campo.addEventListener('input', buscarAnimesEmTempoRealDebounced);
+        
         DOM.busca.campo.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                e.preventDefault();
-                buscarAnimes(DOM.busca.campo.value);
+                const itemAtivo = DOM.busca.resultados?.querySelector('.resultado-item.ativo');
+                if (!itemAtivo) {
+                    e.preventDefault();
+                    buscarAnimes(DOM.busca.campo.value);
+                }
             }
         });
-    }
 
-    DOM.busca.botaoBuscar?.addEventListener('click', () => {
-        const termo = DOM.busca.campo.value;
-        buscarAnimes(termo);
-    });
+        DOM.busca.resultados.addEventListener('mouseover', (e) => {
+            if (DOM.busca.resultados.classList.contains('navegacao-teclado')) return;
+
+            const item = e.target.closest('.resultado-item');
+            if (item) {
+                const ativos = DOM.busca.resultados.querySelectorAll('.resultado-item.ativo');
+                ativos.forEach(i => i.classList.remove('ativo'));
+                item.classList.add('ativo');
+            }
+        });
+
+        DOM.busca.resultados.addEventListener('mousemove', (e) => {
+            if (DOM.busca.resultados.classList.contains('navegacao-teclado')) {
+                DOM.busca.resultados.classList.remove('navegacao-teclado');
+
+                const itemSobMouse = e.target.closest('.resultado-item');
+
+                const ativos = DOM.busca.resultados.querySelectorAll('.resultado-item.ativo');
+                ativos.forEach(i => i.classList.remove('ativo'));
+
+                if (itemSobMouse) {
+                    itemSobMouse.classList.add('ativo');
+                }
+            }
+        });
+
+        DOM.busca.campo.addEventListener('keydown', function(e) {
+            const container = DOM.busca.resultados;
+            if (!container || container.classList.contains('oculto') || container.innerHTML.trim() === '') return;
+
+            const itens = Array.from(container.querySelectorAll('.resultado-item'));
+            if (itens.length === 0) return;
+
+            let currentIndex = itens.findIndex(item => item.classList.contains('ativo'));
+
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                
+                container.classList.add('navegacao-teclado');
+
+                if (currentIndex >= 0) itens[currentIndex].classList.remove('ativo');
+
+                let nextIndex;
+                if (e.key === 'ArrowDown') {
+                    nextIndex = (currentIndex + 1) % itens.length;
+                } else {
+                    if (currentIndex === -1) currentIndex = 0;
+                    nextIndex = (currentIndex - 1 + itens.length) % itens.length;
+                }
+
+                itens[nextIndex].classList.add('ativo');
+                itens[nextIndex].scrollIntoView({ block: 'nearest' });
+
+            } else if (e.key === 'Enter' && currentIndex !== -1) {
+                e.preventDefault();
+                container.classList.remove('navegacao-teclado'); 
+                itens[currentIndex].click();
+            }
+        });
+
+        DOM.busca.botaoBuscar?.addEventListener('click', () => {
+            const termo = DOM.busca.campo.value;
+            buscarAnimes(termo);
+        });
+    }
 
     // Controles
     DOM.busca.botaoLimpar?.addEventListener('click', limparTextoBusca);
@@ -1285,7 +1256,7 @@ function setupListeners() {
 }
 
 // ========================================================
-// 11. INICIALIZAÇÃO
+// 10. INICIALIZAÇÃO
 // ========================================================
 
 document.addEventListener('DOMContentLoaded', () => {

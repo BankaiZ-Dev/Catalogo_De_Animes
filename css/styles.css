@@ -78,6 +78,7 @@ button {
 /* ==========================================================================
    3. CABEÇALHO (HEADER)
    ========================================================================== */
+
 .cabecalho {
     background-color: var(--cor-primaria);
     color: white;
@@ -129,10 +130,6 @@ button {
     color: white;
 }
 
-.btn-icon-header:hover {
-    background-color: rgba(255, 255, 255, 0.4);
-}
-
 #dark-mode-icon-btn {
     width: 40px;
     height: 40px;
@@ -145,10 +142,6 @@ button {
     justify-content: center;
     background-color: #ffcc00;
     box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
-}
-
-#dark-mode-icon-btn:hover {
-    transform: scale(1.1);
 }
 
 #dark-mode-icon-btn::before {
@@ -200,11 +193,6 @@ body.dark-mode #dark-mode-icon-btn::before {
     transition: background-color 0.2s, transform 0.2s;
 }
 
-.btn-voltar-home:hover {
-    background-color: #1976D2;
-    transform: translateY(-1px);
-}
-
 .busca-input-container {
     position: relative;
     flex-grow: 1;
@@ -246,10 +234,6 @@ body.dark-mode #dark-mode-icon-btn::before {
     line-height: 1;
 }
 
-.limpar-busca-btn:hover {
-    color: #ff5252;
-}
-
 .btn-buscar-lupa {
     position: absolute;
     right: 0;
@@ -266,11 +250,6 @@ body.dark-mode #dark-mode-icon-btn::before {
     border-radius: 0 var(--raio-borda) var(--raio-borda) 0;
     transition: color 0.2s, background-color 0.2s;
     z-index: 10;
-}
-
-.btn-buscar-lupa:hover {
-    color: var(--cor-primaria);
-    background-color: rgba(0,0,0,0.05);
 }
 
 .btn-buscar-lupa svg {
@@ -300,12 +279,10 @@ body.dark-mode #dark-mode-icon-btn::before {
     border-bottom: 1px solid var(--cor-borda);
 }
 
-.resultado-item:hover,
 .resultado-item.ativo {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
-body.dark-mode .resultado-item:hover,
 body.dark-mode .resultado-item.ativo {
     background-color: rgba(255, 255, 255, 0.1);
 }
@@ -340,14 +317,6 @@ body.dark-mode .resultado-item.ativo {
     padding: 0 45px 0 15px; 
 }
 
-#filtro-status:hover,
-#ordenacao-catalogo:hover {
-    border-color: var(--cor-primaria);
-    background-color: #f9f9f9;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
 #filtro-status:focus,
 #ordenacao-catalogo:focus {
     border-color: var(--cor-primaria);
@@ -365,13 +334,6 @@ body.dark-mode #ordenacao-catalogo {
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-color: var(--cor-card-fundo);
     color: var(--cor-texto-principal);
-}
-
-body.dark-mode #filtro-status:hover,
-body.dark-mode #ordenacao-catalogo:hover {
-    background-color: #333333;
-    border-color: var(--cor-primaria);
-    color: #ffffff;
 }
 
 .view-mode-toggle {
@@ -409,14 +371,6 @@ body.dark-mode #ordenacao-catalogo:hover {
     color: white;
 }
 
-.view-btn:hover:not(.active) {
-    background-color: rgba(0,0,0,0.05);
-}
-
-body.dark-mode .view-btn:hover:not(.active) {
-    background-color: rgba(255,255,255,0.1);
-}
-
 /* ==========================================================================
    5. CARDS DE ANIME
    ========================================================================== */
@@ -436,10 +390,6 @@ body.dark-mode .view-btn:hover:not(.active) {
     position: relative;
     border-left: 5px solid var(--cor-atual, transparent);
     transition: transform 0.2s, border-left-color 0.5s ease;
-}
-
-.card-anime:hover {
-    transform: translateY(-2px);
 }
 
 .status-concluido {
@@ -601,10 +551,6 @@ body.dark-mode .tag-tipo {
     padding: 0;
 }
 
-.btn-progresso:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
 .input-progresso-base {
     width: 40px;
     height: 28px;
@@ -669,10 +615,6 @@ body.dark-mode .barra-progresso-fundo {
     transition: all 0.2s;
 }
 
-.btn-base:hover {
-    background-color: var(--cor-fundo);
-}
-
 .btn-add-destaque {
     background: linear-gradient(135deg, var(--status-querover) 0%, #1976D2 100%);
     color: white;
@@ -685,15 +627,9 @@ body.dark-mode .barra-progresso-fundo {
     justify-content: center;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(33, 150, 243, 0.4);
-    
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     overflow: hidden;
-}
-
-.btn-add-destaque:hover {
-    transform: translateY(-3px) scale(1.1);
-    box-shadow: 0 6px 15px rgba(33, 150, 243, 0.6);
 }
 
 .btn-add-destaque:active {
@@ -714,12 +650,6 @@ body.dark-mode .barra-progresso-fundo {
     padding-top: 2px;
     text-shadow: none;
     transition: all 0.2s;
-}
-
-.btn-favorite:hover {
-    background-color: #FFD700;
-    color: white;
-    text-shadow: var(--sombra-texto-contorno);
 }
 
 .btn-favorite.active {
@@ -800,6 +730,7 @@ body.dark-mode .barra-progresso-fundo {
 /* ==========================================================================
    7. PAGINAÇÃO
    ========================================================================== */
+
 #paginacao-container {
     display: flex;
     justify-content: center;
@@ -818,11 +749,6 @@ body.dark-mode .barra-progresso-fundo {
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.2s;
-}
-
-#btn-anterior:hover:not(:disabled),
-#btn-proxima:hover:not(:disabled) {
-    background-color: var(--cor-primaria-hover);
 }
 
 #btn-anterior:disabled,
@@ -848,12 +774,6 @@ body.dark-mode .barra-progresso-fundo {
     min-width: 35px;
     font-weight: bold;
     transition: all 0.2s;
-}
-
-.btn-pagina-numero:hover {
-    border-color: var(--cor-primaria);
-    color: var(--cor-primaria);
-    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .btn-pagina-numero.ativo {
@@ -924,11 +844,6 @@ body.dark-mode .barra-progresso-fundo {
     z-index: 10;
 }
 
-.fechar-btn:hover {
-    background-color: var(--cor-primaria-hover);
-    transform: scale(1.1);
-}
-
 .modal-poster-detalhes {
     display: flex;
     flex-wrap: wrap;
@@ -972,11 +887,6 @@ body.dark-mode .barra-progresso-fundo {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.btn-modal-action:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
 .btn-modal-concluir {
     background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
     text-shadow: var(--sombra-texto-contorno);
@@ -1016,18 +926,8 @@ body.dark-mode .modal-tabs {
     font-weight: 500;
 }
 
-.tab-button:hover {
-    color: #333;
-    background-color: #f5f5f5;
-}
-
 body.dark-mode .tab-button {
     color: #aaa;
-}
-
-body.dark-mode .tab-button:hover {
-    color: #e0e0e0;
-    background-color: #333;
 }
 
 .tab-button.ativo {
@@ -1159,26 +1059,11 @@ body.dark-mode .streaming-link {
     border-color: var(--cor-borda);
 }
 
-.streaming-link:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border-color: #cbd5e0;
-}
-
-body.dark-mode .streaming-link:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-}
-
 .streaming-link.oficial {
     background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
     color: white;
     border: none;
     font-weight: 600;
-}
-
-.streaming-link.oficial:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
 }
 
 .streaming-icon {
@@ -1226,11 +1111,6 @@ body.dark-mode .streaming-link:hover {
     gap: 15px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s;
-}
-
-.stat-card:hover {
-    transform: translateY(-3px);
-    border-color: var(--cor-primaria);
 }
 
 .stat-icon {
@@ -1443,18 +1323,9 @@ body.dark-mode .streaming-link:hover {
     color: #667eea;
 }
 
-.btn-atualizar-agora:hover {
-    transform: scale(1.05);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
 .btn-atualizar-depois {
     background: rgba(255, 255, 255, 0.2);
     color: white;
-}
-
-.btn-atualizar-depois:hover {
-    background: rgba(255, 255, 255, 0.3);
 }
 
 #global-loading-overlay {
@@ -1489,6 +1360,7 @@ body.dark-mode .streaming-link:hover {
 /* ==========================================================================
    10. ANIMAÇÕES
    ========================================================================== */
+
 @keyframes aparecerSuave {
     from {
         opacity: 0;
@@ -1604,11 +1476,6 @@ body.dark-mode .streaming-link:hover {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
-}
-
-.btn-topo:hover {
-    background-color: var(--cor-primaria-hover);
-    transform: translateY(-3px);
 }
 
 .btn-topo svg {
@@ -1742,5 +1609,177 @@ body.dark-mode .streaming-link:hover {
 @media (min-width: 601px) and (max-width: 900px) {
     .streaming-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}
+
+/* ==========================================================================
+   13. INTERAÇÕES DE MOUSE (HOVER) - SÓ PARA QUEM TEM MOUSE
+   (Evita o problema de "Sticky Hover" no celular em TODO o site)
+   ========================================================================== */
+
+@media (hover: hover) {
+
+    /* --- CABEÇALHO --- */
+    .btn-icon-header:hover {
+        background-color: rgba(255, 255, 255, 0.4);
+    }
+    
+    #dark-mode-icon-btn:hover {
+        transform: scale(1.1);
+    }
+
+    /* --- BARRA DE FERRAMENTAS --- */
+    .btn-voltar-home:hover {
+        background-color: #1976D2;
+        transform: translateY(-1px);
+    }
+    
+    .limpar-busca-btn:hover {
+        color: #ff5252;
+    }
+    
+    .btn-buscar-lupa:hover {
+        color: var(--cor-primaria);
+        background-color: rgba(0,0,0,0.05);
+    }
+    
+    #filtro-status:hover,
+    #ordenacao-catalogo:hover {
+        border-color: var(--cor-primaria);
+        background-color: #f9f9f9;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    body.dark-mode #filtro-status:hover,
+    body.dark-mode #ordenacao-catalogo:hover {
+        background-color: #333333;
+        border-color: var(--cor-primaria);
+        color: #ffffff;
+    }
+    
+    .view-btn:hover:not(.active) {
+        background-color: rgba(0,0,0,0.05);
+    }
+    
+    body.dark-mode .view-btn:hover:not(.active) {
+        background-color: rgba(255,255,255,0.1);
+    }
+    
+    /* --- BUSCA --- */
+    .resultado-item:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    body.dark-mode .resultado-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    #resultados-busca-api.navegacao-teclado .resultado-item:hover {
+        background-color: transparent; 
+    }
+    
+    #resultados-busca-api.navegacao-teclado .resultado-item.ativo {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    body.dark-mode #resultados-busca-api.navegacao-teclado .resultado-item.ativo {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* --- CARDS --- */
+    .card-anime:hover {
+        transform: translateY(-2px);
+    }
+    
+    .btn-progresso:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-base:hover {
+        background-color: var(--cor-fundo);
+    }
+    
+    .btn-add-destaque:hover {
+        transform: translateY(-3px) scale(1.1);
+        box-shadow: 0 6px 15px rgba(33, 150, 243, 0.6);
+    }
+
+    /* --- BOTÃO FAVORITO --- */
+    .btn-favorite:hover {
+        background-color: #FFD700;
+        color: white;
+        text-shadow: var(--sombra-texto-contorno);
+    }
+
+    /* --- PAGINAÇÃO --- */
+    #btn-anterior:hover:not(:disabled),
+    #btn-proxima:hover:not(:disabled) {
+        background-color: var(--cor-primaria-hover);
+    }
+    
+    .btn-pagina-numero:hover {
+        border-color: var(--cor-primaria);
+        color: var(--cor-primaria);
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* --- MODAIS E DETALHES --- */
+    .fechar-btn:hover {
+        background-color: var(--cor-primaria-hover);
+        transform: scale(1.1);
+    }
+    
+    .btn-modal-action:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .tab-button:hover {
+        color: #333;
+        background-color: #f5f5f5;
+    }
+    
+    body.dark-mode .tab-button:hover {
+        color: #e0e0e0;
+        background-color: #333;
+    }
+
+    /* --- STREAMING E LINKS --- */
+    .streaming-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-color: #cbd5e0;
+    }
+    
+    body.dark-mode .streaming-link:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+    
+    .streaming-link.oficial:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
+    }
+
+    /* --- ESTATÍSTICAS --- */
+    .stat-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--cor-primaria);
+    }
+
+    /* --- UPDATE NOTIFICATION --- */
+    .btn-atualizar-agora:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-atualizar-depois:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* --- RODAPÉ --- */
+    .btn-topo:hover {
+        background-color: var(--cor-primaria-hover);
+        transform: translateY(-3px);
     }
 }

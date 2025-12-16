@@ -39,8 +39,8 @@ const MAPA_GENEROS = {
 };
 
 const MAPA_TIPOS_MIDIA = {
-    "TV": "Série (TV)", "Movie": "Filme", "OVA": "OVA", "Special": "Especial",
-    "ONA": "Web (ONA)", "Music": "Musical", "Unknown": "Desconhecido", "TV Special": "Especial de TV"
+    "TV": "Série TV", "Movie": "Filme", "OVA": "OVA", "Special": "Especial",
+    "ONA": "Web ONA", "Music": "Musical", "Unknown": "Desconhecido", "TV Special": "Especial de TV"
 };
 
 const PLATAFORMAS_STREAMING = {
