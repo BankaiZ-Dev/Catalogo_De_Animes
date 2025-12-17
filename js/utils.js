@@ -2,6 +2,10 @@
 // UTILS.JS - Ferramentas e Componentes Visuais Genéricos
 // ========================================================
 
+// ========================================================
+// 1. PERFORMANCE E CONTROLE
+// ========================================================
+
 function debounce(func, delay) {
     let debounceTimer;
     return function() {
@@ -13,6 +17,10 @@ function debounce(func, delay) {
         }, delay);
     };
 }
+
+// ========================================================
+// 2. COMPONENTES DE INTERFACE (UI) & FEEDBACK
+// ========================================================
 
 function handleImageError(imageElement) {
     const placeholder = (typeof CONFIG !== 'undefined') ? CONFIG.PLACEHOLDER_IMAGE : 'img/placeholder.png';
@@ -55,7 +63,7 @@ function showToast(message, type = 'info') {
         toast.style.animation = 'fade-out 0.5s forwards';
         setTimeout(() => {
             toast.remove();
-            
+
             if (container.children.length === 0) {
                 if (suportaPopover) {
                     container.hidePopover();
@@ -66,6 +74,10 @@ function showToast(message, type = 'info') {
         }, 500);
     }, 3000);
 }
+
+// ========================================================
+// 3. FORMATAÇÃO DE DADOS E SERVIÇOS
+// ========================================================
 
 function traduzirListaGeneros(genresArray) {
     if (!genresArray || genresArray.length === 0) return 'N/A';
@@ -106,4 +118,33 @@ function obterIconePlataforma(nomePlataforma) {
         domain = nome.replace(/\s+/g, '') + '.com';
     }
     return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+}
+
+function formatarDataCompleta(dataIso) {
+    if (!dataIso) return '???';
+    const data = new Date(dataIso);
+    return data.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function formatarListaSimples(arrayObjetos, limite = 3) {
+    if (!arrayObjetos || arrayObjetos.length === 0) return 'N/A';
+    
+    const todosNomes = arrayObjetos.map(item => item.name);
+    
+    if (todosNomes.length <= limite) {
+        return todosNomes.join(', ');
+    }
+
+    const nomesVisiveis = todosNomes.slice(0, limite).join(', ');
+    const restantes = todosNomes.length - limite;
+    
+    const listaCompletaSafe = todosNomes.join(', ').replace(/'/g, "\\'");
+
+    return `<span 
+                title="${todosNomes.join(', ')}" 
+                onclick="showToast('${listaCompletaSafe}', 'info')"
+                style="cursor: pointer;">
+                ${nomesVisiveis} 
+                <strong style="color: var(--cor-primaria);"> (+${restantes})</strong>
+            </span>`;
 }

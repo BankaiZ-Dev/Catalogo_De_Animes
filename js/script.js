@@ -1,5 +1,5 @@
 // ========================================================
-// CATÁLOGO DE ANIMES - SCRIPT REORGANIZADO
+// CATÁLOGO DE ANIMES PESSOAL
 // ========================================================
 // Estrutura:
 // 1. Estado da Aplicação
@@ -76,26 +76,34 @@ function renderizarNumerosPaginacao(paginaAtual, totalPaginas) {
     }
 }
 
+function fabricarAnimeSalvo(malId, titulo, poster, maxEpisodes, type, year, status = 'Quero Ver') {
+    return {
+        mal_id: parseInt(malId),
+        title: titulo,
+        poster: poster,
+        status: status,
+        episode: 0,
+        maxEpisodes: parseInt(maxEpisodes) || 0,
+        dateAdded: new Date().toISOString(),
+        type: type,
+        year: year,
+        favorite: false
+    };
+}
+
 function adicionarRapido(malId, tituloEncoded, posterUrl, maxEpisodes, type, year) {
     const titulo = decodeURIComponent(tituloEncoded);
     adicionarAoCatalogo(malId, titulo, posterUrl, maxEpisodes, 'Quero Ver', type, year);
 }
 
 function salvarNovoAnimeNoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial, type, year) {
-    catalogoPessoal[malId] = {
-        mal_id: malId,
-        title: titulo,
-        poster: posterUrl,
-        status: statusInicial,
-        episode: 0,
-        season: 1,
-        maxEpisodes: maxEpisodes,
-        dateAdded: new Date().toISOString(),
-        type: type,
-        year: year,
-        favorite: false
-    };
-    if (statusInicial === 'Concluído' && maxEpisodes) catalogoPessoal[malId].episode = maxEpisodes;
+    const novoAnime = fabricarAnimeSalvo(malId, titulo, posterUrl, maxEpisodes, type, year, statusInicial);
+    
+    if (statusInicial === 'Concluído' && novoAnime.maxEpisodes) {
+        novoAnime.episode = novoAnime.maxEpisodes;
+    }
+
+    catalogoPessoal[malId] = novoAnime;
     salvarCatalogo();
 }
 
@@ -357,94 +365,120 @@ function updateProgressoDisplay(malId, episode, maxEpisodes) {
     }
 }
 
-function renderizarCardAnime(animeAPI, isSaved = false, savedData = {}, returnElement = false) {
+function prepararDadosCard(animeAPI, isSaved, savedData) {
     const malId = animeAPI.mal_id;
-    const isSavedFinal = catalogoPessoal.hasOwnProperty(malId);
-    const finalSavedData = isSavedFinal ? catalogoPessoal[malId] : savedData;
-    const posterUrl = animeAPI.images?.jpg?.image_url || finalSavedData.poster || CONFIG.PLACEHOLDER_IMAGE;
-    const titulo = animeAPI.title_english || animeAPI.title;
-    const tituloEncoded = encodeURIComponent(titulo).replace(/'/g, "%27");
+    const estaNoCatalogo = catalogoPessoal.hasOwnProperty(malId);
+    const finalSavedData = estaNoCatalogo ? catalogoPessoal[malId] : savedData;
     
-    const detalhesBtn = `
-        <button onclick="abrirModal(${malId})" class="btn-base btn-detalhes btn-icone-acao" title="Detalhes/Gerenciar">
-            <svg class="icone-acao-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width: 18px; height: 18px;">
+    return {
+        malId: malId,
+        poster: animeAPI.images?.jpg?.image_url || finalSavedData.poster || CONFIG.PLACEHOLDER_IMAGE,
+        titulo: animeAPI.title_english || animeAPI.title,
+        tipo: MAPA_TIPOS_MIDIA[animeAPI.type || finalSavedData.type || 'TV'] || (animeAPI.type || 'TV'),
+        ano: animeAPI.year || (animeAPI.aired?.prop?.from?.year) || finalSavedData.year || '----',
+        
+        isSaved: estaNoCatalogo, 
+        savedData: finalSavedData
+    };
+}
+
+function gerarMioloCardSalvo(dados) {
+    const statusInfo = getStatusData(dados.savedData.status);
+    const episodesTotal = dados.savedData.maxEpisodes ? ` / ${dados.savedData.maxEpisodes}` : '';
+    let porcentagem = (dados.savedData.maxEpisodes > 0) ? (dados.savedData.episode / dados.savedData.maxEpisodes) * 100 : 0;
+    if (porcentagem > 100) porcentagem = 100;
+    const dataAdicao = dados.savedData.dateAdded ? new Date(dados.savedData.dateAdded).toLocaleDateString('pt-BR') : '--/--';
+    const classeAtiva = dados.savedData.favorite ? 'active' : '';
+
+    return `
+        <span class="etiqueta-status ${statusInfo.class}">${statusInfo.label}</span>
+        
+        <div class="progresso-linha-topo">
+            <p class="progresso-texto-inline">
+                <span id="ep-atual-${dados.malId}">Ep ${dados.savedData.episode}${episodesTotal}</span>
+            </p>
+            <div class="controle-individual">
+                <button class="btn-progresso btn-menos" onclick="decrementarEpisodio(${dados.malId})">-</button>
+                <input type="number" id="episode-input-${dados.malId}" value="${dados.savedData.episode}" min="0" class="input-progresso-base" onchange="atualizarEpisodio(${dados.malId}, this.value)" />
+                <button class="btn-progresso btn-mais" onclick="incrementarEpisodio(${dados.malId})">+</button>
+            </div>
+        </div>
+        
+        <div class="barra-progresso-fundo">
+            <div class="barra-progresso-preenchimento" id="bar-prog-${dados.malId}" style="width: ${porcentagem}%"></div>
+        </div>
+        
+        <div class="card-meta-info">
+            <span class="tag-tipo">${dados.tipo}</span>
+            <span>Lançado em: ${dados.ano}</span>
+        </div>
+        
+        <div class="card-acoes-compactas">
+            <div class="flex-coluna margem-direita-auto">
+                <span class="card-meta-label">Adicionado em:</span>
+                <span class="card-meta-valor card-meta-info">${dataAdicao}</span>
+            </div>
+            <button onclick="toggleFavorite(${dados.malId})" class="btn-base btn-favorite ${classeAtiva}" title="Favorito">⭐</button>
+            ${gerarBotaoDetalhes(dados.malId)}
+        </div>`;
+}
+
+function gerarMioloCardNovo(dados, animeAPI) {
+    const textoEpisodios = animeAPI.episodes ? `${animeAPI.episodes} Episódios` : 'Episódios: N/A';
+    const tituloEncoded = encodeURIComponent(dados.titulo).replace(/'/g, "%27");
+
+    return `
+        <p class="card-destaque-info">${textoEpisodios}</p>
+        
+        <div class="card-meta-info" style="margin: 10px 0 15px 0;">
+            <span class="tag-tipo">${dados.tipo}</span>
+            <span>Lançado em: ${dados.ano}</span>
+        </div>
+        
+        <div class="card-acoes-compactas">
+            <button onclick="adicionarRapido(${dados.malId}, '${tituloEncoded}', '${dados.poster}', ${animeAPI.episodes}, '${animeAPI.type}', '${dados.ano}')" class="btn-add-destaque" title="Adicionar a Quero Ver">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+            </button>
+            ${gerarBotaoDetalhes(dados.malId)}
+        </div>`;
+}
+
+function gerarBotaoDetalhes(malId) {
+    return `
+        <button onclick="abrirModal(${malId})" class="btn-base btn-detalhes btn-icone-acao" title="Detalhes">
+            <svg class="icone-acao-svg icone-pequeno" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
             </svg>
         </button>`;
+}
+
+function renderizarCardAnime(animeAPI, isSaved = false, savedData = {}, returnElement = false) {
+    const dados = prepararDadosCard(animeAPI, isSaved, savedData);
     
-    const favoriteBadge = (isSavedFinal && finalSavedData.favorite) ? '<div class="favorite-badge" title="Favorito">⭐</div>' : '';
-    const tipoTraduzido = MAPA_TIPOS_MIDIA[animeAPI.type || finalSavedData.type || 'TV'] || (animeAPI.type || 'TV');
-    const anoAnime = animeAPI.year || (animeAPI.aired && animeAPI.aired.prop && animeAPI.aired.prop.from ? animeAPI.aired.prop.from.year : null) || finalSavedData.year || '----';
+    const corpoHTML = dados.isSaved 
+        ? gerarMioloCardSalvo(dados) 
+        : gerarMioloCardNovo(dados, animeAPI);
 
-    let statusHTML;
-    let cardClass = '';
-
-    if (isSavedFinal) {
-        const savedData = catalogoPessoal[malId];
-        const statusInfo = getStatusData(savedData.status);
-        cardClass = statusInfo.class;
-        const episodesTotal = savedData.maxEpisodes ? ` / ${savedData.maxEpisodes}` : '';
-        let porcentagem = (savedData.maxEpisodes && savedData.maxEpisodes > 0) ? (savedData.episode / savedData.maxEpisodes) * 100 : 0;
-        if (porcentagem > 100) porcentagem = 100;
-        const dataAdicao = savedData.dateAdded ? new Date(savedData.dateAdded).toLocaleDateString('pt-BR') : '--/--';
-        const btnFavorito = `<button onclick="toggleFavorite(${malId})" class="btn-base btn-favorite ${savedData.favorite ? 'active' : ''}" title="${savedData.favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">⭐</button>`;
-        
-        statusHTML = `
-            <span class="etiqueta-status ${statusInfo.class}">${statusInfo.label}</span>
-            <div class="progresso-linha-topo">
-                <p class="progresso-texto-inline">
-                    <span id="ep-atual-${malId}">Ep ${savedData.episode}${episodesTotal}</span>
-                </p>
-                <div class="controle-individual">
-                    <button class="btn-progresso btn-menos" onclick="decrementarEpisodio(${malId})">-</button>
-                    <input type="number" id="episode-input-${malId}" value="${savedData.episode}" min="0" class="input-progresso-base" onchange="atualizarEpisodio(${malId}, this.value)" />
-                    <button class="btn-progresso btn-mais" onclick="incrementarEpisodio(${malId})">+</button>
-                </div>
-            </div>
-            <div class="barra-progresso-fundo">
-                <div class="barra-progresso-preenchimento" id="bar-prog-${malId}" style="width: ${porcentagem}%"></div>
-            </div>
-            <div class="card-meta-info">
-                <span class="tag-tipo">${tipoTraduzido}</span>
-                <span>Lançado em: ${anoAnime}</span>
-            </div>
-            <div class="card-acoes-compactas">
-                <div style="display: flex; flex-direction: column; margin-right: auto;">
-                    <span style="font-size: 0.65em; opacity: 0.8;">Adicionado em:</span>
-                    <span class="card-meta-info" style="margin:0; font-weight:bold;">${dataAdicao}</span>
-                </div>
-                ${btnFavorito}
-                ${detalhesBtn}
-            </div>`;
-    } else {
-        const textoEpisodios = animeAPI.episodes ? `${animeAPI.episodes} Episódios` : 'Episódios: N/A';
-        statusHTML = `
-            <p class="card-destaque-info">${textoEpisodios}</p>
-            <div class="card-meta-info" style="margin: 10px 0 15px 0;">
-                <span class="tag-tipo">${tipoTraduzido}</span>
-                <span>Lançado em: ${anoAnime}</span>
-            </div>
-            <div class="card-acoes-compactas">
-                <button onclick="adicionarRapido(${malId}, '${tituloEncoded}', '${posterUrl}', ${animeAPI.episodes}, '${animeAPI.type}', '${anoAnime}')" class="btn-add-destaque" title="Adicionar a Quero Ver">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                </button>
-                ${detalhesBtn}
-            </div>`;
-    }
+    const favoriteBadge = (dados.isSaved && dados.savedData.favorite) 
+        ? '<div class="favorite-badge" title="Favorito">⭐</div>' 
+        : '';
+    
+    const classeStatus = dados.isSaved ? getStatusData(dados.savedData.status).class : '';
 
     const cardElement = document.createElement('div');
-    cardElement.className = `card-anime ${cardClass}`;
-    cardElement.dataset.malId = malId;
+    cardElement.className = `card-anime ${classeStatus}`;
+    cardElement.dataset.malId = dados.malId;
+    
     cardElement.innerHTML = `
         ${favoriteBadge}
-        <img src="${posterUrl}" alt="Poster" class="card-poster" loading="lazy" onerror="handleImageError(this)">
-        <div class="card-info" style="display: flex; flex-direction: column;">
-            <h2 class="card-titulo">${titulo}</h2>
-            <div class="card-status-pessoal" style="flex-grow: 1; display: flex; flex-direction: column;">
-                ${statusHTML}
+        <img src="${dados.poster}" alt="Poster" class="card-poster" loading="lazy" onerror="handleImageError(this)">
+        <div class="card-info flex-coluna">
+            <h2 class="card-titulo">${dados.titulo}</h2>
+            <div class="card-status-pessoal flex-coluna flex-grow">
+                ${corpoHTML}
             </div>
         </div>`;
     
@@ -462,7 +496,7 @@ function carregarAnimesSalvos() {
     let animesArray = Object.values(catalogoPessoal);
     
     if (animesArray.length === 0) {
-        DOM.cards.lista.innerHTML = '<h2 style="width:100%; text-align:center; padding: 40px;">Seu Catálogo está vazio.<br>Pesquise por um anime acima!</h2>';
+        DOM.cards.lista.innerHTML = '<h2 class="mensagem-vazia-titulo">Seu Catálogo está vazio.<br>Pesquise por um anime acima!</h2>';
         DOM.filtros.status?.classList.add('oculto');
         DOM.filtros.ordenacao?.classList.add('oculto');
         return;
@@ -473,6 +507,7 @@ function carregarAnimesSalvos() {
     DOM.busca.botaoVoltar?.classList.add('oculto');
 
     const tipoOrdenacao = DOM.filtros.ordenacao?.value || 'data-desc';
+    
     animesArray.sort((a, b) => {
         switch (tipoOrdenacao) {
             case 'az': return a.title.localeCompare(b.title);
@@ -563,11 +598,11 @@ async function buscarAnimes(query, page = 1) {
                 DOM.paginacao.botaoProxima.disabled = !data.pagination.has_next_page;
             }
         } else {
-            DOM.cards.lista.innerHTML = '<p style="text-align: center; width: 100%;">Nenhum anime encontrado.</p>';
+            DOM.cards.lista.innerHTML = '<p class="mensagem-centro">Nenhum anime encontrado.</p>';
             DOM.paginacao.container?.classList.add('oculto');
         }
     } catch (error) {
-        DOM.cards.lista.innerHTML = '<p style="text-align: center; width: 100%;">Erro na conexão com a API.</p>';
+        DOM.cards.lista.innerHTML = '<p class="mensagem-centro">Erro na conexão com a API.</p>';
     } finally {
         hideGlobalLoading();
     }
@@ -718,7 +753,7 @@ function renderizarAbaStreaming(links) {
                 <p class="streaming-descricao">
                     Links registrados no banco de dados global.
                     <br>
-                    <span style="font-size: 0.85em; color: var(--cor-primaria);">
+                    <span class="streaming-nota-texto">
                         ⚠️ Nota: Podem redirecionar para a tela inicial se não estiverem disponíveis no Brasil.
                     </span>
                 </p>
@@ -740,7 +775,7 @@ function renderizarAbaStreaming(links) {
             <p class="streaming-descricao">Clique para buscar automaticamente este anime na plataforma</p>
             <div class="streaming-grid">
                 ${linksBusca.map(link => `
-                    <a href="${link.url}" target="_blank" class="streaming-link busca" style="border-left: 4px solid ${link.cor}" rel="noopener noreferrer">
+                    <a href="${link.url}" target="_blank" class="streaming-link busca streaming-link-busca" style="border-color: ${link.cor}" rel="noopener noreferrer">
                         <img src="${link.icon}" alt="${link.nome}" class="streaming-icon" onerror="this.style.display='none'">
                         <span class="streaming-nome">${link.nome}</span>
                     </a>
@@ -779,14 +814,179 @@ function mudarAba(event, nomeAba) {
     }
 }
 
+function gerarBotoesAcaoModal(malId, isSaved) {
+    if (!isSaved) return '';
+    return `
+        <div class="modal-actions-row">
+            <button onclick="concluirAnimeRapido(${malId})" class="btn-modal-action btn-modal-concluir" title="Marcar como Concluído">
+                ✅ Marcar Concluído
+            </button>
+            <button onclick="removerDoCatalogo(${malId})" class="btn-modal-action btn-modal-excluir" title="Remover do Catálogo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+            </button>
+        </div>`;
+}
+
+function renderizarAbaMusicas(theme) {
+    if (!theme || (!theme.openings?.length && !theme.endings?.length)) {
+        return '<div class="trailer-indisponivel"><p>🎵 Nenhuma informação musical encontrada.</p></div>';
+    }
+
+    const criarLista = (lista, titulo) => {
+        if (!lista || lista.length === 0) return '';
+        
+        const itens = lista.map(musica => {
+            let textoLimpo = musica.replace(/^\d+:\s*/, '');
+            textoLimpo = textoLimpo.replace(/['"]/g, ''); 
+            textoLimpo = textoLimpo.replace(/\s*\(eps?.*?\)$/i, '');
+            
+            const termoBusca = encodeURIComponent(textoLimpo);
+
+            return `
+                <a href="https://www.youtube.com/results?search_query=${termoBusca}" target="_blank" class="item-musica">
+                    <svg class="icone-play" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <span class="nome-musica">${musica}</span>
+                </a>
+            `;
+        }).join('');
+
+        return `
+            <div class="bloco-musica">
+                <h4 class="titulo-musica">${titulo}</h4>
+                <div class="lista-musicas">${itens}</div>
+            </div>
+        `;
+    };
+
+    return `
+        <div class="container-musicas">
+            ${criarLista(theme.openings, '🎧 Aberturas (Openings)')}
+            ${criarLista(theme.endings, '🏁 Encerramentos (Endings)')}
+        </div>
+    `;
+}
+
+function renderizarConteudoModal(anime, sinopse, links, isSaved) {
+    // 1. Processamento
+    const generos = traduzirListaGeneros(anime.genres);
+    const tipo = MAPA_TIPOS_MIDIA[anime.type] || anime.type || 'N/A';
+    
+    // 2. Traduções
+    const status = MAPA_STATUS[anime.status] || anime.status;
+    const rating = MAPA_RATING[anime.rating] || anime.rating || 'N/A';
+    const season = anime.season ? MAPA_SEASONS[anime.season] : '';
+    const seasonYear = anime.year || '';
+    const temporadaFormatada = (season && seasonYear) ? `${season} de ${seasonYear}` : 'N/A';
+
+    // 3. Datas
+    const dataInicio = anime.aired?.from ? formatarDataCompleta(anime.aired.from) : '?';
+    const dataFim = anime.aired?.to ? formatarDataCompleta(anime.aired.to) : '?';
+    const periodoExibicao = (anime.status === 'Currently Airing') 
+        ? `De ${dataInicio} (Em andamento)`
+        : (dataInicio !== '?' && dataFim !== '?') ? `${dataInicio} até ${dataFim}` : dataInicio;
+
+    // 4. Indústria
+    const estudios = formatarListaSimples(anime.studios, 2);
+    const produtores = formatarListaSimples(anime.producers, 2);
+    const licenciadores = formatarListaSimples(anime.licensors, 2);
+
+    // 5. Trailer
+    const trailerUrl = anime.trailer?.embed_url 
+        ? anime.trailer.embed_url.replace(/[?&]autoplay=1/gi, '') + '&rel=0'
+        : null;
+    const trailerHTML = trailerUrl 
+        ? `<div id="trailer" class="tab-content oculto"><div class="modal-trailer-container"><iframe src="${trailerUrl}" frameborder="0" allowfullscreen></iframe></div></div>`
+        : `<div id="trailer" class="tab-content oculto"><div class="trailer-indisponivel"><p>🎬 Trailer não disponível</p></div></div>`;
+
+    // 6. Músicas
+    const musicasHTML = renderizarAbaMusicas(anime.theme);
+
+    const acoesHTML = gerarBotoesAcaoModal(anime.mal_id, isSaved);
+    const streamingHTML = renderizarAbaStreaming(links);
+
+    // 7. Montagem final
+    return `
+        <h2 id="modal-titulo">${anime.title_english || anime.title}</h2>
+        
+        <div class="modal-poster-detalhes">
+            <img id="modal-poster" src="${anime.images.jpg.large_image_url}" alt="Poster">
+            
+            <div id="modal-detalhes-rapidos">
+                <div class="flex-grow">
+                    <p><strong>Tipo:</strong> ${tipo}</p>
+                    <p><strong>Episódios:</strong> ${anime.episodes || 'N/A'}</p>
+                    <p><strong>Status:</strong> ${status}</p>
+                    <p><strong>Exibição:</strong> ${periodoExibicao}</p>
+                    <p><strong>Temporada:</strong> ${temporadaFormatada}</p>
+                    <p><strong>Classificação:</strong> ${rating}</p>
+                    <p><strong>Gêneros:</strong> ${generos}</p>
+                    
+                    <p><strong>Estúdio:</strong> ${estudios}</p>
+                    <p><strong>Produtores:</strong> ${produtores}</p>
+                    <p><strong>Licenciado por:</strong> ${licenciadores}</p>
+                </div>
+                ${acoesHTML}
+            </div>
+        </div>
+        
+        <div class="modal-tabs">
+            <button class="tab-button ativo" onclick="mudarAba(event, 'sinopse')">📖 Sinopse</button>
+            <button class="tab-button" onclick="mudarAba(event, 'trailer')">🎥 Trailer</button>
+            <button class="tab-button" onclick="mudarAba(event, 'musicas')">🎵 Músicas</button>
+            <button class="tab-button" onclick="mudarAba(event, 'streaming')">📺 Onde Assistir</button>
+        </div>
+
+        <div class="modal-tab-conteudo">
+            <div id="sinopse" class="tab-content ativo">
+                <div class="sinopse-texto">${sinopse}</div>
+            </div>
+            
+            ${trailerHTML}
+            
+            <div id="musicas" class="tab-content oculto">
+                ${musicasHTML}
+            </div>
+
+            <div id="streaming" class="tab-content oculto">
+                ${streamingHTML}
+            </div>
+        </div>`;
+}
+
+function verificarAtualizacaoAno(malId, anoApi) {
+    if (catalogoPessoal.hasOwnProperty(malId)) {
+        const salvo = catalogoPessoal[malId];
+        if ((!salvo.year || salvo.year === '----') && anoApi && anoApi !== 'N/A') {
+            salvo.year = anoApi;
+            salvarCatalogo();
+            const card = getCardAnime(malId);
+            if (card) {
+                const spans = card.querySelectorAll('.card-meta-info span');
+                spans.forEach(span => {
+                    if (span.textContent.includes('Lançado') || span.textContent.includes('----')) {
+                        span.textContent = `Lançado em: ${anoApi}`;
+                    }
+                });
+            }
+        }
+    }
+}
+
 async function abrirModal(malId) {
-    const animeModal = DOM.modais.anime;
     const modalInfo = DOM.modais.animeInfo;
+    const animeModal = DOM.modais.anime;
+
     if (modalInfo) modalInfo.innerHTML = `
-        <div style="text-align:center; padding: 50px 0;">
-            <div class="spinner" style="border-top-color: #3f51b5; margin: 0 auto 15px auto;"></div>
+        <div class="modal-loading-container">
+            <div class="spinner modal-spinner-margin"></div>
             <p class="loading-text modal-loading-text-content">Carregando detalhes...</p>
         </div>`;
+    
     if (animeModal) {
         animeModal.showModal();
         animeModal.scrollTop = 0;
@@ -798,109 +998,20 @@ async function abrirModal(malId) {
         const data = await response.json();
         const anime = data.data;
 
-        const sinopseTraduzida = await traduzirSinopse(anime.synopsis || 'Sinopse não disponível.');
+        const [sinopseTraduzida, linksStreaming] = await Promise.all([
+            traduzirSinopse(anime.synopsis),
+            obterLinksStreaming(anime)
+        ]);
+
         const anoLancamento = anime.year || anime.aired?.prop?.from?.year || 'N/A';
-        const generos = traduzirListaGeneros(anime.genres);
-        const tipoMidia = MAPA_TIPOS_MIDIA[anime.type] || anime.type || 'N/A';
-
-        if (catalogoPessoal.hasOwnProperty(malId)) {
-            const salvo = catalogoPessoal[malId];
-            if ((!salvo.year || salvo.year === '----' || salvo.year === 'undefined') && anoLancamento !== 'N/A') {
-                
-                salvo.year = anoLancamento;
-                salvarCatalogo();
-                
-                const card = getCardAnime(malId);
-                if (card) {
-                    const spans = card.querySelectorAll('.card-meta-info span');
-                    spans.forEach(span => {
-                        if (span.textContent.includes('Lançado em:') || span.textContent.includes('----')) {
-                            span.textContent = `Lançado em: ${anoLancamento}`;
-                        }
-                    });
-                }
-                console.log(`🔧 Ano do anime ${salvo.title} corrigido para ${anoLancamento}`);
-            }
-        }
-
-        const statusTraduzido = anime.status === 'Finished Airing' ? 'Concluído' : anime.status === 'Currently Airing' ? 'Em Exibição' : anime.status;
-        let trailerEmbedUrl = anime.trailer?.embed_url ? anime.trailer.embed_url.replace(/[?&]autoplay=1/gi, '') + '&rel=0' : null;
+        verificarAtualizacaoAno(malId, anoLancamento);
 
         const isSaved = catalogoPessoal.hasOwnProperty(malId);
-        
-        let acoesHTML = '';
-        if (isSaved) {
-            acoesHTML = `
-                <div class="modal-actions-row">
-                    <button onclick="concluirAnimeRapido(${malId})" class="btn-modal-action btn-modal-concluir" title="Marcar como Concluído">
-                        ✅ Marcar Concluído
-                    </button>
-                    <button onclick="removerDoCatalogo(${malId})" class="btn-modal-action btn-modal-excluir" title="Remover do Catálogo">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        </svg>
-                    </button>
-                </div>
-            `;
-        }
-
-        const linksStreaming = await obterLinksStreaming(anime);
-        const streamingHTML = renderizarAbaStreaming(linksStreaming);
-
-        const trailerAbaHTML = trailerEmbedUrl 
-            ? `<div id="trailer" class="tab-content oculto">
-                <div class="modal-trailer-container">
-                    <iframe src="${trailerEmbedUrl}" frameborder="0" allowfullscreen></iframe>
-                </div>
-              </div>`
-            : `<div id="trailer" class="tab-content oculto">
-                <div class="trailer-indisponivel">
-                    <p>🎬 Trailer não disponível</p>
-                </div>
-              </div>`;
-
-        modalInfo.innerHTML = `
-            <h2 id="modal-titulo">${anime.title_english || anime.title}</h2>
-            
-            <div class="modal-poster-detalhes">
-                <img id="modal-poster" src="${anime.images.jpg.large_image_url}" alt="Poster">
-                
-                <div id="modal-detalhes-rapidos">
-                    <div style="flex-grow: 1;">
-                        <p><strong>Tipo:</strong> ${tipoMidia}</p>
-                        <p><strong>Gêneros:</strong> ${generos}</p>
-                        <p><strong>Episódios:</strong> ${anime.episodes || 'N/A'}</p>
-                        <p><strong>Status:</strong> ${statusTraduzido}</p>
-                        <p><strong>Lançado em:</strong> ${anoLancamento}</p>
-                    </div>
-                    ${acoesHTML}
-                </div>
-            </div>
-            
-            <div class="modal-tabs">
-                <button class="tab-button ativo" onclick="mudarAba(event, 'sinopse')">📖 Sinopse</button>
-                <button class="tab-button" onclick="mudarAba(event, 'trailer')">🎥 Trailer</button>
-                <button class="tab-button" onclick="mudarAba(event, 'streaming')">📺 Onde Assistir</button>
-            </div>
-
-            <div class="modal-tab-conteudo">
-                <div id="sinopse" class="tab-content ativo">
-                    <div class="sinopse-texto">
-                        ${sinopseTraduzida}
-                    </div>
-                </div>
-                
-                ${trailerAbaHTML}
-                
-                <div id="streaming" class="tab-content oculto">
-                    ${streamingHTML}
-                </div>
-            </div>`;
+        modalInfo.innerHTML = renderizarConteudoModal(anime, sinopseTraduzida, linksStreaming, isSaved);
 
     } catch (error) {
-        if (modalInfo) modalInfo.innerHTML = '<p style="text-align:center; color: red;">Não foi possível carregar detalhes.</p>';
         console.error(error);
+        if (modalInfo) modalInfo.innerHTML = '<p class="mensagem-erro-modal">Não foi possível carregar detalhes.</p>';
     }
 }
 
@@ -1028,6 +1139,19 @@ function setViewMode(mode) {
 function aplicarModoVisualizacaoInicial() {
     const savedMode = carregarModoVisualizacao();
     setViewMode(savedMode);
+}
+
+function aplicarPreferenciasFiltros() {
+    const statusSalvo = localStorage.getItem(STORAGE_KEYS.FILTRO_STATUS);
+    const ordemSalva = localStorage.getItem(STORAGE_KEYS.FILTRO_ORDEM);
+
+    if (statusSalvo && DOM.filtros.status) {
+        DOM.filtros.status.value = statusSalvo;
+    }
+
+    if (ordemSalva && DOM.filtros.ordenacao) {
+        DOM.filtros.ordenacao.value = ordemSalva;
+    }
 }
 
 // ========================================================
@@ -1198,8 +1322,6 @@ function setupListeners() {
     // Controles
     DOM.busca.botaoLimpar?.addEventListener('click', limparTextoBusca);
     DOM.busca.botaoVoltar?.addEventListener('click', resetarInterfaceDeBusca);
-    DOM.filtros.status?.addEventListener('change', filtrarAnimesSalvos);
-    DOM.filtros.ordenacao?.addEventListener('change', carregarAnimesSalvos);
 
     // Modais
     const dialogs = document.querySelectorAll('dialog');
@@ -1228,6 +1350,14 @@ function setupListeners() {
     // Modo de Visualização
     DOM.visualizacao.botoes.forEach(btn => {
         btn.addEventListener('click', () => setViewMode(btn.dataset.view));
+    });
+    DOM.filtros.status?.addEventListener('change', () => {
+        localStorage.setItem(STORAGE_KEYS.FILTRO_STATUS, DOM.filtros.status.value);
+        filtrarAnimesSalvos();
+    });
+    DOM.filtros.ordenacao?.addEventListener('change', () => {
+        localStorage.setItem(STORAGE_KEYS.FILTRO_ORDEM, DOM.filtros.ordenacao.value);
+        carregarAnimesSalvos();
     });
 
     // Botão Voltar ao Topo
@@ -1265,6 +1395,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Carrega preferências
     aplicarModoEscuroInicial();
     aplicarModoVisualizacaoInicial();
+    aplicarPreferenciasFiltros();
     
     // Carrega dados
     carregarCatalogo();

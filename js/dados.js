@@ -11,7 +11,9 @@ const CONFIG = {
 const STORAGE_KEYS = {
     CATALOGO: 'meu_catalogo_animes_v2',
     DARK_MODE: 'dark_mode_ativado',
-    VIEW_MODE: 'view_mode_preferido'
+    VIEW_MODE: 'view_mode_preferido',
+    FILTRO_STATUS: 'filtro_status_pref',
+    FILTRO_ORDEM: 'filtro_ordem_pref'
 };
 
 const MAPA_GENEROS = {
@@ -41,6 +43,29 @@ const MAPA_GENEROS = {
 const MAPA_TIPOS_MIDIA = {
     "TV": "Série TV", "Movie": "Filme", "OVA": "OVA", "Special": "Especial",
     "ONA": "Web ONA", "Music": "Musical", "Unknown": "Desconhecido", "TV Special": "Especial de TV"
+};
+
+const MAPA_STATUS = {
+    "Finished Airing": "Concluído",
+    "Currently Airing": "Em Exibição",
+    "Not yet aired": "Em Breve / Não Lançado",
+    "Null": "Desconhecido"
+};
+
+const MAPA_SEASONS = {
+    "summer": "Verão (Japão)",
+    "winter": "Inverno (Japão)",
+    "spring": "Primavera (Japão)",
+    "fall": "Outono (Japão)"
+};
+
+const MAPA_RATING = {
+    "G - All Ages": "Livre (G)",
+    "PG - Children": "+10 (Infantil)",
+    "PG-13 - Teens 13 or older": "+13 (Adolescentes)",
+    "R - 17+ (violence & profanity)": "+17 (Violência/Profanidade)",
+    "R+ - Mild Nudity": "+18 (Nudez Leve)",
+    "Rx - Hentai": "+18 (Hentai/Explícito)"
 };
 
 const PLATAFORMAS_STREAMING = {
