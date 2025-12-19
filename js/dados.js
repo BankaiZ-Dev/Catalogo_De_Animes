@@ -68,6 +68,20 @@ const MAPA_RATING = {
     "Rx - Hentai": "+18 (Hentai/Explícito)"
 };
 
+const MAPA_RELACAO = {
+        "Sequel": "Continuação",
+        "Prequel": "Antecessor",
+        "Alternative Setting": "Universo Alternativo",
+        "Alternative Version": "Versão Alternativa",
+        "Side Story": "História Paralela",
+        "Parent Story": "História Original",
+        "Summary": "Resumo",
+        "Adaptation": "Baseado em (Adaptação)",
+        "Character": "Sobre Personagem",
+        "Other": "Outros",
+        "Spin-off": "Derivado (Spin-off)"
+    };
+
 const PLATAFORMAS_STREAMING = {
     crunchyroll: {
         nome: 'Crunchyroll',

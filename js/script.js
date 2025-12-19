@@ -91,9 +91,34 @@ function fabricarAnimeSalvo(malId, titulo, poster, maxEpisodes, type, year, stat
     };
 }
 
-function adicionarRapido(malId, tituloEncoded, posterUrl, maxEpisodes, type, year) {
+function adicionarRapido(malId, tituloEncoded, poster, episodes, type, year) {
     const titulo = decodeURIComponent(tituloEncoded);
-    adicionarAoCatalogo(malId, titulo, posterUrl, maxEpisodes, 'Quero Ver', type, year);
+    
+    adicionarAoCatalogo(malId, titulo, poster, episodes, 'Quero Ver', type, year);
+    
+    const card = document.querySelector(`.card-anime[data-mal-id="${malId}"]`);
+    
+    if (card) {
+        const savedData = catalogoPessoal[malId];
+        renderizarCardAnime({
+            mal_id: malId,
+            title: titulo,
+            images: { jpg: { image_url: poster } },
+            type: type,
+            year: year
+        }, true, savedData, true).then(newCard => {
+            card.replaceWith(newCard);
+        });
+    } else {
+        
+        if (DOM.busca.campo) DOM.busca.campo.value = '';
+        termoBuscaAtual = '';
+        
+        DOM.busca.resultados?.classList.add('oculto');
+        DOM.busca.botaoVoltar?.classList.add('oculto');
+        
+        carregarAnimesSalvos();
+    }
 }
 
 function salvarNovoAnimeNoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial, type, year) {
@@ -176,16 +201,14 @@ function removerDoCatalogo(malId) {
                 card.replaceWith(novoCardElement);
             }
         } else {
-            if (card) {
-                card.style.transition = 'opacity 0.3s, transform 0.3s';
-                card.style.opacity = '0';
-                card.style.transform = 'scale(0.9)';
-                setTimeout(() => card.remove(), 300);
-            }
-            if (Object.keys(catalogoPessoal).length === 0) {
-                setTimeout(() => carregarAnimesSalvos(), 300);
-            }
+        if (card) {
+            card.classList.add('card-animacao-saida');
+            setTimeout(() => card.remove(), 300);
         }
+        if (Object.keys(catalogoPessoal).length === 0) {
+            setTimeout(() => carregarAnimesSalvos(), 300);
+        }
+    }
 
         showToast(`${animeTitulo} Removido do catálogo.`, 'error');
         fecharModal();
@@ -329,17 +352,13 @@ function atualizarElementosDoCard(malId, savedData, statusChanged) {
 
         if (deveSairDaTela) {
             if (card) {
-                card.style.transition = "opacity 0.5s, transform 0.5s";
-                card.style.opacity = "0";
-                card.style.transform = "scale(0.95)";
+                card.classList.add('card-animacao-saida');
                 
                 setTimeout(() => {
                     card.classList.add('oculto');
-                    card.style.display = 'none';
-                    card.style.opacity = "";
-                    card.style.transform = "";
+                    card.classList.remove('card-animacao-saida');
                     atualizarVisualDoCard(card, savedData); 
-                }, 500);
+                }, 300);
             }
         } else {
             if (card) {
@@ -430,7 +449,7 @@ function gerarMioloCardNovo(dados, animeAPI) {
     return `
         <p class="card-destaque-info">${textoEpisodios}</p>
         
-        <div class="card-meta-info" style="margin: 10px 0 15px 0;">
+        <div class="card-meta-info card-meta-wrapper">
             <span class="tag-tipo">${dados.tipo}</span>
             <span>Lançado em: ${dados.ano}</span>
         </div>
@@ -552,7 +571,6 @@ function filtrarAnimesSalvos() {
         
         if (mostrarCard) {
             card.classList.remove('oculto');
-            card.style.display = 'flex';
         } else {
             card.classList.add('oculto');
         }
@@ -814,25 +832,45 @@ function mudarAba(event, nomeAba) {
     }
 }
 
-function gerarBotoesAcaoModal(malId, isSaved) {
-    if (!isSaved) return '';
+function gerarBotoesAcaoModal(anime, isSaved) {
+    if (isSaved) {
+        return `
+            <div class="modal-actions-row">
+                <button onclick="concluirAnimeRapido(${anime.mal_id})" class="btn-modal-action btn-modal-concluir" title="Marcar como Concluído">
+                    ✅ Concluído
+                </button>
+                <button onclick="removerDoCatalogo(${anime.mal_id})" class="btn-modal-action btn-modal-excluir" title="Remover do Catálogo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>`;
+    } 
+    
+    const tituloEncoded = encodeURIComponent(anime.title_english || anime.title).replace(/'/g, "%27");
+    const poster = anime.images?.jpg?.image_url || CONFIG.PLACEHOLDER_IMAGE;
+    const ano = anime.year || anime.aired?.prop?.from?.year || '----';
+    
     return `
         <div class="modal-actions-row">
-            <button onclick="concluirAnimeRapido(${malId})" class="btn-modal-action btn-modal-concluir" title="Marcar como Concluído">
-                ✅ Marcar Concluído
-            </button>
-            <button onclick="removerDoCatalogo(${malId})" class="btn-modal-action btn-modal-excluir" title="Remover do Catálogo">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <button 
+                onclick="adicionarRapido(${anime.mal_id}, '${tituloEncoded}', '${poster}', ${anime.episodes || 0}, '${anime.type}', '${ano}'); fecharModal();"
+                class="btn-modal-action btn-destaque-modal" 
+                title="Adicionar a Quero Ver"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
+                Adicionar
             </button>
         </div>`;
 }
 
 function renderizarAbaMusicas(theme) {
     if (!theme || (!theme.openings?.length && !theme.endings?.length)) {
-        return '<div class="trailer-indisponivel"><p>🎵 Nenhuma informação musical encontrada.</p></div>';
+        return '<div class="conteudo-vazio"><p>🎵 Nenhuma informação musical encontrada.</p></div>';
     }
 
     const criarLista = (lista, titulo) => {
@@ -871,6 +909,49 @@ function renderizarAbaMusicas(theme) {
     `;
 }
 
+function renderizarAbaRelacionados(relations) {
+    if (!relations || relations.length === 0) {
+        return '<div class="conteudo-vazio"><p>🔗 Sem animes relacionados.</p></div>';
+    }
+
+    let html = '<div class="container-relacionados">';
+
+    relations.forEach(grupo => {
+        const nomeRelacao = MAPA_RELACAO[grupo.relation] || grupo.relation;
+        
+        const itensHTML = grupo.entry.map(item => {
+            const isAnime = item.type === 'anime';
+            
+            if (isAnime) {
+                return `
+                    <div class="item-relacionado link-anime" onclick="abrirModal(${item.mal_id})" title="Ver detalhes deste anime">
+                        <span class="tag-midia">ANIME</span>
+                        <span>${item.name}</span>
+                    </div>
+                `;
+            } else {
+                return `
+                    <a href="${item.url}" target="_blank" class="item-relacionado item-externo">
+                        <span class="tag-midia">${item.type.toUpperCase()}</span>
+                        <span>${item.name}</span>
+                        <svg style="width:12px; height:12px; margin-left:auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </a>
+                `;
+            }
+        }).join('');
+
+        html += `
+            <div class="grupo-relacionado">
+                <div class="tipo-relacao">${nomeRelacao}</div>
+                <div class="lista-relacoes">${itensHTML}</div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    return html;
+}
+
 function renderizarConteudoModal(anime, sinopse, links, isSaved) {
     // 1. Processamento
     const generos = traduzirListaGeneros(anime.genres);
@@ -901,34 +982,33 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
         : null;
     const trailerHTML = trailerUrl 
         ? `<div id="trailer" class="tab-content oculto"><div class="modal-trailer-container"><iframe src="${trailerUrl}" frameborder="0" allowfullscreen></iframe></div></div>`
-        : `<div id="trailer" class="tab-content oculto"><div class="trailer-indisponivel"><p>🎬 Trailer não disponível</p></div></div>`;
+        : `<div id="trailer" class="tab-content oculto"><div class="conteudo-vazio"><p>🎬 Trailer não disponível</p></div></div>`;
 
     // 6. Músicas
     const musicasHTML = renderizarAbaMusicas(anime.theme);
+    const relacionadosHTML = renderizarAbaRelacionados(anime.relations);
 
-    const acoesHTML = gerarBotoesAcaoModal(anime.mal_id, isSaved);
+    const acoesHTML = gerarBotoesAcaoModal(anime, isSaved);
     const streamingHTML = renderizarAbaStreaming(links);
 
-    // 7. Montagem final
+// 7. Montagem
     return `
         <h2 id="modal-titulo">${anime.title_english || anime.title}</h2>
         
         <div class="modal-poster-detalhes">
             <img id="modal-poster" src="${anime.images.jpg.large_image_url}" alt="Poster">
-            
             <div id="modal-detalhes-rapidos">
                 <div class="flex-grow">
-                    <p><strong>Tipo:</strong> ${tipo}</p>
-                    <p><strong>Episódios:</strong> ${anime.episodes || 'N/A'}</p>
-                    <p><strong>Status:</strong> ${status}</p>
-                    <p><strong>Exibição:</strong> ${periodoExibicao}</p>
-                    <p><strong>Temporada:</strong> ${temporadaFormatada}</p>
-                    <p><strong>Classificação:</strong> ${rating}</p>
-                    <p><strong>Gêneros:</strong> ${generos}</p>
-                    
-                    <p><strong>Estúdio:</strong> ${estudios}</p>
-                    <p><strong>Produtores:</strong> ${produtores}</p>
-                    <p><strong>Licenciado por:</strong> ${licenciadores}</p>
+                     <p><strong>Tipo:</strong> ${tipo}</p>
+                     <p><strong>Episódios:</strong> ${anime.episodes || 'N/A'}</p>
+                     <p><strong>Status:</strong> ${status}</p>
+                     <p><strong>Exibição:</strong> ${periodoExibicao}</p>
+                     <p><strong>Temporada:</strong> ${temporadaFormatada}</p>
+                     <p><strong>Classificação:</strong> ${rating}</p>
+                     <p><strong>Gêneros:</strong> ${generos}</p>
+                     <p><strong>Estúdio:</strong> ${estudios}</p>
+                     <p><strong>Produtores:</strong> ${produtores}</p>
+                     <p><strong>Licenciado por:</strong> ${licenciadores}</p>
                 </div>
                 ${acoesHTML}
             </div>
@@ -938,6 +1018,7 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
             <button class="tab-button ativo" onclick="mudarAba(event, 'sinopse')">📖 Sinopse</button>
             <button class="tab-button" onclick="mudarAba(event, 'trailer')">🎥 Trailer</button>
             <button class="tab-button" onclick="mudarAba(event, 'musicas')">🎵 Músicas</button>
+            <button class="tab-button" onclick="mudarAba(event, 'relacionados')">🔗 Relacionados</button>
             <button class="tab-button" onclick="mudarAba(event, 'streaming')">📺 Onde Assistir</button>
         </div>
 
@@ -950,6 +1031,10 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
             
             <div id="musicas" class="tab-content oculto">
                 ${musicasHTML}
+            </div>
+
+            <div id="relacionados" class="tab-content oculto">
+                ${relacionadosHTML}
             </div>
 
             <div id="streaming" class="tab-content oculto">
@@ -1087,27 +1172,27 @@ function toggleFavorite(malId) {
         
         if (isFavorite && !badge) {
             card.insertAdjacentHTML('afterbegin', '<div class="favorite-badge" title="Favorito">⭐</div>');
-            
             const novoBadge = card.querySelector('.favorite-badge');
-            
             if (novoBadge) {
                 novoBadge.classList.add('animar-entrada');
             }
         
         } else if (!isFavorite && badge) {
-            badge.style.animation = 'badgeDisappear 0.3s ease-out forwards';
-            setTimeout(() => badge.remove(), 300); 
+            badge.classList.remove('animar-entrada');
+            badge.classList.add('badge-saindo');
+            
+            setTimeout(() => {
+                if (badge.parentNode) badge.remove();
+            }, 300);
         }
 
         const deveSair = DOM.filtros.status?.value === 'favoritos' && !isFavorite;
         if (deveSair) {
-            card.style.transition = 'opacity 0.3s, transform 0.3s';
-            card.style.opacity = '0';
-            card.style.transform = 'scale(0.9)';
+            card.classList.add('card-animacao-saida');
 
             setTimeout(() => {
                 card.classList.add('oculto');
-                card.style.cssText = '';
+                card.classList.remove('card-animacao-saida');
             }, 300);
         }
 

@@ -439,6 +439,11 @@ body.dark-mode #ordenacao-catalogo {
     animation: badgeAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
+.badge-saindo {
+    animation: badgeDisappear 0.3s ease-out forwards;
+    pointer-events: none;
+}
+
 .card-info {
     padding: 15px;
     display: flex;
@@ -903,12 +908,55 @@ body.dark-mode .barra-progresso-fundo {
     height: 18px;
 }
 
+.btn-destaque-modal {
+    background: var(--cor-primaria) !important;
+    color: white !important;
+    padding: 6px 16px !important;
+    height: 40px !important; 
+    width: fit-content !important;
+    flex: none !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-right: auto;
+    text-shadow: var(--sombra-texto-contorno) !important;
+    font-weight: 600 !important;
+    font-size: 0.9em !important;
+    border-radius: 6px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.btn-destaque-modal svg {
+    width: 18px !important;
+    height: 18px !important;
+    stroke-width: 3 !important;
+    filter: drop-shadow(1px 0px 0px #000) 
+            drop-shadow(-1px 0px 0px #000) 
+            drop-shadow(0px 1px 0px #000) 
+            drop-shadow(0px -1px 0px #000) !important;
+    display: block;
+}
+
+.btn-destaque-modal:active {
+    transform: scale(0.96);
+    opacity: 0.9;
+}
+
 .modal-tabs {
     display: flex;
-    border-bottom: 2px solid #ddd;
-    gap: 0;
-    margin: 20px 0;
-    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--cor-borda);
+    padding-bottom: 2px;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.modal-tabs::-webkit-scrollbar {
+    display: none; 
 }
 
 body.dark-mode .modal-tabs {
@@ -925,6 +973,7 @@ body.dark-mode .modal-tabs {
     border-bottom: 3px solid transparent;
     transition: all 0.3s ease;
     font-weight: 500;
+    flex-shrink: 0;
 }
 
 body.dark-mode .tab-button {
@@ -972,21 +1021,22 @@ body.dark-mode .tab-button.ativo {
     height: 100%;
 }
 
-.trailer-indisponivel {
+.conteudo-vazio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 40px 20px;
     text-align: center;
-    background-color: #f5f5f5;
-    border-radius: 8px;
-    color: #000;
+    background-color: rgba(128, 128, 128, 0.1); 
+    border-radius: var(--raio-borda);
+    border: 2px dashed var(--cor-borda);
+    
+    color: var(--cor-texto-secundario);
     font-weight: bold;
+    width: 100%;
 }
 
-body.dark-mode .trailer-indisponivel {
-    background-color: #333;
-    color: #e0e0e0;
-}
-
-.trailer-indisponivel p {
+.conteudo-vazio p {
     margin: 0;
     font-size: 1.1em;
 }
@@ -1756,6 +1806,13 @@ body.dark-mode .streaming-link {
     body.dark-mode .streaming-link:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     }
+
+    .item-relacionado.link-anime:hover {
+        background-color: var(--cor-primaria);
+        color: white;
+        border-color: var(--cor-primaria);
+        transform: translateX(5px);
+    }
     
     .streaming-link.oficial:hover {
         transform: translateY(-2px) scale(1.02);
@@ -1789,13 +1846,11 @@ body.dark-mode .streaming-link {
    CLASSES UTILITÁRIAS (Refatoração do JS)
    ========================================================================== */
 
-/* --- Ícones SVG --- */
 .icone-pequeno {
     width: 18px;
     height: 18px;
 }
 
-/* --- Layouts Flexbox Genéricos --- */
 .flex-coluna {
     display: flex;
     flex-direction: column;
@@ -1813,7 +1868,6 @@ body.dark-mode .streaming-link {
     width: 100%;
 }
 
-/* --- Mensagens de Estado (Vazio/Erro) --- */
 .mensagem-centro {
     width: 100%;
     text-align: center;
@@ -1826,7 +1880,6 @@ body.dark-mode .streaming-link {
     padding: 40px;
 }
 
-/* --- Detalhes do Card (Adicionado em...) --- */
 .card-meta-label {
     font-size: 0.65em;
     opacity: 0.8;
@@ -1841,7 +1894,6 @@ body.dark-mode .streaming-link {
     margin-right: auto;
 }
 
-/* --- Modal e Loading --- */
 .modal-loading-container {
     text-align: center;
     padding: 50px 0;
@@ -1857,7 +1909,6 @@ body.dark-mode .streaming-link {
     padding: 20px;
 }
 
-/* --- Streaming --- */
 .streaming-nota-texto {
     font-size: 0.85em;
     color: var(--cor-primaria);
@@ -1868,9 +1919,25 @@ body.dark-mode .streaming-link {
     border-left-style: solid;
 }
 
+.card-animacao-saida {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+}
+
+.card-meta-wrapper {
+    margin: 10px 0 15px 0;
+}
+
+.card-anime:not(.oculto) {
+    display: flex;
+}
+
 /* ==========================================================================
    ABA DE MÚSICAS
    ========================================================================== */
+
 .container-musicas {
     display: flex;
     flex-direction: column;
@@ -1923,4 +1990,76 @@ body.dark-mode .streaming-link {
     flex-shrink: 0;
     fill: currentColor;
     opacity: 0.8;
+}
+
+/* ==========================================================================
+   ABA DE RELACIONADOS
+   ========================================================================== */
+
+.container-relacionados {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px 0;
+}
+
+.grupo-relacionado {
+    background-color: var(--cor-card-fundo);
+    border-radius: var(--raio-borda);
+    padding: 12px;
+    border-left: 4px solid var(--cor-primaria);
+}
+
+.tipo-relacao {
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--cor-texto);
+    opacity: 0.7;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.lista-relacoes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.item-relacionado {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background-color: rgba(255,255,255, 0.05);
+    border-radius: 4px;
+    font-size: 0.9em;
+    text-decoration: none;
+    color: var(--cor-texto);
+    transition: all 0.2s;
+}
+
+.item-relacionado.item-externo {
+    opacity: 0.7;
+}
+
+.item-relacionado.link-anime {
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.item-relacionado.link-anime:active {
+    background-color: var(--cor-primaria);
+    color: white;
+    transform: scale(0.98);
+    transition: 0.1s;
+}
+
+.tag-midia {
+    font-size: 0.7em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background-color: rgba(0,0,0,0.3);
+    color: #fff;
+    flex-shrink: 0;
 }
