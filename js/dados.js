@@ -1,5 +1,5 @@
 // ========================================================
-// Responsável por: Constantes, Configurações e Mapas
+// CONSTANTES E MAPAS DE TRADUÇÃO
 // ========================================================
 
 const CONFIG = {
@@ -69,18 +69,20 @@ const MAPA_RATING = {
 };
 
 const MAPA_RELACAO = {
-        "Sequel": "Continuação",
-        "Prequel": "Antecessor",
-        "Alternative Setting": "Universo Alternativo",
-        "Alternative Version": "Versão Alternativa",
-        "Side Story": "História Paralela",
-        "Parent Story": "História Original",
-        "Summary": "Resumo",
-        "Adaptation": "Baseado em (Adaptação)",
-        "Character": "Sobre Personagem",
-        "Other": "Outros",
-        "Spin-off": "Derivado (Spin-off)"
-    };
+    "Sequel": "Continuação",
+    "Prequel": "Anterior (Prequel)",
+    "Alternative Setting": "Universo Alternativo",
+    "Alternative Version": "Versão Alternativa",
+    "Side Story": "História Paralela",
+    "Parent Story": "História Original",
+    "Summary": "Resumo",
+    "Full Story": "História Completa",
+    "Compilation": "Compilação",
+    "Adaptation": "Baseado em (Adaptação)",
+    "Character": "Sobre Personagem",
+    "Other": "Outros",
+    "Spin-off": "Derivado (Spin-off)"
+};
 
 const PLATAFORMAS_STREAMING = {
     crunchyroll: {

@@ -2,7 +2,7 @@
 // SERVICE WORKER
 // ========================================================
 
-const CACHE_NAME = 'anime-catalog-v2.1';
+const CACHE_NAME = 'anime-catalog-v2.2';
 const URLS_TO_CACHE = [
   './',
   './index.html',
@@ -13,8 +13,8 @@ const URLS_TO_CACHE = [
   './js/script.js',
   './css/styles.css',
   './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  './png/icon-192.png',
+  './png/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {

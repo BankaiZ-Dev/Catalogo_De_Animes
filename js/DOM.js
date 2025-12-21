@@ -1,5 +1,5 @@
 // ========================================================
-// DOM.JS - REFERÊNCIAS CENTRALIZADAS DO DOM
+// REFERÊNCIAS CENTRALIZADAS DO DOM
 // ========================================================
 
 const DOM = {
@@ -16,8 +16,8 @@ const DOM = {
     // ========================================================
     busca: {
         campo: document.getElementById('campo-busca'),
-        botaoLimpar: document.getElementById('limpar-busca-btn'),
         botaoBuscar: document.getElementById('btn-buscar-lupa'),
+        form: document.querySelector('.busca-input-container'),
         resultados: document.getElementById('resultados-busca-api'),
         botaoVoltar: document.getElementById('btn-voltar-catalogo')
     },

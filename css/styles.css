@@ -202,7 +202,8 @@ body.dark-mode #dark-mode-icon-btn::before {
 
 #campo-busca {
     width: 100%;
-    padding: 0 85px 0 15px;
+    flex: 1;
+    padding: 10px 35px 10px 15px;
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
     background-color: var(--cor-card-fundo);
@@ -217,22 +218,26 @@ body.dark-mode #dark-mode-icon-btn::before {
     outline: none;
 }
 
-.limpar-busca-btn {
-    position: absolute;
-    right: 45px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    font-size: 1.5em;
-    color: var(--cor-texto-secundario);
+#campo-busca::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    height: 18px;
+    width: 18px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d32f2f' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='6' x2='6' y2='18'></line><line x1='6' y1='6' x2='18' y2='18'></line></svg>");
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.2s ease, filter 0.2s ease;
     cursor: pointer;
-    width: 30px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
+    margin-right: 8px;
+}
+
+body.dark-mode #campo-busca::-webkit-search-cancel-button {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='6' x2='6' y2='18'></line><line x1='6' y1='6' x2='18' y2='18'></line></svg>");
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-right: 10px;
 }
 
 .btn-buscar-lupa {
@@ -391,6 +396,7 @@ body.dark-mode #ordenacao-catalogo {
     position: relative;
     border-left: 5px solid var(--cor-atual, transparent);
     transition: transform 0.2s, border-left-color 0.5s ease;
+    animation: fadeInUp 0.6s ease-out;
 }
 
 .status-concluido {
@@ -407,9 +413,12 @@ body.dark-mode #ordenacao-catalogo {
 
 .card-poster {
     width: 170px;
-    height: 260px;
+    aspect-ratio: 170 / 260; 
+    height: auto;
     object-fit: cover;
     flex-shrink: 0;
+    background-color: var(--cor-borda); 
+    border-radius: var(--raio-borda) var(--raio-borda) 0 0;
 }
 
 .favorite-badge {
@@ -727,6 +736,9 @@ body.dark-mode .barra-progresso-fundo {
     width: 130px;
     height: 100%;
     object-fit: cover;
+    border-radius: var(--raio-borda) 0 0 var(--raio-borda);
+    border-bottom: none;
+    flex-shrink: 0;
 }
 
 .lista-cards.list-view .card-info {
@@ -1030,7 +1042,6 @@ body.dark-mode .tab-button.ativo {
     background-color: rgba(128, 128, 128, 0.1); 
     border-radius: var(--raio-borda);
     border: 2px dashed var(--cor-borda);
-    
     color: var(--cor-texto-secundario);
     font-weight: bold;
     width: 100%;
@@ -1470,6 +1481,17 @@ body.dark-mode .streaming-link {
     }
 }
 
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @keyframes fadeInBackdrop {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -1685,13 +1707,20 @@ body.dark-mode .streaming-link {
         transform: translateY(-1px);
     }
     
-    .limpar-busca-btn:hover {
-        color: #ff5252;
-    }
-    
     .btn-buscar-lupa:hover {
         color: var(--cor-primaria);
         background-color: rgba(0,0,0,0.05);
+    }
+
+    #campo-busca::-webkit-search-cancel-button:hover {
+        filter: saturate(2) brightness(1.2);
+        transform: scale(1.1);
+        cursor: pointer;
+    }
+
+    body.dark-mode #campo-busca::-webkit-search-cancel-button:hover {
+        filter: brightness(1.5) drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+        transform: scale(1.1);
     }
     
     #filtro-status:hover,
@@ -1819,6 +1848,12 @@ body.dark-mode .streaming-link {
         box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
     }
 
+    /* --- MÚSICAS --- */
+    .item-musica:hover {
+    background-color: var(--cor-primaria);
+    color: white;
+    }
+
     /* --- ESTATÍSTICAS --- */
     .stat-card:hover {
         transform: translateY(-3px);
@@ -1934,6 +1969,57 @@ body.dark-mode .streaming-link {
     display: flex;
 }
 
+/* --- ESTILOS DOS COLAPSÁVEIS (Músicas e Relacionados) --- */
+
+.grupo-colapsavel {
+    margin-bottom: 10px;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-borda);
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+body.dark-mode .grupo-colapsavel {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.grupo-colapsavel summary {
+    padding: 12px 15px;
+    cursor: pointer;
+    font-weight: bold;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s;
+    user-select: none;
+}
+
+.grupo-colapsavel summary:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .grupo-colapsavel summary:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.grupo-colapsavel summary::after {
+    content: '▶';
+    font-size: 0.8em;
+    transition: transform 0.3s;
+    opacity: 0.6;
+}
+
+.grupo-colapsavel[open] summary::after {
+    transform: rotate(90deg);
+}
+
+.grupo-colapsavel .conteudo-colapsavel {
+    padding: 10px;
+    border-top: 1px solid var(--cor-borda);
+    background-color: var(--cor-card-fundo);
+}
+
 /* ==========================================================================
    ABA DE MÚSICAS
    ========================================================================== */
@@ -1977,11 +2063,6 @@ body.dark-mode .streaming-link {
     border-radius: 5px;
     transition: background-color 0.2s;
     background-color: rgba(255,255,255, 0.03);
-}
-
-.item-musica:hover {
-    background-color: var(--cor-primaria);
-    color: white;
 }
 
 .icone-play {
@@ -2062,4 +2143,35 @@ body.dark-mode .streaming-link {
     background-color: rgba(0,0,0,0.3);
     color: #fff;
     flex-shrink: 0;
+}
+
+/* ==========================================================================
+   MODO OFFLINE
+   ========================================================================== */
+
+body.modo-offline .card-poster {
+    filter: grayscale(100%);
+    opacity: 0.8;
+    transition: filter 0.5s, opacity 0.5s;
+}
+
+body.modo-offline::before {
+    content: '📡 MODO OFFLINE';
+    display: block;
+    background-color: #ff9800;
+    color: #fff;
+    text-align: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    padding: 5px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+body.modo-offline {
+    padding-top: 25px; 
 }

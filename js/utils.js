@@ -1,5 +1,5 @@
 // ========================================================
-// UTILS.JS - Ferramentas e Componentes Visuais Genéricos
+// FUNÇÕES UTILITÁRIAS
 // ========================================================
 
 // ========================================================
@@ -23,7 +23,7 @@ function debounce(func, delay) {
 // ========================================================
 
 function handleImageError(imageElement) {
-    const placeholder = (typeof CONFIG !== 'undefined') ? CONFIG.PLACEHOLDER_IMAGE : 'img/placeholder.png';
+    const placeholder = (typeof CONFIG !== 'undefined') ? CONFIG.PLACEHOLDER_IMAGE : 'png/placeholder.png';
     imageElement.onerror = null;
     imageElement.src = placeholder;
 }
@@ -124,6 +124,12 @@ function formatarDataCompleta(dataIso) {
     if (!dataIso) return '???';
     const data = new Date(dataIso);
     return data.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function formatarDataSimples(dataIso) {
+    if (!dataIso) return '--/--';
+    const data = new Date(dataIso);
+    return data.toLocaleDateString('pt-BR');
 }
 
 function formatarListaSimples(arrayObjetos, limite = 3) {
