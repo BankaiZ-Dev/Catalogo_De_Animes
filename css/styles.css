@@ -463,11 +463,15 @@ body.dark-mode #ordenacao-catalogo {
 .card-titulo {
     font-size: 1.1em;
     font-weight: bold;
+    line-height: 1.3em;
+    height: 2.6em;
     margin-bottom: 10px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
 }
 
 .etiqueta-status {
@@ -485,21 +489,38 @@ body.dark-mode #ordenacao-catalogo {
 }
 
 .card-meta-info {
-    font-size: 0.75em;
-    color: #666;
+    font-size: 0.65em;
+    color: var(--cor-texto-principal);
     margin: 5px 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    text-align: center;
+    gap: 4px;
+    width: 100%;
 }
 
 body.dark-mode .card-meta-info {
-    color: #bbb;
+    color: #fff;
+}
+
+.card-meta-label {
+    font-size: 0.65em;
+    color: var(--cor-texto-principal);
+    justify-content: center;
+    text-align: center;
+}
+
+body.dark-mode .card-meta-label {
+    color: #fff;
 }
 
 .card-destaque-info {
     font-weight: bold;
     font-size: 0.95em;
+    justify-content: center;
+    text-align: center;
     color: #444;
     margin-top: 5px;
 }
@@ -510,10 +531,14 @@ body.dark-mode .card-destaque-info {
 
 .tag-tipo {
     background: #eee;
-    padding: 2px 6px;
+    padding: 2px 8px;
     border-radius: 4px;
     font-weight: bold;
     color: #333;
+    display: inline-table;
+    width: fit-content;
+    margin: 0 auto;
+    white-space: nowrap;
 }
 
 body.dark-mode .tag-tipo {
@@ -612,7 +637,7 @@ body.dark-mode .barra-progresso-fundo {
     border-top: 1px solid var(--cor-borda);
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
     gap: 10px;
 }
 
@@ -628,6 +653,13 @@ body.dark-mode .barra-progresso-fundo {
     cursor: pointer;
     color: var(--cor-texto-secundario);
     transition: all 0.2s;
+}
+
+.btn-base:active, 
+.btn-progresso:active,
+.btn-add-destaque:active {
+    transform: scale(0.94);
+    transition: transform 0.1s;
 }
 
 .btn-add-destaque {
@@ -678,52 +710,214 @@ body.dark-mode .barra-progresso-fundo {
    6. MODOS DE VISUALIZAÇÃO
    ========================================================================== */
 
+.card-overlay-wrapper {
+    display: contents;
+}
+
+.card-titulo-compacto {
+    display: none;
+}
+
+/* ==========================================================================
+   MODO COMPACTO
+   ========================================================================== */
+
 .lista-cards.compact-view {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     gap: 15px;
+    padding: 20px 0;
 }
 
 .lista-cards.compact-view .card-anime {
+    position: relative;
+    display: flex;
     flex-direction: column;
+    height: 320px;
+    background: var(--cor-card-fundo);
+    border-radius: var(--raio-borda);
+    border-left: 5px solid transparent; 
+    border-top: 1px solid rgba(0,0,0,0.05);
+    border-right: 1px solid rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding: 0;
+    overflow: hidden;
+    transition: transform 0.2s ease;
 }
+
+.lista-cards.compact-view .card-anime.status-concluido { border-left-color: var(--status-concluido); }
+.lista-cards.compact-view .card-anime.status-em-andamento { border-left-color: var(--status-andamento); }
+.lista-cards.compact-view .card-anime.status-quero-ver { border-left-color: var(--status-querover); }
 
 .lista-cards.compact-view .card-poster {
     width: 100%;
-    height: 200px;
+    height: 260px; 
     object-fit: cover;
+    margin: 0;
+    transition: opacity 0.3s;
 }
 
-.lista-cards.compact-view .card-titulo {
+.lista-cards.compact-view .card-titulo-compacto {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    line-height: 1.3em;
-    height: 2.6em;
-    margin-bottom: 5px;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+    line-height: 1.3em; 
+    max-height: 2.6em;
+    margin: auto 8px;
+    width: calc(100% - 16px);
+    font-weight: 600;
+    text-align: center;
+    color: var(--cor-texto-principal);
+    background: transparent;
 }
 
-.lista-cards.compact-view .progresso-texto-inline {
-    font-size: 0.8em;
-    letter-spacing: -0.5px;
+.lista-cards.compact-view .card-overlay-wrapper {
+    display: block; 
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 260px; 
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 10;
+}
+
+.lista-cards.compact-view .card-info {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    padding: 10px; 
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.9); 
+}
+
+.lista-cards.compact-view .card-info .card-titulo { display: none; }
+
+.lista-cards.compact-view .card-status-pessoal {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    gap: 5px;
+}
+
+.lista-cards.compact-view .etiqueta-status {
+    display: inline-block;
+    white-space: nowrap;
 }
 
 .lista-cards.compact-view .progresso-linha-topo {
+    margin-top: auto; 
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 4px;
+}
+
+.lista-cards.compact-view .progresso-texto-inline {
+    font-size: 0.75rem; 
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    opacity: 0.85;
+}
+
+.lista-cards.compact-view .controle-individual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 2px;
 }
 
-.lista-cards.compact-view .btn-progresso {
-    width: 22px;
-}
-
 .lista-cards.compact-view .input-progresso-base {
-    width: 35px;
-    font-size: 0.85em;
+    width: 38px !important;
+    height: 22px;
+    text-align: center;
+    font-size: 0.75rem;
+    padding: 0;
 }
 
-/* --- Modo Lista --- */
+.lista-cards.compact-view .btn-progresso {
+    width: 20px;
+    height: 20px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lista-cards.compact-view .barra-progresso-fundo {
+    width: 95%;
+    height: 5px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+    margin-top: 5px;
+    margin-bottom: auto; 
+}
+
+.lista-cards.compact-view .card-acoes-compactas {
+    width: 100%;
+    justify-content: space-between;
+    padding-bottom: 5px;
+    padding-right: 2px;
+}
+
+.lista-cards.compact-view .margem-direita-auto {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.1;
+    margin-right: 5px;
+}
+
+.lista-cards.compact-view .card-meta-label {
+    font-size: 0.6rem;
+}
+
+.lista-cards.compact-view .btn-base {
+    width: 32px;
+    height: 32px;
+    margin-left: 2px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lista-cards.compact-view .card-anime.active-mobile .card-overlay-wrapper,
+.lista-cards.compact-view .card-anime.active-mobile .badge-favorito {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.lista-cards.compact-view .card-anime.active-mobile {
+    transform: translateY(-3px);
+}
+
+.lista-cards.compact-view .card-overlay-wrapper,
+.lista-cards.compact-view .btn-favorito-container,
+.lista-cards.compact-view .badge-favorito {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+
+/* ==========================================================================
+   MODO LISTA
+   ========================================================================== */
+
 .lista-cards.list-view {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px
 }
 
 .lista-cards.list-view .card-anime {
@@ -733,7 +927,7 @@ body.dark-mode .barra-progresso-fundo {
 }
 
 .lista-cards.list-view .card-poster {
-    width: 130px;
+    width: 80px;
     height: 100%;
     object-fit: cover;
     border-radius: var(--raio-borda) 0 0 var(--raio-borda);
@@ -741,8 +935,39 @@ body.dark-mode .barra-progresso-fundo {
     flex-shrink: 0;
 }
 
+.lista-cards.list-view .card-titulo {
+    margin-top: 0;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: auto; 
+    text-align: center;
+    width: 100%;
+}
+
+.lista-cards.list-view .card-meta-info {
+    flex-direction: row;
+}
+
+.lista-cards.list-view .tag-tipo {
+    margin: 0;
+    white-space: nowrap;
+}
+
 .lista-cards.list-view .card-info {
-    padding-left: 20px;
+    flex: 1;
+    justify-content: space-between;
+    height: 100%;
+    min-width: 0;
+}
+
+.lista-cards.list-view .card-acoes-compactas {
+    margin-top: auto;
+    margin-bottom: 0;
+    padding-top: 10px;
+    width: 100%;
+    display: flex;
 }
 
 /* ==========================================================================
@@ -1572,11 +1797,52 @@ body.dark-mode .streaming-link {
     }
 }
 
-/* Tablets e Mobile */
-@media (max-width: 768px) {
+@media (max-width: 600px) {
+    .cabecalho-conteudo {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .cabecalho h1 {
+        font-size: 1.1em;
+        white-space: normal;
+        word-wrap: break-word;
+        line-height: 1.2;
+        flex: 1;
+        margin: 0;
+    }
+
+    .cabecalho-utilitarios {
+        flex-shrink: 0;
+        display: flex;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 600px) {
+    .barra-ferramentas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .busca-input-container {
+        flex: 1 1 100%;
+    }
+
+    .barra-ferramentas select {
+        flex: 1; 
+        min-width: 0;
+        font-size: 0.8em !important;
+        padding: 5px 2px;
+        height: 40px;
+    }
+
     .view-mode-toggle {
         width: 100%;
-        margin-bottom: 10px;
+        display: flex;
         margin-right: 0;
     }
     
@@ -1585,7 +1851,6 @@ body.dark-mode .streaming-link {
     }
 }
 
-/* Mobile */
 @media (max-width: 600px) {
     .btn-voltar-home {
         width: 100%;
@@ -1655,14 +1920,18 @@ body.dark-mode .streaming-link {
         flex: 1;
     }
 
-    #paginacao-container { gap: 5px; }
+    #paginacao-container { 
+        gap: 5px; 
+    }
     
     #btn-anterior, #btn-proxima {
         padding: 8px 12px;
         font-size: 0.9em;
     }
 
-    .paginacao-numeros { gap: 3px; }
+    .paginacao-numeros {
+        gap: 3px; 
+    }
     
     .btn-pagina-numero {
         padding: 5px 8px;
@@ -1676,9 +1945,205 @@ body.dark-mode .streaming-link {
         width: 40px;
         height: 40px;
     }
+    
+    /* --- MODO GRID --- */
+    .lista-cards:not(.compact-view) {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        padding: 10px !important;
+    }
+
+    .lista-cards:not(.compact-view) .card-anime {
+        display: flex !important;
+        flex-direction: row !important;
+        height: auto !important; 
+        min-height: 115px !important;
+        overflow: hidden;
+        border-left: 6px solid var(--cor-atual) !important;
+    }
+
+    .lista-cards:not(.compact-view) .card-poster {
+        width: 105px !important; 
+        min-width: 105px !important;
+        height: 100% !important;
+        align-self: stretch !important;
+        object-fit: cover !important;
+        flex-shrink: 0;
+    }
+
+    .lista-cards:not(.compact-view) .card-info {
+        flex: 1 !important;
+        min-width: 0 !important;
+        padding: 10px 12px !important;
+        display: flex !important;
+        justify-content: center !important;
+    }
+
+    .lista-cards:not(.compact-view) .card-titulo {
+        font-size: 0.95rem !important;
+        height: auto !important;
+        -webkit-line-clamp: 1 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        margin-bottom: 6px !important;
+    }
+
+    .lista-cards:not(.compact-view) .progresso-texto-inline {
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        white-space: nowrap !important;
+    }
+
+    .lista-cards:not(.compact-view) .input-progresso-base {
+        width: 42px !important;
+        height: 24px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .lista-cards:not(.compact-view) .card-meta-info {
+        display: flex !important;
+        gap: 5px !important;
+        margin-top: 4px !important;
+    }
+
+    .lista-cards:not(.compact-view) .card-meta-label {
+        font-size: 0.65rem !important;
+    }
+
+    .lista-cards:not(.compact-view) .card-acoes-compactas {
+        gap: 8px !important;
+        margin-top: 8px !important;
+    }
+
+    /*--- MODO COMPACTO ---*/
+    .lista-cards.compact-view {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        padding: 10px 4px !important;
+    }
+
+    .compact-view .card-acoes-compactas {
+        padding: 2px 0px 4px 4px !important;
+        gap: 0 !important;
+    }
+
+    .compact-view .margem-direita-auto {
+        margin-right: auto !important;
+        min-width: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 4px !important;
+    }
+
+    .compact-view .progresso-linha-topo {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 4px !important;
+    }
+
+    .compact-view .btn-base {
+        margin-left: 5px !important; 
+        margin-right: 0 !important;
+        width: 26px !important;
+        height: 26px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .compact-view .card-meta-label {
+        font-size: 0.55rem !important;
+        margin-bottom: -5px !important;
+    }
+
+    .compact-view .input-progresso-base {
+        width: 45px !important;
+        height: 24px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .compact-view .card-anime {
+        width: 100% !important;
+        border-right: none !important;
+        box-sizing: border-box !important;
+    }
+
+    /* --- MODO LISTA --- */
+    .lista-cards.list-view .card-anime {
+        display: flex !important;
+        flex-direction: row !important;
+        height: 135px !important;
+        min-height: 135px !important;
+    }
+
+    .lista-cards.list-view .card-info {
+        height: 135px !important;
+        padding: 5px 10px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+    }
+
+    .lista-cards.list-view .card-titulo {
+        font-size: 0.9rem !important;
+        line-height: 1.2 !important;
+        height: auto !important;
+        margin: 0 0 2px 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        text-align: center !important;
+        display: block !important;
+    }
+
+    .lista-cards.list-view .etiqueta-status {
+        display: inline-block !important;
+        align-self: center !important;
+        font-size: 0.5rem !important;
+        padding: 1px 6px !important;
+        margin: 2px 0 !important;
+    }
+
+    .lista-cards.list-view .card-meta-info {
+        font-size: 0.45rem !important;
+        justify-content: center !important;
+        margin: 0 !important;
+    }
+
+    .lista-cards.list-view .progresso-linha-topo {
+        margin-top: 4px !important; 
+        font-size: 0.55rem !important;
+        justify-content: center !important;
+    }
+
+    .lista-cards.list-view .barra-progresso-fundo {
+        height: 3px !important;
+        margin: 7px 0 6px 0 !important; 
+    }
+
+    .lista-cards.list-view .card-acoes-compactas {
+        margin-top: auto !important; 
+        padding: 4px 0 0 0 !important;
+        border-top: 1px solid var(--cor-borda) !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    .lista-cards.list-view .card-acoes-compactas .card-meta-label,
+    .lista-cards.list-view .card-acoes-compactas .card-meta-valor {
+        font-size: 0.4rem !important;
+    }
+
+    .lista-cards.list-view .btn-base,
+    .lista-cards.list-view .btn-add-destaque {
+        width: 20px !important;
+        height: 20px !important;
+        font-size: 0.65rem !important;
+    }
 }
 
-/* Tablets médios */
 @media (min-width: 601px) and (max-width: 900px) {
     .streaming-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -1686,8 +2151,7 @@ body.dark-mode .streaming-link {
 }
 
 /* ==========================================================================
-   13. INTERAÇÕES DE MOUSE (HOVER) - SÓ PARA QUEM TEM MOUSE
-   (Evita o problema de "Sticky Hover" no celular em TODO o site)
+   13. INTERAÇÕES DE MOUSE/TOUCH (HOVER)
    ========================================================================== */
 
 @media (hover: hover) {
@@ -1785,6 +2249,16 @@ body.dark-mode .streaming-link {
         box-shadow: 0 6px 15px rgba(33, 150, 243, 0.6);
     }
 
+    .lista-cards.compact-view .card-anime:hover {
+        transform: translateY(-3px);
+    }
+
+    .lista-cards.compact-view .card-anime:hover .card-overlay-wrapper,
+    .lista-cards.compact-view .card-anime:hover .badge-favorito {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
     /* --- BOTÃO FAVORITO --- */
     .btn-favorite:hover {
         background-color: #FFD700;
@@ -1854,6 +2328,14 @@ body.dark-mode .streaming-link {
     color: white;
     }
 
+    .grupo-colapsavel summary:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    body.dark-mode .grupo-colapsavel summary:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
     /* --- ESTATÍSTICAS --- */
     .stat-card:hover {
         transform: translateY(-3px);
@@ -1915,14 +2397,11 @@ body.dark-mode .streaming-link {
     padding: 40px;
 }
 
-.card-meta-label {
-    font-size: 0.65em;
-    opacity: 0.8;
-}
-
 .card-meta-valor {
-    margin: 0;
+    font-size: 0.65rem;
     font-weight: bold;
+    text-align: center;
+    color: var(--cor-texto-principal);
 }
 
 .margem-direita-auto {
@@ -1969,6 +2448,16 @@ body.dark-mode .streaming-link {
     display: flex;
 }
 
+.lista-cards .card-anime.oculto {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+}
+
 /* --- ESTILOS DOS COLAPSÁVEIS (Músicas e Relacionados) --- */
 
 .grupo-colapsavel {
@@ -1993,14 +2482,6 @@ body.dark-mode .grupo-colapsavel {
     align-items: center;
     transition: background 0.3s;
     user-select: none;
-}
-
-.grupo-colapsavel summary:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-body.dark-mode .grupo-colapsavel summary:hover {
-    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .grupo-colapsavel summary::after {
@@ -2148,12 +2629,6 @@ body.dark-mode .grupo-colapsavel summary:hover {
 /* ==========================================================================
    MODO OFFLINE
    ========================================================================== */
-
-body.modo-offline .card-poster {
-    filter: grayscale(100%);
-    opacity: 0.8;
-    transition: filter 0.5s, opacity 0.5s;
-}
 
 body.modo-offline::before {
     content: '📡 MODO OFFLINE';

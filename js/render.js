@@ -3,7 +3,6 @@
 // ========================================================
 
 // --- SUB-COMPONENTES DE CARDS ---
-
 function renderizarBadgeFavorito(dados) {
     if (!dados.isSaved || !dados.savedData.favorite) return '';
     return `<div class="favorite-badge" title="Favorito">⭐</div>`;
@@ -65,7 +64,7 @@ function renderizarAcoesSalvo(dados) {
         <div class="card-acoes-compactas">
             <div class="flex-coluna margem-direita-auto">
                 <span class="card-meta-label">Adicionado em:</span>
-                <span class="card-meta-valor card-meta-info">${dataExibicao}</span>
+                <span class="card-meta-valor">${dataExibicao}</span>
             </div>
             <button onclick="toggleFavorite(${dados.malId})" class="btn-base btn-favorite ${classeAtiva}" title="Favorito">⭐</button>
             ${renderizarBotaoDetalhes(dados.malId)}
@@ -96,7 +95,6 @@ function renderizarBotaoDetalhes(malId) {
 }
 
 // --- ORQUESTRADORES DE CONTEÚDO (MOLDE DOS CARDS) ---
-
 function renderizarConteudoSalvo(dados) {
     return `
         ${renderizarEtiquetaStatus(dados)}
@@ -116,7 +114,6 @@ function renderizarConteudoBusca(dados) {
 }
 
 // --- FUNÇÃO PRINCIPAL: CARD ANIME ---
-
 function renderizarCardAnime(animeAPI, isSaved = false, savedData = {}, returnElement = false) {
     const dados = prepararDadosCard(animeAPI, isSaved, savedData);
     
@@ -128,19 +125,51 @@ function renderizarCardAnime(animeAPI, isSaved = false, savedData = {}, returnEl
     cardElement.innerHTML = `
         ${renderizarBadgeFavorito(dados)}
         ${renderizarPoster(dados)}
-        <div class="card-info flex-coluna">
-            <h2 class="card-titulo">${dados.titulo}</h2>
-            <div class="card-status-pessoal flex-coluna flex-grow">
-                ${dados.isSaved ? renderizarConteudoSalvo(dados) : renderizarConteudoBusca(dados)}
+        
+        <h2 class="card-titulo-compacto">${dados.titulo}</h2>
+        
+        <div class="card-overlay-wrapper">
+            <div class="card-info flex-coluna">
+                <h2 class="card-titulo">${dados.titulo}</h2>
+                
+                <div class="card-status-pessoal flex-coluna flex-grow">
+                    ${dados.isSaved ? renderizarConteudoSalvo(dados) : renderizarConteudoBusca(dados)}
+                </div>
             </div>
         </div>`;
-    
+
+    cardElement.addEventListener('click', function(e) {
+        if (window.innerWidth <= 768) {
+            
+            if (e.target.closest('button') || e.target.closest('input')) {
+                return; 
+            }
+
+            const isActive = this.classList.contains('active-mobile');
+
+            document.querySelectorAll('.card-anime').forEach(card => {
+                card.classList.remove('active-mobile');
+            });
+
+            if (!isActive) {
+                this.classList.add('active-mobile');
+            }
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.card-anime')) {
+            document.querySelectorAll('.card-anime.active-mobile').forEach(card => {
+                card.classList.remove('active-mobile');
+            });
+        }
+    });
+
     if (returnElement) return cardElement;
     DOM.cards.lista.appendChild(cardElement);
 }
 
 // --- COMPONENTES DO MODAL ---
-
 function renderizarAbaMusicas(theme) {
     if (!theme || (!theme.openings?.length && !theme.endings?.length)) {
         return '<div class="conteudo-vazio"><p>🎵 Nenhuma informação musical encontrada.</p></div>';
@@ -355,7 +384,6 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
 }
 
 // --- COMPONENTES DE PAGINAÇÃO ---
-
 function renderizarNumerosPaginacao(paginaAtual, totalPaginas) {
     const container = DOM.paginacao.numerosContainer;
     if (!container) return;

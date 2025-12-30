@@ -2,7 +2,7 @@
 // SERVICE WORKER
 // ========================================================
 
-const CACHE_NAME = 'anime-catalog-v2.2';
+const CACHE_NAME = 'anime-catalog-v2.3';
 const URLS_TO_CACHE = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const URLS_TO_CACHE = [
   './js/DOM.js',
   './js/storage.js',
   './js/utils.js',
+  './js/render.js',
   './js/script.js',
   './css/styles.css',
   './manifest.json',
