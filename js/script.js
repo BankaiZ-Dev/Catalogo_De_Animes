@@ -420,11 +420,59 @@ function filtrarAnimesSalvos() {
     });
 }  
 
+async function sincronizacaoInteligente() {
+    if (!navigator.onLine) return;
+
+    const filaPendentes = Object.values(catalogoPessoal).filter(anime => {
+        const faltaEpisodios = (!anime.maxEpisodes || anime.maxEpisodes === 0);
+        const faltaAno = (anime.year === '----' || !anime.year);
+        return faltaEpisodios || faltaAno;
+    });
+
+    if (filaPendentes.length === 0) return;
+
+    console.log(`[Sync] Sincronização em background iniciada para ${filaPendentes.length} itens.`);
+
+    const limiteProcessamento = filaPendentes.slice(0, 5);
+
+    for (const anime of limiteProcessamento) {
+        try {
+            await new Promise(r => setTimeout(r, 3000));
+
+            const resp = await fetch(`${CONFIG.JIKAN_API_URL}/${anime.mal_id}`);
+            if (!resp.ok) continue;
+
+            const json = await resp.json();
+            const dadosNovos = json.data;
+
+            let houveMudanca = false;
+
+            if (verificarAtualizacaoAno(anime.mal_id, dadosNovos.year || dadosNovos.aired?.prop?.from?.year)) {
+                houveMudanca = true;
+            }
+
+            if (verificarAtualizacaoEpisodios(anime.mal_id, dadosNovos.episodes)) {
+                houveMudanca = true;
+            }
+
+            if (houveMudanca) {
+                salvarCatalogo();
+                atualizarInterfaceCard(anime.mal_id);
+            }
+
+        } catch (erro) {
+            console.error(`[Sync] Falha ao atualizar ${anime.title}:`, erro);
+        }
+    }
+}
+
 // ========================================================
 // 4. BUSCA E API
 // ========================================================
 
 async function buscarAnimes(query, page = 1) {
+    if (searchController) searchController.abort();
+
     showGlobalLoading(`Buscando página ${page}...`);
     DOM.cards.lista.innerHTML = '';
     termoBuscaAtual = query;
@@ -514,6 +562,12 @@ async function buscarAnimesEmTempoReal() {
         
         if (!response.ok) return;
         const data = await response.json();
+
+        const carregando = !DOM.loading.overlay.classList.contains('oculto');
+        if (carregando || DOM.busca.campo.value.trim() === '') {
+            DOM.busca.resultados.classList.add('oculto');
+            return;
+        }
         
         if (data.data && data.data.length > 0) {
             let html = '';
@@ -548,14 +602,6 @@ function selecionarSugestao(malId, titulo) {
     DOM.busca.resultados.innerHTML = '';
     DOM.busca.campo.value = titulo;
     buscarAnimes(titulo);
-}
-
-function limparTextoBusca() {
-    if (DOM.busca.campo) {
-        DOM.busca.campo.value = '';
-        DOM.busca.campo.focus();
-        DOM.busca.resultados?.classList.add('oculto');
-    }
 }
 
 function resetarInterfaceDeBusca() {
@@ -675,25 +721,6 @@ function gerarBotoesAcaoModal(anime, isSaved) {
         </div>`;
 }
 
-function verificarAtualizacaoAno(malId, anoApi) {
-    if (catalogoPessoal.hasOwnProperty(malId)) {
-        const salvo = catalogoPessoal[malId];
-        if ((!salvo.year || salvo.year === '----') && anoApi && anoApi !== 'N/A') {
-            salvo.year = anoApi;
-            salvarCatalogo();
-            const card = getCardAnime(malId);
-            if (card) {
-                const spans = card.querySelectorAll('.card-meta-info span');
-                spans.forEach(span => {
-                    if (span.textContent.includes('Lançado') || span.textContent.includes('----')) {
-                        span.textContent = `Lançado em: ${anoApi}`;
-                    }
-                });
-            }
-        }
-    }
-}
-
 async function abrirModal(malId) {
     const modalInfo = DOM.modais.animeInfo;
     const animeModal = DOM.modais.anime;
@@ -742,7 +769,7 @@ async function abrirModal(malId) {
                     <p style="font-size: 0.9em">Aguarde 5 segundos e tente novamente.</p>
                 </div>`;
         } else {
-            if (modalInfo) modalInfo.innerHTML = '<p class="mensagem-erro-modal">Não foi possível carregar detalhes.</p>';
+            if (modalInfo) modalInfo.innerHTML = '<p class="mensagem-erro-modal">Não foi possível carregar os detalhes.</p>';
         }
     }
 }
@@ -1054,8 +1081,11 @@ function setupListeners() {
         if (DOM.busca.campo.value === '') {
             DOM.busca.resultados.classList.add('oculto');
             DOM.busca.resultados.innerHTML = '';
-            termoBuscaAtual = '';
-            if (DOM.busca.botaoVoltar) DOM.busca.botaoVoltar.classList.add('oculto');
+            if (termoBuscaAtual === '') {
+            DOM.busca.botaoVoltar?.classList.add('oculto');
+            } else {
+                DOM.busca.botaoVoltar?.classList.remove('oculto');
+            }
         }
     });
 
@@ -1170,6 +1200,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('✅ App atualizado para a versão mais recente!', 'success');
         localStorage.removeItem('app_updated');
     }
+
+    setTimeout(sincronizacaoInteligente, 8000);
     
     console.log('✅ Aplicação pronta!');
 });

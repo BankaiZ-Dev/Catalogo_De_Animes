@@ -54,7 +54,7 @@ function carregarModoVisualizacao() {
 }
 
 // ========================================================
-// BACKUP - EXPORTAR
+// BACKUP - IMPORTAR/EXPORTAR
 // ========================================================
 
 function exportarBackup() {
@@ -109,4 +109,28 @@ function importarBackup(event) {
     };
     leitor.readAsText(arquivo);
     event.target.value = '';
+}
+
+// ========================================================
+// FUNÇÕES DE SINCRONIZAÇÃO DE DADOS
+// ========================================================
+
+function verificarAtualizacaoAno(malId, anoApi) {
+    const anime = catalogoPessoal[malId];
+    if (anime && (anime.year === '----' || !anime.year) && anoApi) {
+        anime.year = anoApi;
+        console.log(`[Sync] Ano atualizado: ${anime.title} -> ${anoApi}`);
+        return true;
+    }
+    return false;
+}
+
+function verificarAtualizacaoEpisodios(malId, totalEpsApi) {
+    const anime = catalogoPessoal[malId];
+    if (anime && (!anime.maxEpisodes || anime.maxEpisodes === 0) && totalEpsApi > 0) {
+        anime.maxEpisodes = totalEpsApi;
+        console.log(`[Sync] Total de Eps atualizado: ${anime.title} -> ${totalEpsApi}`);
+        return true;
+    }
+    return false;
 }

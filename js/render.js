@@ -293,30 +293,25 @@ function renderizarAbaStreaming(links) {
 }
 
 function renderizarConteudoModal(anime, sinopse, links, isSaved) {
-    // 1. Processamento
     const generos = traduzirListaGeneros(anime.genres);
     const tipo = MAPA_TIPOS_MIDIA[anime.type] || anime.type || 'N/A';
     
-    // 2. Traduções
     const status = MAPA_STATUS[anime.status] || anime.status;
     const rating = MAPA_RATING[anime.rating] || anime.rating || 'N/A';
     const season = anime.season ? MAPA_SEASONS[anime.season] : '';
     const seasonYear = anime.year || '';
     const temporadaFormatada = (season && seasonYear) ? `${season} de ${seasonYear}` : 'N/A';
 
-    // 3. Datas
     const dataInicio = anime.aired?.from ? formatarDataCompleta(anime.aired.from) : '?';
     const dataFim = anime.aired?.to ? formatarDataCompleta(anime.aired.to) : '?';
     const periodoExibicao = (anime.status === 'Currently Airing') 
         ? `De ${dataInicio} (Em andamento)`
         : (dataInicio !== '?' && dataFim !== '?') ? `${dataInicio} até ${dataFim}` : dataInicio;
 
-    // 4. Indústria
     const estudios = formatarListaSimples(anime.studios, 2);
     const produtores = formatarListaSimples(anime.producers, 2);
     const licenciadores = formatarListaSimples(anime.licensors, 2);
 
-    // 5. Trailer
     const trailerUrl = anime.trailer?.embed_url 
         ? anime.trailer.embed_url.replace(/[?&]autoplay=1/gi, '') + '&rel=0'
         : null;
@@ -324,14 +319,12 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
         ? `<div id="trailer" class="tab-content oculto"><div class="modal-trailer-container"><iframe src="${trailerUrl}" frameborder="0" allowfullscreen></iframe></div></div>`
         : `<div id="trailer" class="tab-content oculto"><div class="conteudo-vazio"><p>🎬 Trailer não disponível</p></div></div>`;
 
-    // 6. Músicas
     const musicasHTML = renderizarAbaMusicas(anime.theme);
     const relacionadosHTML = renderizarAbaRelacionados(anime.relations);
 
     const acoesHTML = gerarBotoesAcaoModal(anime, isSaved);
     const streamingHTML = renderizarAbaStreaming(links);
 
-    // 7. Montagem
     return `
         <h2 id="modal-titulo">${anime.title_english || anime.title}</h2>
         
@@ -424,4 +417,26 @@ function renderizarNumerosPaginacao(paginaAtual, totalPaginas) {
     if (fim < totalPaginas - 1) container.appendChild(criarDots());
 
     if (totalPaginas > 1) container.appendChild(criarBotao(totalPaginas));
+}
+
+// --- ATUALIZAÇÃO EM TEMPO REAL DO CARD ---
+function atualizarInterfaceCard(malId) {
+    const anime = catalogoPessoal[malId];
+    const card = getCardAnime(malId);
+    
+    if (!card) return;
+
+    const anoEl = card.querySelector('.anime-ano'); 
+    if (anoEl) anoEl.textContent = anime.year;
+
+    const progressoEl = getTextoProgresso(malId);
+    if (progressoEl) {
+        progressoEl.textContent = `Ep ${anime.episode}${anime.maxEpisodes ? ' / ' + anime.maxEpisodes : ''}`;
+    }
+    
+    const barra = getBarraProgresso(malId);
+    if (barra && anime.maxEpisodes > 0) {
+        const porc = (anime.episode / anime.maxEpisodes) * 100;
+        barra.style.width = porc + '%';
+    }
 }
