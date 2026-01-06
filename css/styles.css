@@ -2472,6 +2472,13 @@ body.dark-mode .streaming-link {
     padding: 20px;
 }
 
+.badge-tempo-total {
+    font-size: 0.9em;
+    color: var(--cor-texto-secundario);
+    margin-left: 4px;
+    font-weight: normal;
+}
+
 .streaming-nota-texto {
     font-size: 0.85em;
     color: var(--cor-primaria);

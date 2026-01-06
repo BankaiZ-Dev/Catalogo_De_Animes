@@ -48,28 +48,35 @@ function adicionarRapido(malId, tituloEncoded, poster, episodes, type, year) {
     
     adicionarAoCatalogo(malId, titulo, poster, episodes, 'Quero Ver', type, year);
     
-    const card = document.querySelector(`.card-anime[data-mal-id="${malId}"]`);
-    
+    const card = getCardAnime(malId);
     if (card) {
         const savedData = catalogoPessoal[malId];
-        renderizarCardAnime({
+        const newCard = renderizarCardAnime({
             mal_id: malId,
             title: titulo,
             images: { jpg: { image_url: poster } },
             type: type,
             year: year
-        }, true, savedData, true).then(newCard => {
-            card.replaceWith(newCard);
-        });
-    } else {
+        }, true, savedData, true);
         
-        if (DOM.busca.campo) DOM.busca.campo.value = '';
-        termoBuscaAtual = '';
-        
-        DOM.busca.resultados?.classList.add('oculto');
-        DOM.busca.botaoVoltar?.classList.add('oculto');
-        
-        carregarAnimesSalvos();
+        card.replaceWith(newCard);
+    }
+
+    const modalAcoes = document.querySelector('.modal-actions-row');
+    const modalAberto = DOM.modais.anime.hasAttribute('open');
+
+    if (modalAberto && modalAcoes) {
+        const animeFake = {
+            mal_id: malId,
+            title: titulo,
+            title_english: titulo,
+            images: { jpg: { image_url: poster } },
+            episodes: episodes,
+            type: type,
+            year: year
+        };
+
+        modalAcoes.outerHTML = gerarBotoesAcaoModal(animeFake, true);
     }
 }
 
@@ -428,41 +435,25 @@ async function sincronizacaoInteligente() {
         const faltaAno = (anime.year === '----' || !anime.year);
         return faltaEpisodios || faltaAno;
     });
-
     if (filaPendentes.length === 0) return;
 
-    console.log(`[Sync] Sincronização em background iniciada para ${filaPendentes.length} itens.`);
-
-    const limiteProcessamento = filaPendentes.slice(0, 5);
-
-    for (const anime of limiteProcessamento) {
+    for (const anime of filaPendentes.slice(0, 5)) {
         try {
             await new Promise(r => setTimeout(r, 3000));
 
-            const resp = await fetch(`${CONFIG.JIKAN_API_URL}/${anime.mal_id}`);
-            if (!resp.ok) continue;
-
-            const json = await resp.json();
+            const json = await apiObterDadosSimples(anime.mal_id);
             const dadosNovos = json.data;
 
             let houveMudanca = false;
 
-            if (verificarAtualizacaoAno(anime.mal_id, dadosNovos.year || dadosNovos.aired?.prop?.from?.year)) {
-                houveMudanca = true;
-            }
-
-            if (verificarAtualizacaoEpisodios(anime.mal_id, dadosNovos.episodes)) {
-                houveMudanca = true;
-            }
+            if (verificarAtualizacaoAno(anime.mal_id, dadosNovos.year || dadosNovos.aired?.prop?.from?.year)) houveMudanca = true;
+            if (verificarAtualizacaoEpisodios(anime.mal_id, dadosNovos.episodes)) houveMudanca = true;
 
             if (houveMudanca) {
                 salvarCatalogo();
                 atualizarInterfaceCard(anime.mal_id);
             }
-
-        } catch (erro) {
-            console.error(`[Sync] Falha ao atualizar ${anime.title}:`, erro);
-        }
+        } catch (erro) { console.error(`[Sync] Falha ao atualizar ${anime.title}:`, erro); }
     }
 }
 
@@ -493,14 +484,7 @@ async function buscarAnimes(query, page = 1) {
     DOM.busca.botaoVoltar?.classList.remove('oculto');
 
     try {
-        const response = await fetch(`${CONFIG.JIKAN_API_URL}?q=${encodeURIComponent(query)}&limit=${CONFIG.ANIME_LIMIT_PER_PAGE}&page=${page}`);
-        
-        if (response.status === 429) {
-            throw new Error('RATE_LIMIT'); 
-        }
-
-        if (!response.ok) throw new Error(`Erro HTTP!`);
-        const data = await response.json();
+        const data = await apiBuscarAnimes(query, page);
 
         if (data.data && data.data.length > 0) {
             data.data.forEach(anime => renderizarCardAnime(anime));
@@ -556,12 +540,7 @@ async function buscarAnimesEmTempoReal() {
     searchController = new AbortController();
 
     try {
-        const response = await fetch(`${CONFIG.JIKAN_API_URL}?q=${encodeURIComponent(query)}&limit=7`, {
-            signal: searchController.signal
-        });
-        
-        if (!response.ok) return;
-        const data = await response.json();
+        const data = await apiBuscarSugestoes(query, searchController.signal);
 
         const carregando = !DOM.loading.overlay.classList.contains('oculto');
         if (carregando || DOM.busca.campo.value.trim() === '') {
@@ -625,40 +604,6 @@ function fecharModal() {
     }
 }
 
-async function obterLinksStreaming(animeData) {
-    try {
-        const tituloParaBusca = animeData.title_english || animeData.title;
-        const todosOsLinks = [];
-        
-        if (animeData.streaming && animeData.streaming.length > 0) {
-            animeData.streaming.forEach(stream => {
-                todosOsLinks.push({
-                    nome: stream.name,
-                    url: stream.url,
-                    tipo: 'oficial',
-                    icon: obterIconePlataforma(stream.name)
-                });
-            });
-        }
-        
-        Object.values(PLATAFORMAS_STREAMING).forEach(plataforma => {
-            const urlBusca = plataforma.baseUrl + encodeURIComponent(tituloParaBusca);
-            todosOsLinks.push({
-                nome: plataforma.nome,
-                url: urlBusca,
-                icon: plataforma.icon,
-                cor: plataforma.cor,
-                tipo: 'busca'
-            });
-        });
-        
-        return todosOsLinks;
-    } catch (error) {
-        console.error('Erro ao obter links de streaming:', error);
-        return [];
-    }
-}
-
 function mudarAba(event, nomeAba) {
     const modal = event.target.closest('dialog');
     
@@ -685,42 +630,6 @@ function mudarAba(event, nomeAba) {
     }
 }
 
-function gerarBotoesAcaoModal(anime, isSaved) {
-    if (isSaved) {
-        return `
-            <div class="modal-actions-row">
-                <button onclick="concluirAnimeRapido(${anime.mal_id})" class="btn-modal-action btn-modal-concluir" title="Marcar como Concluído">
-                    ✅ Concluído
-                </button>
-                <button onclick="removerDoCatalogo(${anime.mal_id})" class="btn-modal-action btn-modal-excluir" title="Remover do Catálogo">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                </button>
-            </div>`;
-    } 
-    
-    const tituloEncoded = encodeURIComponent(anime.title_english || anime.title).replace(/'/g, "%27");
-    const poster = anime.images?.jpg?.image_url || CONFIG.PLACEHOLDER_IMAGE;
-    const ano = anime.year || anime.aired?.prop?.from?.year || '----';
-    
-    return `
-        <div class="modal-actions-row">
-            <button 
-                onclick="adicionarRapido(${anime.mal_id}, '${tituloEncoded}', '${poster}', ${anime.episodes || 0}, '${anime.type}', '${ano}'); fecharModal();"
-                class="btn-modal-action btn-destaque-modal" 
-                title="Adicionar a Quero Ver"
-            >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Adicionar
-            </button>
-        </div>`;
-}
-
 async function abrirModal(malId) {
     const modalInfo = DOM.modais.animeInfo;
     const animeModal = DOM.modais.anime;
@@ -737,23 +646,13 @@ async function abrirModal(malId) {
     }
 
     try {
-        const response = await fetch(`${CONFIG.JIKAN_API_URL}/${malId}/full`);
-
-        if (response.status === 429) {
-            throw new Error('RATE_LIMIT');
-        }
-
-        if (!response.ok) throw new Error('Falha API');
-        const data = await response.json();
+        const data = await apiObterDetalhesFull(malId);
         const anime = data.data;
 
         const [sinopseTraduzida, linksStreaming] = await Promise.all([
-            traduzirSinopse(anime.synopsis),
+            apiTraduzirTexto(anime.synopsis),
             obterLinksStreaming(anime)
         ]);
-
-        const anoLancamento = anime.year || anime.aired?.prop?.from?.year || 'N/A';
-        verificarAtualizacaoAno(malId, anoLancamento);
 
         const isSaved = catalogoPessoal.hasOwnProperty(malId);
         

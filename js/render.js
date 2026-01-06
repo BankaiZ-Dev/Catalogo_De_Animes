@@ -2,16 +2,18 @@
 // COMPONENTES DE INTERFACE
 // ========================================================
 
-// --- SUB-COMPONENTES DE CARDS ---
+// --- BADGE DE FAVORITO ---
 function renderizarBadgeFavorito(dados) {
     if (!dados.isSaved || !dados.savedData.favorite) return '';
     return `<div class="favorite-badge" title="Favorito">⭐</div>`;
 }
 
+// --- POSTER DO CARD ---
 function renderizarPoster(dados) {
     return `<img src="${dados.poster}" alt="Poster" class="card-poster" loading="lazy" onerror="handleImageError(this)">`;
 }
 
+// --- DADOS DE STATUS ---
 function getStatusData(status) {
     switch (status) {
         case 'Concluído': return { class: 'status-concluido', label: 'Concluído ✅' };
@@ -20,12 +22,14 @@ function getStatusData(status) {
     }
 }
 
+// --- ETIQUETA DE STATUS ---
 function renderizarEtiquetaStatus(dados) {
     if (!dados.isSaved) return '';
     const statusInfo = getStatusData(dados.savedData.status);
     return `<span class="etiqueta-status ${statusInfo.class}">${statusInfo.label}</span>`;
 }
 
+// --- CONTROLE DE PROGRESSO ---
 function renderizarControleProgresso(dados) {
     const { savedData, malId } = dados;
     const episodesTotal = savedData.maxEpisodes ? ` / ${savedData.maxEpisodes}` : '';
@@ -48,6 +52,7 @@ function renderizarControleProgresso(dados) {
         </div>`;
 }
 
+// --- INFORMAÇÕES TAG/ANO ---
 function renderizarMetaInfo(dados) {
     return `
         <div class="card-meta-info">
@@ -56,6 +61,7 @@ function renderizarMetaInfo(dados) {
         </div>`;
 }
 
+// --- AÇÕES PARA ANIMES SALVOS ---
 function renderizarAcoesSalvo(dados) {
     const dataExibicao = formatarDataSimples(dados.savedData.dateAdded);
     const classeAtiva = dados.savedData.favorite ? 'active' : '';
@@ -71,6 +77,7 @@ function renderizarAcoesSalvo(dados) {
         </div>`;
 }
 
+// --- AÇÕES PARA RESULTADOS DE BUSCA ---
 function renderizarAcoesBusca(dados) {
     const tituloEncoded = encodeURIComponent(dados.titulo).replace(/'/g, "%27");
     return `
@@ -85,6 +92,7 @@ function renderizarAcoesBusca(dados) {
         </div>`;
 }
 
+// --- BOTÃO DETALHES ---
 function renderizarBotaoDetalhes(malId) {
     return `
         <button onclick="abrirModal(${malId})" class="btn-base btn-detalhes btn-icone-acao" title="Detalhes">
@@ -104,6 +112,7 @@ function renderizarConteudoSalvo(dados) {
     `;
 }
 
+// --- CONTEÚDO PARA RESULTADOS DE BUSCA ---
 function renderizarConteudoBusca(dados) {
     const textoEpisodios = dados.totalEpisodios ? `${dados.totalEpisodios} Episódios` : 'Episódios: N/A';
     return `
@@ -169,7 +178,7 @@ function renderizarCardAnime(animeAPI, isSaved = false, savedData = {}, returnEl
     DOM.cards.lista.appendChild(cardElement);
 }
 
-// --- COMPONENTES DO MODAL ---
+// --- ABA DE MÚSICAS ---
 function renderizarAbaMusicas(theme) {
     if (!theme || (!theme.openings?.length && !theme.endings?.length)) {
         return '<div class="conteudo-vazio"><p>🎵 Nenhuma informação musical encontrada.</p></div>';
@@ -203,6 +212,7 @@ function renderizarAbaMusicas(theme) {
         </div>`;
 }
 
+// --- ABA DE RELACIONADOS ---
 function renderizarAbaRelacionados(relations) {
     if (!relations || relations.length === 0) {
         return '<div class="conteudo-vazio"><p>🔗 Sem animes relacionados.</p></div>';
@@ -244,6 +254,7 @@ function renderizarAbaRelacionados(relations) {
     return html;
 }
 
+// --- ABA DE STREAMING ---
 function renderizarAbaStreaming(links) {
     const linksOficiais = links.filter(link => link.tipo === 'oficial');
     const linksBusca = links.filter(link => link.tipo === 'busca');
@@ -292,6 +303,7 @@ function renderizarAbaStreaming(links) {
     return html;
 }
 
+// --- ORQUESTRADOR DO CONTEÚDO DO MODAL ---
 function renderizarConteudoModal(anime, sinopse, links, isSaved) {
     const generos = traduzirListaGeneros(anime.genres);
     const tipo = MAPA_TIPOS_MIDIA[anime.type] || anime.type || 'N/A';
@@ -311,6 +323,38 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
     const estudios = formatarListaSimples(anime.studios, 2);
     const produtores = formatarListaSimples(anime.producers, 2);
     const licenciadores = formatarListaSimples(anime.licensors, 2);
+
+    let duracaoRaw = anime.duration || 'N/A';
+
+    let duracaoFormatada = duracaoRaw
+    .replace(/per ep/g, 'por ep')
+    .replace(/min/g, 'min')
+    .replace(/sec/g, 'seg')
+    .replace(/hr/g, 'h')
+    .replace(/(\d+)\s+(min|seg|h)/g, '$1$2');
+
+    let tempoTotalHTML = '';
+
+    if (anime.episodes > 1 && anime.duration) {
+        const valorNumerico = parseInt(anime.duration);
+        
+        if (!isNaN(valorNumerico)) {
+            if (anime.duration.toLowerCase().includes('min')) {
+                const totalMinutos = anime.episodes * valorNumerico;
+                const h = Math.floor(totalMinutos / 60);
+                const m = totalMinutos % 60;
+                const textoFinal = h > 0 ? `${h}h ${m}min` : `${totalMinutos}min`;
+                tempoTotalHTML = ` <span class="badge-tempo-total">(Total: ${textoFinal})</span>`;
+            } 
+            else if (anime.duration.toLowerCase().includes('sec')) {
+                const totalSegundos = anime.episodes * valorNumerico;
+                const m = Math.floor(totalSegundos / 60);
+                const s = totalSegundos % 60;
+                const textoFinal = m > 0 ? `${m}min ${s}seg` : `${totalSegundos}seg`;
+                tempoTotalHTML = ` <span class="badge-tempo-total">(Total: ${textoFinal})</span>`;
+            }
+        }
+    }
 
     const trailerUrl = anime.trailer?.embed_url 
         ? anime.trailer.embed_url.replace(/[?&]autoplay=1/gi, '') + '&rel=0'
@@ -332,13 +376,14 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
             <img id="modal-poster" src="${anime.images.jpg.large_image_url}" alt="Poster">
             <div id="modal-detalhes-rapidos">
                 <div class="flex-grow">
-                     <p><strong>Tipo:</strong> ${tipo}</p>
-                     <p><strong>Episódios:</strong> ${anime.episodes || 'N/A'}</p>
-                     <p><strong>Status:</strong> ${status}</p>
-                     <p><strong>Exibição:</strong> ${periodoExibicao}</p>
-                     <p><strong>Temporada:</strong> ${temporadaFormatada}</p>
-                     <p><strong>Classificação:</strong> ${rating}</p>
                      <p><strong>Gêneros:</strong> ${generos}</p>
+                     <p><strong>Tipo:</strong> ${tipo}</p>
+                     <p><strong>Status:</strong> ${status}</p>
+                     <p><strong>Episódios:</strong> ${anime.episodes || 'N/A'}</p>
+                     <p><strong>Duração:</strong> ${duracaoFormatada}${tempoTotalHTML}</p>
+                     <p><strong>Temporada:</strong> ${temporadaFormatada}</p>
+                     <p><strong>Exibição:</strong> ${periodoExibicao}</p>
+                     <p><strong>Classificação:</strong> ${rating}</p>
                      <p><strong>Estúdio:</strong> ${estudios}</p>
                      <p><strong>Produtores:</strong> ${produtores}</p>
                      <p><strong>Licenciado por:</strong> ${licenciadores}</p>
@@ -439,4 +484,74 @@ function atualizarInterfaceCard(malId) {
         const porc = (anime.episode / anime.maxEpisodes) * 100;
         barra.style.width = porc + '%';
     }
+}
+
+// --- OBTER LINKS DE STREAMING ---
+async function obterLinksStreaming(animeData) {
+    try {
+        const tituloParaBusca = animeData.title_english || animeData.title;
+        const todosOsLinks = [];
+        
+        if (animeData.streaming && animeData.streaming.length > 0) {
+            animeData.streaming.forEach(stream => {
+                todosOsLinks.push({
+                    nome: stream.name,
+                    url: stream.url,
+                    tipo: 'oficial',
+                    icon: obterIconePlataforma(stream.name)
+                });
+            });
+        }
+        
+        Object.values(PLATAFORMAS_STREAMING).forEach(plataforma => {
+            const urlBusca = plataforma.baseUrl + encodeURIComponent(tituloParaBusca);
+            todosOsLinks.push({
+                nome: plataforma.nome,
+                url: urlBusca,
+                icon: plataforma.icon,
+                cor: plataforma.cor,
+                tipo: 'busca'
+            });
+        });
+        
+        return todosOsLinks;
+    } catch (error) {
+        console.error('Erro ao obter links de streaming:', error);
+        return [];
+    }
+}
+
+// --- BOTÕES DE AÇÃO DO MODAL ---
+function gerarBotoesAcaoModal(anime, isSaved) {
+    if (isSaved) {
+        return `
+            <div class="modal-actions-row">
+                <button onclick="concluirAnimeRapido(${anime.mal_id})" class="btn-modal-action btn-modal-concluir" title="Marcar como Concluído">
+                    ✅ Concluído
+                </button>
+                <button onclick="removerDoCatalogo(${anime.mal_id})" class="btn-modal-action btn-modal-excluir" title="Remover do Catálogo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>`;
+    } 
+    const tituloEncoded = encodeURIComponent(anime.title_english || anime.title).replace(/'/g, "%27");
+    const poster = anime.images?.jpg?.image_url || CONFIG.PLACEHOLDER_IMAGE;
+    const ano = anime.year || anime.aired?.prop?.from?.year || '----';
+    return `
+        <div class="modal-actions-row">
+            <button 
+                onclick="adicionarRapido(${anime.mal_id}, '${tituloEncoded}', '${poster}', ${anime.episodes || 0}, '${anime.type}', '${ano}')"
+                class="btn-modal-action btn-destaque-modal" 
+                title="Adicionar a Quero Ver"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Adicionar
+            </button>
+        </div>`;
 }
