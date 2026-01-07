@@ -154,3 +154,27 @@ function formatarListaSimples(arrayObjetos, limite = 3) {
                 <strong style="color: var(--cor-primaria);"> (+${restantes})</strong>
             </span>`;
 }
+
+function formatarBroadcast(broadcast, status) {
+    if (!broadcast || !broadcast.day || !broadcast.time) return '';
+
+    const diasIngles = ["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"];
+    const diasPT = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+
+    const diaIndexOriginal = diasIngles.indexOf(broadcast.day);
+    if (diaIndexOriginal === -1) return '';
+
+    const [horasJapao, minutosJapao] = broadcast.time.split(':').map(Number);
+    let horasBrasil = horasJapao - 12;
+    let diaIndexBrasil = diaIndexOriginal;
+
+    if (horasBrasil < 0) {
+        horasBrasil += 24;
+        diaIndexBrasil = (diaIndexOriginal - 1 + 7) % 7;
+    }
+
+    const horaFormatada = String(horasBrasil).padStart(2, '0') + ':' + String(minutosJapao).padStart(2, '0');
+    const label = (status === 'Currently Airing') ? 'Transmissão:' : 'Era exibido:';
+    
+    return `<p><strong>${label}</strong> ${diasPT[diaIndexBrasil]} às ${horaFormatada} <span class="badge-tempo-total">(Horário de Brasília)</span></p>`;
+}

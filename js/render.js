@@ -178,131 +178,6 @@ function renderizarCardAnime(animeAPI, isSaved = false, savedData = {}, returnEl
     DOM.cards.lista.appendChild(cardElement);
 }
 
-// --- ABA DE MÚSICAS ---
-function renderizarAbaMusicas(theme) {
-    if (!theme || (!theme.openings?.length && !theme.endings?.length)) {
-        return '<div class="conteudo-vazio"><p>🎵 Nenhuma informação musical encontrada.</p></div>';
-    }
-
-    const criarBlocoColapsavel = (lista, titulo) => {
-        if (!lista || lista.length === 0) return '';
-        
-        const itens = lista.map(musica => {
-            let textoLimpo = musica.replace(/^\d+:\s*/, '').replace(/['"]/g, '').replace(/\s*\(eps?.*?\)$/i, '');
-            return `
-                <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(textoLimpo)}" target="_blank" class="item-musica">
-                    <svg class="icone-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                    <span class="nome-musica">${musica}</span>
-                </a>`;
-        }).join('');
-
-        return `
-            <details class="grupo-colapsavel">
-                <summary>${titulo} (${lista.length})</summary>
-                <div class="conteudo-colapsavel lista-musicas">
-                    ${itens}
-                </div>
-            </details>`;
-    };
-
-    return `
-        <div class="container-musicas">
-            ${criarBlocoColapsavel(theme.openings, '🎧 Aberturas (Openings)')}
-            ${criarBlocoColapsavel(theme.endings, '🏁 Encerramentos (Endings)')}
-        </div>`;
-}
-
-// --- ABA DE RELACIONADOS ---
-function renderizarAbaRelacionados(relations) {
-    if (!relations || relations.length === 0) {
-        return '<div class="conteudo-vazio"><p>🔗 Sem animes relacionados.</p></div>';
-    }
-
-    let html = '<div class="container-relacionados">';
-
-    relations.forEach(grupo => {
-        const nomeRelacao = MAPA_RELACAO[grupo.relation] || grupo.relation;
-        
-        const itensHTML = grupo.entry.map(item => {
-            const isAnime = item.type === 'anime';
-            if (isAnime) {
-                return `
-                    <div class="item-relacionado link-anime" onclick="abrirModal(${item.mal_id})" title="Ver detalhes">
-                        <span class="tag-midia">ANIME</span>
-                        <span>${item.name}</span>
-                    </div>`;
-            } else {
-                return `
-                    <a href="${item.url}" target="_blank" class="item-relacionado item-externo">
-                        <span class="tag-midia">${item.type.toUpperCase()}</span>
-                        <span>${item.name}</span>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                    </a>`;
-            }
-        }).join('');
-
-        html += `
-            <details class="grupo-colapsavel">
-                <summary>${nomeRelacao} (${grupo.entry.length})</summary>
-                <div class="conteudo-colapsavel lista-relacoes">
-                    ${itensHTML}
-                </div>
-            </details>`;
-    });
-
-    html += '</div>';
-    return html;
-}
-
-// --- ABA DE STREAMING ---
-function renderizarAbaStreaming(links) {
-    const linksOficiais = links.filter(link => link.tipo === 'oficial');
-    const linksBusca = links.filter(link => link.tipo === 'busca');
-    
-    let html = '<div class="streaming-container">';
-    
-    if (linksOficiais.length > 0) {
-        html += `
-            <div class="streaming-section">
-                <h3 class="streaming-titulo">✅ Licenciamento Oficial</h3>
-                <p class="streaming-descricao">
-                    Links registrados no banco de dados global.
-                    <br>
-                    <span class="streaming-nota-texto">
-                        ⚠️ Nota: Podem redirecionar para a tela inicial se não estiverem disponíveis no Brasil.
-                    </span>
-                </p>
-                <div class="streaming-grid">
-                    ${linksOficiais.map(link => `
-                        <a href="${link.url}" target="_blank" class="streaming-link oficial" rel="noopener noreferrer">
-                            <img src="${link.icon}" alt="${link.nome}" class="streaming-icon" onerror="this.style.display='none'">
-                            <span class="streaming-nome">${link.nome}</span>
-                        </a>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
-    
-    html += `
-        <div class="streaming-section">
-            <h3 class="streaming-titulo">🔍 Buscar nas Plataformas</h3>
-            <p class="streaming-descricao">Clique para buscar automaticamente este anime na plataforma</p>
-            <div class="streaming-grid">
-                ${linksBusca.map(link => `
-                    <a href="${link.url}" target="_blank" class="streaming-link busca streaming-link-busca" style="border-color: ${link.cor}" rel="noopener noreferrer">
-                        <img src="${link.icon}" alt="${link.nome}" class="streaming-icon" onerror="this.style.display='none'">
-                        <span class="streaming-nome">${link.nome}</span>
-                    </a>
-                `).join('')}
-            </div>
-        </div>
-    `;
-    
-    html += '</div>';
-    return html;
-}
-
 // --- ORQUESTRADOR DO CONTEÚDO DO MODAL ---
 function renderizarConteudoModal(anime, sinopse, links, isSaved) {
     const generos = traduzirListaGeneros(anime.genres);
@@ -313,12 +188,16 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
     const season = anime.season ? MAPA_SEASONS[anime.season] : '';
     const seasonYear = anime.year || '';
     const temporadaFormatada = (season && seasonYear) ? `${season} de ${seasonYear}` : 'N/A';
+    const episodiosHTML = anime.episodes > 1 
+        ? `<p><strong>Episódios:</strong> ${anime.episodes}</p>` 
+        : '';
 
     const dataInicio = anime.aired?.from ? formatarDataCompleta(anime.aired.from) : '?';
     const dataFim = anime.aired?.to ? formatarDataCompleta(anime.aired.to) : '?';
     const periodoExibicao = (anime.status === 'Currently Airing') 
         ? `De ${dataInicio} (Em andamento)`
         : (dataInicio !== '?' && dataFim !== '?') ? `${dataInicio} até ${dataFim}` : dataInicio;
+    const broadcastHTML = formatarBroadcast(anime.broadcast, anime.status);
 
     const estudios = formatarListaSimples(anime.studios, 2);
     const produtores = formatarListaSimples(anime.producers, 2);
@@ -327,6 +206,7 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
     let duracaoRaw = anime.duration || 'N/A';
 
     let duracaoFormatada = duracaoRaw
+    .replace(/Unknown/gi, 'Desconhecida')
     .replace(/per ep/g, 'por ep')
     .replace(/min/g, 'min')
     .replace(/sec/g, 'seg')
@@ -335,7 +215,7 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
 
     let tempoTotalHTML = '';
 
-    if (anime.episodes > 1 && anime.duration) {
+    if (anime.episodes > 1 && anime.duration && !anime.duration.toLowerCase().includes('unknown')) {
         const valorNumerico = parseInt(anime.duration);
         
         if (!isNaN(valorNumerico)) {
@@ -379,10 +259,11 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
                      <p><strong>Gêneros:</strong> ${generos}</p>
                      <p><strong>Tipo:</strong> ${tipo}</p>
                      <p><strong>Status:</strong> ${status}</p>
-                     <p><strong>Episódios:</strong> ${anime.episodes || 'N/A'}</p>
+                     ${broadcastHTML}
+                     ${episodiosHTML}
                      <p><strong>Duração:</strong> ${duracaoFormatada}${tempoTotalHTML}</p>
-                     <p><strong>Temporada:</strong> ${temporadaFormatada}</p>
                      <p><strong>Exibição:</strong> ${periodoExibicao}</p>
+                     <p><strong>Temporada:</strong> ${temporadaFormatada}</p>
                      <p><strong>Classificação:</strong> ${rating}</p>
                      <p><strong>Estúdio:</strong> ${estudios}</p>
                      <p><strong>Produtores:</strong> ${produtores}</p>
@@ -519,39 +400,4 @@ async function obterLinksStreaming(animeData) {
         console.error('Erro ao obter links de streaming:', error);
         return [];
     }
-}
-
-// --- BOTÕES DE AÇÃO DO MODAL ---
-function gerarBotoesAcaoModal(anime, isSaved) {
-    if (isSaved) {
-        return `
-            <div class="modal-actions-row">
-                <button onclick="concluirAnimeRapido(${anime.mal_id})" class="btn-modal-action btn-modal-concluir" title="Marcar como Concluído">
-                    ✅ Concluído
-                </button>
-                <button onclick="removerDoCatalogo(${anime.mal_id})" class="btn-modal-action btn-modal-excluir" title="Remover do Catálogo">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                </button>
-            </div>`;
-    } 
-    const tituloEncoded = encodeURIComponent(anime.title_english || anime.title).replace(/'/g, "%27");
-    const poster = anime.images?.jpg?.image_url || CONFIG.PLACEHOLDER_IMAGE;
-    const ano = anime.year || anime.aired?.prop?.from?.year || '----';
-    return `
-        <div class="modal-actions-row">
-            <button 
-                onclick="adicionarRapido(${anime.mal_id}, '${tituloEncoded}', '${poster}', ${anime.episodes || 0}, '${anime.type}', '${ano}')"
-                class="btn-modal-action btn-destaque-modal" 
-                title="Adicionar a Quero Ver"
-            >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Adicionar
-            </button>
-        </div>`;
 }

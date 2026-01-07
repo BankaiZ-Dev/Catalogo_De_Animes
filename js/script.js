@@ -6,7 +6,7 @@
 // 2. CRUD do Catálogo
 // 3. Renderização de Cards
 // 4. Busca e API
-// 5. Modais
+// 5. Aleatoriedade
 // 6. Sistema de Favoritos
 // 7. Modo de Visualização
 // 8. PWA & Service Worker
@@ -591,114 +591,8 @@ function resetarInterfaceDeBusca() {
 }
 
 // ========================================================
-// 5. MODAIS & STREAMING
+// 5 ALEATORIEDADE
 // ========================================================
-
-function fecharModal() {
-    const modal = DOM.modais.anime;
-    if (modal) {
-        modal.close();
-        const iframe = modal.querySelector('iframe');
-        if (iframe) iframe.src = '';
-        DOM.modais.animeInfo && (DOM.modais.animeInfo.innerHTML = '');
-    }
-}
-
-function mudarAba(event, nomeAba) {
-    const modal = event.target.closest('dialog');
-    
-    modal.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('ativo'));
-    modal.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('oculto');
-        content.classList.remove('ativo');
-    });
-
-    if (nomeAba !== 'trailer') {
-        const trailerContainer = modal.querySelector('#trailer iframe');
-        if (trailerContainer) {
-            const urlAtual = trailerContainer.src;
-            trailerContainer.src = ''; 
-            trailerContainer.src = urlAtual;
-        }
-    }
-
-    event.target.classList.add('ativo');
-    const conteudoAlvo = modal.querySelector('#' + nomeAba);
-    if (conteudoAlvo) {
-        conteudoAlvo.classList.remove('oculto');
-        conteudoAlvo.classList.add('ativo');
-    }
-}
-
-async function abrirModal(malId) {
-    const modalInfo = DOM.modais.animeInfo;
-    const animeModal = DOM.modais.anime;
-
-    if (modalInfo) modalInfo.innerHTML = `
-        <div class="modal-loading-container">
-            <div class="spinner modal-spinner-margin"></div>
-            <p class="loading-text modal-loading-text-content">Carregando detalhes...</p>
-        </div>`;
-    
-    if (animeModal) {
-        animeModal.showModal();
-        animeModal.scrollTop = 0;
-    }
-
-    try {
-        const data = await apiObterDetalhesFull(malId);
-        const anime = data.data;
-
-        const [sinopseTraduzida, linksStreaming] = await Promise.all([
-            apiTraduzirTexto(anime.synopsis),
-            obterLinksStreaming(anime)
-        ]);
-
-        const isSaved = catalogoPessoal.hasOwnProperty(malId);
-        
-        modalInfo.innerHTML = renderizarConteudoModal(anime, sinopseTraduzida, linksStreaming, isSaved);
-
-    } catch (error) {
-        console.error(error);
-
-        if (error.message === 'RATE_LIMIT') {
-            if (modalInfo) modalInfo.innerHTML = `
-                <div class="conteudo-vazio">
-                    <p>🚦 O servidor está ocupado.</p>
-                    <p style="font-size: 0.9em">Aguarde 5 segundos e tente novamente.</p>
-                </div>`;
-        } else {
-            if (modalInfo) modalInfo.innerHTML = '<p class="mensagem-erro-modal">Não foi possível carregar os detalhes.</p>';
-        }
-    }
-}
-
-// ========================================================
-// 5b. ESTATÍSTICAS & ALEATORIEDADE
-// ========================================================
-
-function calcularEstatisticas() {
-    const animes = Object.values(catalogoPessoal);
-    const totalAnimes = animes.length;
-    let totalEps = 0;
-    let totalConcluidos = 0;
-    
-    animes.forEach(anime => {
-        totalEps += parseInt(anime.episode) || 0;
-        if (anime.status === 'Concluído') totalConcluidos++;
-    });
-    
-    const minutos = totalEps * 24;
-    const dias = Math.floor(minutos / 1440);
-    const horas = Math.floor((minutos % 1440) / 60);
-    
-    DOM.statsValores.totalAnimes.textContent = totalAnimes;
-    DOM.statsValores.totalEpisodios.textContent = totalEps;
-    DOM.statsValores.tempoTotal.textContent = (dias > 0 ? `${dias}d ` : '') + `${horas}h`;
-    DOM.statsValores.concluidos.textContent = totalConcluidos;
-    
-    DOM.modais.stats?.showModal();
-}
 
 function sugerirAnimeAleatorio() {
     const animesCandidatos = Object.values(catalogoPessoal).filter(anime => anime.status === 'Quero Ver');
