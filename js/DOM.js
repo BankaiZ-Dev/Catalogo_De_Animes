@@ -99,9 +99,11 @@ const DOM = {
     // ========================================================
     statsValores: {
         totalAnimes: $('stat-total-animes'),
+        concluidos: $('stat-concluidos'),
+        andamento: $('stat-andamento'),
+        queroVer: $('stat-quero-ver'),
         totalEpisodios: $('stat-total-eps'),
-        tempoTotal: $('stat-tempo-total'),
-        concluidos: $('stat-concluidos')
+        tempoTotal: $('stat-tempo-total')
     }
 };
 

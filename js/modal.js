@@ -243,12 +243,22 @@ function renderizarAbaStreaming(links) {
 function calcularEstatisticas() {
     const animes = Object.values(catalogoPessoal);
     const totalAnimes = animes.length;
+    
     let totalEps = 0;
     let totalConcluidos = 0;
+    let totalAndamento = 0;
+    let totalQueroVer = 0;
     
     animes.forEach(anime => {
         totalEps += parseInt(anime.episode) || 0;
-        if (anime.status === 'Concluído') totalConcluidos++;
+        
+        if (anime.status === 'Concluído') {
+            totalConcluidos++;
+        } else if (anime.status === 'Em Andamento') {
+            totalAndamento++;
+        } else if (anime.status === 'Quero Ver') {
+            totalQueroVer++;
+        }
     });
     
     const minutos = totalEps * 24;
@@ -259,6 +269,31 @@ function calcularEstatisticas() {
     DOM.statsValores.totalEpisodios.textContent = totalEps;
     DOM.statsValores.tempoTotal.textContent = (dias > 0 ? `${dias}d ` : '') + `${horas}h`;
     DOM.statsValores.concluidos.textContent = totalConcluidos;
+    DOM.statsValores.andamento.textContent = totalAndamento;
+    DOM.statsValores.queroVer.textContent = totalQueroVer;
     
     DOM.modais.stats?.showModal();
+}
+
+// --- 4. ALEATORIEDADE ---
+function sugerirAnimeAleatorio() {
+    const animesCandidatos = Object.values(catalogoPessoal).filter(anime => anime.status === 'Quero Ver');
+    
+    if (animesCandidatos.length === 0) {
+        return showToast("Lista 'Quero Ver' vazia! Adicione animes para sortear.", "info");
+    }
+    
+    showGlobalLoading("🎲 Rolando os dados...");
+    
+    setTimeout(() => {
+        const index = Math.floor(Math.random() * animesCandidatos.length);
+        const animeSorteado = animesCandidatos[index];
+
+        hideGlobalLoading();
+        
+        abrirModal(animeSorteado.mal_id);
+        
+        showToast(`🎲 Sorteado: ${animeSorteado.title}`, "roleta");
+        
+    }, 800);
 }

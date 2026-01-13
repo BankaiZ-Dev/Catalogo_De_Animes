@@ -134,3 +134,33 @@ function verificarAtualizacaoEpisodios(malId, totalEpsApi) {
     }
     return false;
 }
+
+async function sincronizacaoInteligente() {
+    if (!navigator.onLine) return;
+
+    const filaPendentes = Object.values(catalogoPessoal).filter(anime => {
+        const faltaEpisodios = (!anime.maxEpisodes || anime.maxEpisodes === 0);
+        const faltaAno = (anime.year === '----' || !anime.year);
+        return faltaEpisodios || faltaAno;
+    });
+    if (filaPendentes.length === 0) return;
+
+    for (const anime of filaPendentes.slice(0, 5)) {
+        try {
+            await new Promise(r => setTimeout(r, 3000));
+
+            const json = await apiObterDadosSimples(anime.mal_id);
+            const dadosNovos = json.data;
+
+            let houveMudanca = false;
+
+            if (verificarAtualizacaoAno(anime.mal_id, dadosNovos.year || dadosNovos.aired?.prop?.from?.year)) houveMudanca = true;
+            if (verificarAtualizacaoEpisodios(anime.mal_id, dadosNovos.episodes)) houveMudanca = true;
+
+            if (houveMudanca) {
+                salvarCatalogo();
+                atualizarInterfaceCard(anime.mal_id);
+            }
+        } catch (erro) { console.error(`[Sync] Falha ao atualizar ${anime.title}:`, erro); }
+    }
+}

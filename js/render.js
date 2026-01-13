@@ -114,7 +114,16 @@ function renderizarConteudoSalvo(dados) {
 
 // --- CONTEÚDO PARA RESULTADOS DE BUSCA ---
 function renderizarConteudoBusca(dados) {
-    const textoEpisodios = dados.totalEpisodios ? `${dados.totalEpisodios} Episódios` : 'Episódios: N/A';
+    let textoEpisodios = 'Episódios: N/A';
+    
+    if (dados.totalEpisodios) {
+        if (dados.totalEpisodios === 1) {
+            textoEpisodios = '1 Episódio';
+        } else {
+            textoEpisodios = `${dados.totalEpisodios} Episódios`;
+        }
+    }
+
     return `
         <p class="card-destaque-info">${textoEpisodios}</p>
         ${renderizarMetaInfo(dados)}
@@ -178,6 +187,108 @@ function renderizarCardAnime(animeAPI, isSaved = false, savedData = {}, returnEl
     DOM.cards.lista.appendChild(cardElement);
 }
 
+function prepararDadosCard(animeAPI, isSaved, savedData) {
+    const malId = animeAPI.mal_id;
+    const estaNoCatalogo = catalogoPessoal.hasOwnProperty(malId);
+    const finalSavedData = estaNoCatalogo ? catalogoPessoal[malId] : savedData;
+    
+    return {
+        malId: malId,
+        poster: animeAPI.images?.jpg?.image_url || finalSavedData.poster || CONFIG.PLACEHOLDER_IMAGE,
+        titulo: animeAPI.title_english || animeAPI.title,
+        tipo: MAPA_TIPOS_MIDIA[animeAPI.type || finalSavedData.type || 'TV'] || (animeAPI.type || 'TV'),
+        ano: animeAPI.year || (animeAPI.aired?.prop?.from?.year) || finalSavedData.year || '----',
+        totalEpisodios: animeAPI.episodes || finalSavedData.maxEpisodes || 0,
+        isSaved: estaNoCatalogo, 
+        savedData: finalSavedData
+    };
+}
+
+function atualizarCardNaTela(malId, titulo, posterUrl, maxEpisodes, type, year) {
+    const cardAntigo = getCardAnime(malId);
+    if (cardAntigo) {
+        const savedData = catalogoPessoal[malId]; 
+
+        const animeDadosAPI = {
+            mal_id: malId,
+            title: titulo,
+            images: { jpg: { image_url: posterUrl } },
+            episodes: maxEpisodes,
+            type: type,
+            year: year
+        };
+        
+        const novoCard = renderizarCardAnime(animeDadosAPI, true, savedData, true);
+        
+        cardAntigo.replaceWith(novoCard);
+    }
+}
+
+function atualizarElementosDoCard(malId, savedData, statusChanged) {
+    const card = getCardAnime(malId);
+    const inputElement = getInputEpisodios(malId);
+    if (inputElement) inputElement.value = savedData.episode;
+
+    updateProgressoDisplay(malId, savedData.episode, savedData.maxEpisodes)
+
+    if (statusChanged) {
+        const filtroAtual = DOM.filtros.status ? DOM.filtros.status.value : 'todos';
+        let deveSairDaTela = false;
+        
+        if (filtroAtual === 'favoritos') {
+            if (!savedData.favorite) deveSairDaTela = true;
+        } else if (filtroAtual !== 'todos' && filtroAtual !== savedData.status) {
+            deveSairDaTela = true;
+        }
+
+        if (deveSairDaTela) {
+            if (card) {
+                card.classList.add('card-animacao-saida');
+                
+                setTimeout(() => {
+                    card.classList.add('oculto');
+                    card.classList.remove('card-animacao-saida');
+                    atualizarVisualDoCard(card, savedData); 
+                }, 300);
+            }
+        } else {
+            if (card) {
+                atualizarVisualDoCard(card, savedData); 
+            }
+        }
+    }
+}
+
+function updateProgressoDisplay(malId, episode, maxEpisodes) {
+    const progressoTexto = getTextoProgresso(malId);
+    const barra = getBarraProgresso(malId);
+    
+    if (progressoTexto) {
+        const episodesTotal = maxEpisodes ? ` / ${maxEpisodes}` : '';
+        progressoTexto.textContent = `Ep ${episode}${episodesTotal}`;
+    }
+
+    if (barra && maxEpisodes > 0) {
+        let pct = (episode / maxEpisodes) * 100;
+        if (pct > 100) pct = 100;
+        barra.style.width = `${pct}%`;
+    }
+}
+
+function atualizarVisualDoCard(card, savedData) {
+    const statusInfo = getStatusData(savedData.status);
+    
+    card.classList.remove('status-concluido', 'status-em-andamento', 'status-quero-ver');
+    card.classList.add(statusInfo.class);
+
+    const etiqueta = card.querySelector('.etiqueta-status');
+    if (etiqueta) {
+        etiqueta.classList.remove('status-concluido', 'status-em-andamento', 'status-quero-ver');
+        etiqueta.classList.add(statusInfo.class);
+        etiqueta.textContent = statusInfo.label;
+    }
+}
+
 // --- ORQUESTRADOR DO CONTEÚDO DO MODAL ---
 function renderizarConteudoModal(anime, sinopse, links, isSaved) {
     const generos = traduzirListaGeneros(anime.genres);
@@ -204,7 +315,6 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
     const licenciadores = formatarListaSimples(anime.licensors, 2);
 
     let duracaoRaw = anime.duration || 'N/A';
-
     let duracaoFormatada = duracaoRaw
     .replace(/Unknown/gi, 'Desconhecida')
     .replace(/per ep/g, 'por ep')

@@ -116,3 +116,12 @@ const PLATAFORMAS_STREAMING = {
         cor: '#113dcfcc'
     },
 };
+
+const DIAS_SEMANA_EN = ["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"];
+const DIAS_SEMANA_PT = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+
+const MAPA_BROADCAST_LABELS = {
+    'Currently Airing': 'Transmissão:',
+    'Not yet aired': 'Será exibido:',
+    'Finished Airing': 'Era exibido:'
+};
