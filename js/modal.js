@@ -18,6 +18,8 @@ async function abrirModal(malId) {
         animeModal.scrollTop = 0;
     }
 
+    document.body.style.overflow = 'hidden';
+
     try {
         const data = await apiObterDetalhesFull(malId);
         const anime = data.data;
@@ -28,7 +30,6 @@ async function abrirModal(malId) {
         ]);
 
         const isSaved = catalogoPessoal.hasOwnProperty(malId);
-        
         modalInfo.innerHTML = renderizarConteudoModal(anime, sinopseTraduzida, linksStreaming, isSaved);
 
     } catch (error) {
@@ -54,6 +55,8 @@ function fecharModal() {
         if (iframe) iframe.src = '';
         DOM.modais.animeInfo && (DOM.modais.animeInfo.innerHTML = '');
     }
+
+    document.body.style.overflow = '';
 }
 
 function mudarAba(event, nomeAba) {

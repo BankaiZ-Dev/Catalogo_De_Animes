@@ -1901,7 +1901,59 @@ body.dark-mode .streaming-link {
         order: -1;
         margin-bottom: 10px;
     }
-    
+
+    #modal-anime {
+        width: 95%;
+        max-height: 90vh;
+        position: fixed;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
+        padding: 0;
+        border: 1px solid var(--cor-borda);
+    }
+
+    #modal-titulo {
+        padding: 8px 40px 4px 40px;
+        font-size: 1.05rem;
+        text-align: center;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .modal-poster-detalhes {
+        display: flex;
+        flex-direction: column;
+        align-items: center; 
+        gap: 8px;
+        padding: 5px 15px 10px 15px;
+    }
+
+    #modal-poster {
+        width: 170px;
+        height: auto;
+        border-radius: 8px;
+        margin: 0 auto;
+    }
+
+    #modal-detalhes-rapidos {
+        width: 100%;
+        text-align: left;
+        font-size: 0.8rem;
+        gap: 3px;
+    }
+
+    .modal-tab-conteudo {
+        min-height: 180px;
+        padding: 10px 15px;
+    }
+
+    .tab-button {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
     .modal-actions-row {
         justify-content: center;
         margin-top: 15px;
@@ -1914,11 +1966,6 @@ body.dark-mode .streaming-link {
     
     .modal-tabs {
         gap: 5px;
-    }
-    
-    .tab-button {
-        padding: 10px 15px;
-        font-size: 0.9em;
     }
     
     .streaming-grid {
