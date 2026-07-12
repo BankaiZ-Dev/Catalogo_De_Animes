@@ -3,7 +3,7 @@
 // Gerencia adição, remoção e atualização de animes no catálogo
 // ========================================================
 
-function fabricarAnimeSalvo(malId, titulo, poster, maxEpisodes, type, year, status = 'Quero Ver') {
+function fabricarAnimeSalvo(malId, titulo, poster, maxEpisodes, type, year, status = 'Quero Ver', statusLancamento = 'Unknown') {
     return {
         mal_id: parseInt(malId),
         title: titulo,
@@ -14,12 +14,13 @@ function fabricarAnimeSalvo(malId, titulo, poster, maxEpisodes, type, year, stat
         dateAdded: new Date().toISOString(),
         type: type,
         year: year,
+        statusLancamento: statusLancamento,
         favorite: false
     };
 }
 
-function salvarNovoAnimeNoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial, type, year) {
-    const novoAnime = fabricarAnimeSalvo(malId, titulo, posterUrl, maxEpisodes, type, year, statusInicial);
+function salvarNovoAnimeNoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial, type, year, statusLancamento) {
+    const novoAnime = fabricarAnimeSalvo(malId, titulo, posterUrl, maxEpisodes, type, year, statusInicial, statusLancamento);
     
     if (statusInicial === 'Concluído' && novoAnime.maxEpisodes) {
         novoAnime.episode = novoAnime.maxEpisodes;
@@ -27,6 +28,7 @@ function salvarNovoAnimeNoCatalogo(malId, titulo, posterUrl, maxEpisodes, status
 
     catalogoPessoal[malId] = novoAnime;
     salvarCatalogo();
+    limparCacheCalendario();
 }
 
 function atualizarEpisodioEStatus(malId, change) {
@@ -48,6 +50,7 @@ function atualizarEpisodioEStatus(malId, change) {
     }
 
     salvarCatalogo();
+    limparCacheCalendario();
 
     return { 
         statusChanged: savedData.status !== statusBefore,
@@ -56,23 +59,23 @@ function atualizarEpisodioEStatus(malId, change) {
     };
 }
 
-function adicionarAoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial = 'Quero Ver', type = 'TV', year = '----') {
+function adicionarAoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial = 'Quero Ver', type = 'TV', year = '----', statusLancamento = 'Unknown') {
     if (catalogoPessoal.hasOwnProperty(malId)) {
         showToast('Este anime já está no seu catálogo!', 'info');
         return;
     }
 
-    salvarNovoAnimeNoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial, type, year);
+    salvarNovoAnimeNoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial, type, year, statusLancamento);
 
-    atualizarCardNaTela(malId, titulo, posterUrl, maxEpisodes, type, year);
+    atualizarCardNaTela(malId, titulo, posterUrl, maxEpisodes, type, year, statusLancamento);
 
     showToast(`Anime adicionado como "${statusInicial}"!`, 'info');
 }
 
-function adicionarRapido(malId, tituloEncoded, poster, episodes, type, year) {
+function adicionarRapido(malId, tituloEncoded, poster, episodes, type, year, statusLancamento) {
     const titulo = decodeURIComponent(tituloEncoded);
     
-    adicionarAoCatalogo(malId, titulo, poster, episodes, 'Quero Ver', type, year);
+    adicionarAoCatalogo(malId, titulo, poster, episodes, 'Quero Ver', type, year, statusLancamento);
     
     const card = getCardAnime(malId);
     if (card) {
@@ -99,7 +102,8 @@ function adicionarRapido(malId, tituloEncoded, poster, episodes, type, year) {
             images: { jpg: { image_url: poster } },
             episodes: episodes,
             type: type,
-            year: year
+            year: year,
+            status: statusLancamento
         };
 
         modalAcoes.outerHTML = gerarBotoesAcaoModal(animeFake, true);
@@ -124,7 +128,8 @@ function removerDoCatalogo(malId) {
         };
 
         delete catalogoPessoal[malId];
-        salvarCatalogo();
+        salvarCatalogoImediato();
+        limparCacheCalendario();
 
         const card = getCardAnime(malId);
         const isSearchMode = DOM.busca.campo.value.trim().length > 0 || (DOM.busca.resultados && !DOM.busca.resultados.classList.contains('oculto'));
@@ -159,6 +164,7 @@ function atualizarStatusAnime(malId, novoStatus) {
              anime.episode = anime.maxEpisodes;
         }
         salvarCatalogo();
+        limparCacheCalendario();
 
         const statusChanged = (anime.status !== statusBefore);
         const savedData = anime;
@@ -214,7 +220,8 @@ function concluirAnimeRapido(malId) {
         }
         anime.status = 'Concluído';
         
-        salvarCatalogo(); 
+        salvarCatalogo();
+        limparCacheCalendario();
         
         const statusMudou = (statusAnterior !== 'Concluído');
         atualizarElementosDoCard(malId, anime, statusMudou);

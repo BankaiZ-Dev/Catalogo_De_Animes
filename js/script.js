@@ -57,15 +57,22 @@ function carregarAnimesSalvos() {
         }
     });
 
+    const fragmento = document.createDocumentFragment();
+
     for (const savedData of animesArray) {
-        renderizarCardAnime({
+        const card = renderizarCardAnime({
             mal_id: savedData.mal_id,
             title: savedData.title,
             images: { jpg: { image_url: savedData.poster } },
             type: savedData.type,
-            year: savedData.year
-        });
+            year: savedData.year,
+            status: savedData.statusLancamento
+        }, true, savedData, true);
+
+        if (card) fragmento.appendChild(card);
     }
+
+    DOM.cards.lista.appendChild(fragmento);
     filtrarAnimesSalvos();
 }
 
@@ -104,7 +111,9 @@ function filtrarAnimesSalvos() {
 async function buscarAnimes(query, page = 1) {
     if (searchController) searchController.abort();
 
-    showGlobalLoading(`Buscando página ${page}...`);
+    searchController = new AbortController();
+
+    showGlobalLoading(`Buscando animes...`);
     DOM.cards.lista.innerHTML = '';
     termoBuscaAtual = query;
     paginaAtual = page;
@@ -124,7 +133,7 @@ async function buscarAnimes(query, page = 1) {
     DOM.busca.botaoVoltar?.classList.remove('oculto');
 
     try {
-        const data = await apiBuscarAnimes(query, page);
+        const data = await apiBuscarAnimes(query, page, searchController.signal);
 
         if (data.data && data.data.length > 0) {
             data.data.forEach(anime => renderizarCardAnime(anime));
@@ -143,6 +152,10 @@ async function buscarAnimes(query, page = 1) {
         }
 
     } catch (error) {
+        if (error.name === 'AbortError') {
+            console.log('Busca anterior interrompida corretamente.');
+            return; 
+        }
         if (error.message === 'RATE_LIMIT') {
             showToast('🚦 Muita velocidade! Aguarde um pouco e tente novamente.', 'warning');
             DOM.cards.lista.innerHTML = '<p class="mensagem-centro">Muitas requisições. Aguarde...</p>';
@@ -275,7 +288,6 @@ function setupServiceWorker() {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
                 .then(reg => {
-                    console.log('✅ Service Worker registrado:', reg);
 
                     if (reg.waiting) {
                         newWorker = reg.waiting;
@@ -451,6 +463,29 @@ function setupListeners() {
     // Controles
     DOM.busca.botaoVoltar?.addEventListener('click', resetarInterfaceDeBusca);
 
+    // Mobile Cards
+    DOM.cards.lista?.addEventListener('click', (e) => {
+    if (window.innerWidth > 768) return;
+
+    const cardClicado = e.target.closest('.card-anime');
+    if (!cardClicado) return;
+
+    if (e.target.closest('button') || e.target.closest('input')) return;
+
+    const estavaAtivo = cardClicado.classList.contains('active-mobile');
+    document.querySelectorAll('.active-mobile').forEach(c => c.classList.remove('active-mobile'));
+
+    if (!estavaAtivo) {
+        cardClicado.classList.add('active-mobile');
+    }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.card-anime')) {
+            document.querySelectorAll('.active-mobile').forEach(card => card.classList.remove('active-mobile'));
+        }
+    });
+
     // Modais
     const dialogs = document.querySelectorAll('dialog');
     dialogs.forEach(dialog => {
@@ -488,6 +523,21 @@ function setupListeners() {
         carregarAnimesSalvos();
     });
 
+    // Calendário
+    const btnCalendario = document.getElementById('btn-calendario');
+    if (btnCalendario) {
+        btnCalendario.addEventListener('click', () => {
+            carregarCalendarioSemanal(); 
+        });
+    } else {
+        console.error("❌ Botão de calendário não encontrado no HTML!");
+    }
+
+    // E para fechar o novo modal:
+    DOM.modais.calendarioFecharBtn?.addEventListener('click', () => {
+        DOM.modais.calendario.close();
+    });
+
     // Botão Voltar ao Topo
     const btnTopo = DOM.acoesGlobais.botaoTopo;
     if (btnTopo) {
@@ -512,6 +562,13 @@ function setupListeners() {
         });
     }
 
+    // Salvamento antes de sair
+    window.addEventListener('beforeunload', () => {
+        if (typeof salvarCatalogoImediato === 'function') {
+            salvarCatalogoImediato();
+        }
+    });
+
     // Conectividade
     window.addEventListener('offline', () => {
         showToast('📡 Você está offline. Modo de leitura ativado.', 'warning');
@@ -533,8 +590,6 @@ function setupListeners() {
 // ========================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Inicializando aplicação...');
-    
     // Carrega preferências
     aplicarModoEscuroInicial();
     aplicarModoVisualizacaoInicial();
@@ -554,7 +609,5 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('app_updated');
     }
 
-    setTimeout(sincronizacaoInteligente, 8000);
-    
-    console.log('✅ Aplicação pronta!');
+    setTimeout(sincronizacaoInteligente, 5000);
 });

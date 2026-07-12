@@ -91,7 +91,12 @@ const DOM = {
 
         // Modal de Estatísticas
         stats: $('stats-modal'),
-        statsFecharBtn: $('fechar-stats')
+        statsFecharBtn: $('fechar-stats'),
+
+        // Modal do Calendário
+        calendario: $('calendario-modal'),
+        calendarioConteudo: $('calendario-conteudo'),
+        calendarioFecharBtn: $('fechar-calendario')
     },
 
     // ========================================================

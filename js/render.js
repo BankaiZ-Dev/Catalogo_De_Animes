@@ -54,10 +54,24 @@ function renderizarControleProgresso(dados) {
 
 // --- INFORMAÇÕES TAG/ANO ---
 function renderizarMetaInfo(dados) {
+    let prefixo = "Lançamento:";
+    let icone = "📅"; 
+
+    if (dados.statusLancamento === "Finished Airing") {
+        prefixo = "Lançou em:";
+        icone = "🏁";
+    } else if (dados.statusLancamento === "Currently Airing") {
+        prefixo = "Lançando Desde:";
+        icone = "🔥";
+    } else if (dados.statusLancamento === "Not yet aired") {
+        prefixo = "Lançamento em:";
+        icone = "⏳";
+    }
+
     return `
         <div class="card-meta-info">
             <span class="tag-tipo">${dados.tipo}</span>
-            <span>Lançado em: ${dados.ano}</span>
+            <span title="${dados.statusLancamento}">${icone} ${prefixo} ${dados.ano}</span>
         </div>`;
 }
 
@@ -82,7 +96,7 @@ function renderizarAcoesBusca(dados) {
     const tituloEncoded = encodeURIComponent(dados.titulo).replace(/'/g, "%27");
     return `
         <div class="card-acoes-compactas">
-            <button onclick="adicionarRapido(${dados.malId}, '${tituloEncoded}', '${dados.poster}', ${dados.totalEpisodios}, '${dados.tipo}', '${dados.ano}')" class="btn-add-destaque" title="Adicionar a Quero Ver">
+            <button onclick="adicionarRapido(${dados.malId}, '${tituloEncoded}', '${dados.poster}', ${dados.totalEpisodios}, '${dados.tipo}', '${dados.ano}', '${dados.statusLancamento}')" class="btn-add-destaque" title="Adicionar a Quero Ver">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -156,33 +170,6 @@ function renderizarCardAnime(animeAPI, isSaved = false, savedData = {}, returnEl
             </div>
         </div>`;
 
-    cardElement.addEventListener('click', function(e) {
-        if (window.innerWidth <= 768) {
-            
-            if (e.target.closest('button') || e.target.closest('input')) {
-                return; 
-            }
-
-            const isActive = this.classList.contains('active-mobile');
-
-            document.querySelectorAll('.card-anime').forEach(card => {
-                card.classList.remove('active-mobile');
-            });
-
-            if (!isActive) {
-                this.classList.add('active-mobile');
-            }
-        }
-    });
-
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.card-anime')) {
-            document.querySelectorAll('.card-anime.active-mobile').forEach(card => {
-                card.classList.remove('active-mobile');
-            });
-        }
-    });
-
     if (returnElement) return cardElement;
     DOM.cards.lista.appendChild(cardElement);
 }
@@ -200,11 +187,12 @@ function prepararDadosCard(animeAPI, isSaved, savedData) {
         ano: animeAPI.year || (animeAPI.aired?.prop?.from?.year) || finalSavedData.year || '----',
         totalEpisodios: animeAPI.episodes || finalSavedData.maxEpisodes || 0,
         isSaved: estaNoCatalogo, 
-        savedData: finalSavedData
+        savedData: finalSavedData,
+        statusLancamento: animeAPI.status || finalSavedData.statusLancamento || 'Unknown' 
     };
 }
 
-function atualizarCardNaTela(malId, titulo, posterUrl, maxEpisodes, type, year) {
+function atualizarCardNaTela(malId, titulo, posterUrl, maxEpisodes, type, year, statusLancamento) {
     const cardAntigo = getCardAnime(malId);
     if (cardAntigo) {
         const savedData = catalogoPessoal[malId]; 
@@ -215,7 +203,8 @@ function atualizarCardNaTela(malId, titulo, posterUrl, maxEpisodes, type, year) 
             images: { jpg: { image_url: posterUrl } },
             episodes: maxEpisodes,
             type: type,
-            year: year
+            year: year,
+            status: statusLancamento
         };
         
         const novoCard = renderizarCardAnime(animeDadosAPI, true, savedData, true);

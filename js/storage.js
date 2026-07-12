@@ -22,9 +22,13 @@ function carregarCatalogo() {
     }
 }
 
-function salvarCatalogo() {
+function salvarCatalogoImediato() {
     localStorage.setItem(STORAGE_KEYS.CATALOGO, JSON.stringify(catalogoPessoal));
 }
+
+const salvarCatalogo = debounce(() => {
+    salvarCatalogoImediato();
+}, 500);
 
 // ========================================================
 // MODO ESCURO
@@ -98,7 +102,7 @@ function importarBackup(event) {
                 });
 
                 catalogoPessoal = dados;
-                salvarCatalogo();
+                salvarCatalogoImediato();
                 carregarAnimesSalvos();
                 
                 showToast("Restaurado com sucesso!", "success");
@@ -129,7 +133,20 @@ function verificarAtualizacaoEpisodios(malId, totalEpsApi) {
     const anime = catalogoPessoal[malId];
     if (anime && (!anime.maxEpisodes || anime.maxEpisodes === 0) && totalEpsApi > 0) {
         anime.maxEpisodes = totalEpsApi;
-        console.log(`[Sync] Total de Eps atualizado: ${anime.title} -> ${totalEpsApi}`);
+        if (anime.episode >= anime.maxEpisodes && anime.status !== 'Concluído') {
+            anime.status = 'Concluído';
+            anime.episode = anime.maxEpisodes;
+        }
+        return true;
+    }
+    return false;
+}
+
+function verificarAtualizacaoLancamento(malId, statusApi) {
+    const anime = catalogoPessoal[malId];
+    if (anime && (!anime.statusLancamento || anime.statusLancamento === 'Unknown') && statusApi) {
+        anime.statusLancamento = statusApi;
+        console.log(`[Sync] Status de Lançamento atualizado: ${anime.title} -> ${statusApi}`);
         return true;
     }
     return false;
@@ -141,13 +158,14 @@ async function sincronizacaoInteligente() {
     const filaPendentes = Object.values(catalogoPessoal).filter(anime => {
         const faltaEpisodios = (!anime.maxEpisodes || anime.maxEpisodes === 0);
         const faltaAno = (anime.year === '----' || !anime.year);
-        return faltaEpisodios || faltaAno;
+        const faltaStatus = (!anime.statusLancamento || anime.statusLancamento === 'Unknown');
+        return faltaEpisodios || faltaAno || faltaStatus;
     });
     if (filaPendentes.length === 0) return;
 
-    for (const anime of filaPendentes.slice(0, 5)) {
+    for (const anime of filaPendentes.slice(0, 50)) {
         try {
-            await new Promise(r => setTimeout(r, 3000));
+            await new Promise(r => setTimeout(r, 3500));
 
             const json = await apiObterDadosSimples(anime.mal_id);
             const dadosNovos = json.data;
@@ -156,10 +174,11 @@ async function sincronizacaoInteligente() {
 
             if (verificarAtualizacaoAno(anime.mal_id, dadosNovos.year || dadosNovos.aired?.prop?.from?.year)) houveMudanca = true;
             if (verificarAtualizacaoEpisodios(anime.mal_id, dadosNovos.episodes)) houveMudanca = true;
+            if (verificarAtualizacaoLancamento(anime.mal_id, dadosNovos.status)) houveMudanca = true;
 
             if (houveMudanca) {
-                salvarCatalogo();
-                atualizarInterfaceCard(anime.mal_id);
+                salvarCatalogoImediato();
+                atualizarCardNaTela(anime.mal_id, anime.title, anime.poster, anime.maxEpisodes, anime.type, anime.year, anime.statusLancamento);
             }
         } catch (erro) { console.error(`[Sync] Falha ao atualizar ${anime.title}:`, erro); }
     }

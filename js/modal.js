@@ -107,7 +107,7 @@ function gerarBotoesAcaoModal(anime, isSaved) {
     return `
         <div class="modal-actions-row">
             <button 
-                onclick="adicionarRapido(${anime.mal_id}, '${tituloEncoded}', '${poster}', ${anime.episodes || 0}, '${anime.type}', '${ano}')"
+                onclick="adicionarRapido(${anime.mal_id}, '${tituloEncoded}', '${poster}', ${anime.episodes || 0}, '${anime.type}', '${ano}', '${anime.status}')"
                 class="btn-modal-action btn-destaque-modal" 
                 title="Adicionar a Quero Ver"
             >

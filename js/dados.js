@@ -5,6 +5,7 @@
 const CONFIG = {
     PLACEHOLDER_IMAGE: "https://placehold.co/170x260?text=Sem+Poster",
     JIKAN_API_URL: 'https://api.jikan.moe/v4/anime',
+    TENRAI_API_URL: 'https://api.tenrai.org/v1/anime',
     ANIME_LIMIT_PER_PAGE: 9
 };
 

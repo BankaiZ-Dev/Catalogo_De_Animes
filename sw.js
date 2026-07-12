@@ -2,19 +2,20 @@
 // SERVICE WORKER
 // ========================================================
 
-const CACHE_NAME = 'anime-catalog-v2.8';
+const CACHE_NAME = 'anime-catalog-v2.9';
 const URLS_TO_CACHE = [
   './',
   './index.html',
   './js/dados.js',
   './js/DOM.js',
   './js/api.js',
-  './js/storage.js',
   './js/utils.js',
+  './js/storage.js',
   './js/catalogo.js',
   './js/render.js',
   './js/modal.js',
   './js/script.js',
+  './js/calendario.js',
   './css/styles.css',
   './manifest.json',
   './png/icon-192.png',

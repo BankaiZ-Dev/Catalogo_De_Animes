@@ -85,26 +85,6 @@ function traduzirListaGeneros(genresArray) {
     return genresArray.map(g => mapa[g.name] || g.name).join(', ');
 }
 
-async function traduzirSinopse(text) {
-    if (!text || text.length < 5) return text || "Sinopse não disponível.";
-    try {
-        const cleanText = text.replace(/\n/g, ' ').trim();
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt&dt=t&q=${encodeURIComponent(cleanText)}`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Erro Tradução');
-        const data = await response.json();
-        let translatedText = '';
-        if (data && data[0]) {
-            data[0].forEach(segment => {
-                if (segment[0]) translatedText += segment[0];
-            });
-        }
-        return translatedText || text;
-    } catch (error) {
-        return text;
-    }
-}
-
 function obterIconePlataforma(nomePlataforma) {
     const nome = nomePlataforma.toLowerCase();
     let domain = '';
