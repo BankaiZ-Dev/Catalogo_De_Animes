@@ -20,6 +20,7 @@ let termoBuscaAtual = '';
 let currentViewMode = 'grid';
 let newWorker;
 let searchController = null;
+let modoBuscaAtual = 'online'
 
 // ========================================================
 // 2. CARDS
@@ -78,8 +79,10 @@ function carregarAnimesSalvos() {
 
 function filtrarAnimesSalvos() {
     const statusSelecionado = DOM.filtros.status?.value || 'todos';
-    const termoBusca = DOM.busca.campo?.value.toLowerCase() || '';
+    const termoBusca = (modoBuscaAtual === 'offline') ? (DOM.busca.campo?.value.toLowerCase().trim() || '') : '';
+    
     const cards = DOM.cards.lista.querySelectorAll('.card-anime');
+    let animesVisiveis = 0;
     
     cards.forEach(card => {
         const malId = card.dataset.malId;
@@ -92,17 +95,46 @@ function filtrarAnimesSalvos() {
             if (!animeData || animeData.status !== statusSelecionado) mostrarCard = false;
         }
         
-        if (termoBusca) {
-            if (!animeData || !animeData.title.toLowerCase().includes(termoBusca)) mostrarCard = false;
+        if (termoBusca && mostrarCard) {
+            if (!animeData) {
+                mostrarCard = false;
+            } else {
+                const tituloAnime = animeData.title.toLowerCase();
+                
+                if (termoBusca.length === 1) {
+                    if (!tituloAnime.startsWith(termoBusca)) mostrarCard = false;
+                } else {
+                    if (!tituloAnime.includes(termoBusca)) mostrarCard = false;
+                }
+            }
         }
         
         if (mostrarCard) {
             card.classList.remove('oculto');
+            animesVisiveis++;
         } else {
             card.classList.add('oculto');
         }
     });
-}  
+
+    let msgVazia = document.getElementById('mensagem-catalogo-vazio');
+    
+    if (animesVisiveis === 0) {
+        if (!msgVazia) {
+            msgVazia = document.createElement('div');
+            msgVazia.id = 'mensagem-catalogo-vazio';
+            msgVazia.className = 'mensagem-centro';
+            msgVazia.style.gridColumn = '1 / -1';
+            DOM.cards.lista.appendChild(msgVazia);
+        }
+        msgVazia.innerHTML = termoBusca 
+            ? `<h3>Nenhum anime encontrado para "${termoBusca}" 🕵️‍♂️</h3><p style="color: var(--cor-texto-secundario); margin-top: 5px;">Verifique a digitação ou busque no modo online.</p>` 
+            : `<h3>Nenhum anime encontrado 🕵️‍♂️</h3><p style="color: var(--cor-texto-secundario); margin-top: 5px;">Altere os filtros acima para ver seus animes.</p>`;
+        msgVazia.classList.remove('oculto');
+    } else if (msgVazia) {
+        msgVazia.classList.add('oculto');
+    }
+}
 
 // ========================================================
 // 3. BUSCA E API
@@ -243,8 +275,30 @@ function resetarInterfaceDeBusca() {
     carregarAnimesSalvos();
 }
 
+function alternarModoBusca() {
+    const btnToggle = document.getElementById('btn-toggle-busca');
+    
+    if (modoBuscaAtual === 'online') {
+        modoBuscaAtual = 'offline';
+        btnToggle.innerHTML = '📁';
+        btnToggle.title = 'Modo Atual: Seu Catálogo (Offline)';
+        DOM.busca.campo.placeholder = 'Procurar no seu Catálogo...)';
+        showToast('Modo Offline: Buscando no seu catálogo', 'info');
+        DOM.busca.resultados?.classList.add('oculto');
+    } else {
+        modoBuscaAtual = 'online';
+        btnToggle.innerHTML = '🌐';
+        btnToggle.title = 'Modo Atual: Explorar (Online)';
+        DOM.busca.campo.placeholder = 'Pesquisar novos animes...';
+        showToast('Modo Online: Explorando a internet', 'info');
+    }
+    
+    DOM.busca.campo.value = '';
+    carregarAnimesSalvos();
+}
+
 // ========================================================
-// 5. MODO DE VISUALIZAÇÃO
+// 4. MODO DE VISUALIZAÇÃO
 // ========================================================
 
 function setViewMode(mode) {
@@ -280,7 +334,7 @@ function aplicarPreferenciasFiltros() {
 }
 
 // ========================================================
-// 6. PWA & SERVICE WORKER
+// 5. PWA & SERVICE WORKER
 // ========================================================
 
 function setupServiceWorker() {
@@ -349,7 +403,7 @@ function hideUpdateNotification() {
 }
 
 // ========================================================
-// 7. EVENT LISTENERS
+// 6. EVENT LISTENERS
 // ========================================================
 
 function setupListeners() {
@@ -361,8 +415,16 @@ function setupListeners() {
     DOM.paginacao.botaoProxima?.addEventListener('click', () => mudarPagina(1));
 
     // Busca
+    document.getElementById('btn-toggle-busca')?.addEventListener('click', alternarModoBusca);
     if (DOM.busca.campo) {
-        DOM.busca.campo.addEventListener('input', buscarAnimesEmTempoRealDebounced);
+        DOM.busca.campo.addEventListener('input', (e) => {
+            if (modoBuscaAtual === 'online') {
+                buscarAnimesEmTempoRealDebounced(e);
+            } else {
+                DOM.busca.resultados?.classList.add('oculto');
+                filtrarAnimesSalvos();
+            }
+        });
         
         DOM.busca.campo.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -436,7 +498,7 @@ function setupListeners() {
         DOM.busca.form.addEventListener('submit', (e) => {
             e.preventDefault();
             const termo = DOM.busca.campo.value.trim();
-            if (termo) {
+            if (termo && modoBuscaAtual === 'online') {
                 buscarAnimes(termo);
             }
         });
@@ -533,7 +595,6 @@ function setupListeners() {
         console.error("❌ Botão de calendário não encontrado no HTML!");
     }
 
-    // E para fechar o novo modal:
     DOM.modais.calendarioFecharBtn?.addEventListener('click', () => {
         DOM.modais.calendario.close();
     });
@@ -583,10 +644,52 @@ function setupListeners() {
             buscarAnimes(termoBuscaAtual, paginaAtual);
         }
     });
+
+    // Menu Dropdown
+    const btnMenu = document.getElementById('btn-menu-perfil');
+    const dropdown = document.getElementById('dropdown-opcoes');
+
+    if (btnMenu && dropdown) {
+        btnMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('mostrar');
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (dropdown && dropdown.classList.contains('mostrar') && !dropdown.contains(e.target)) {
+            dropdown.classList.remove('mostrar');
+        }
+    });
+
+    const botoesDropdown = document.querySelectorAll('.dropdown-item');
+    botoesDropdown.forEach(botao => {
+        botao.addEventListener('click', () => {
+            dropdown.classList.remove('mostrar');
+        });
+    });
+
+    const btnTemaDropdown = document.getElementById('btn-tema-dropdown');
+    if (btnTemaDropdown) {
+        btnTemaDropdown.addEventListener('click', () => {
+            if (typeof toggleDarkMode === 'function') toggleDarkMode();
+            const icone = btnTemaDropdown.querySelector('.icone-tema');
+            if (icone) {
+                icone.textContent = document.body.classList.contains('dark-mode') ? '🌙' : '☀️';
+            }
+        });
+        
+        setTimeout(() => {
+            const icone = btnTemaDropdown.querySelector('.icone-tema');
+            if (icone && document.body.classList.contains('dark-mode')) {
+                icone.textContent = '🌙';
+            }
+        }, 100);
+    }
 }
 
 // ========================================================
-// 8. INICIALIZAÇÃO
+// 7. INICIALIZAÇÃO
 // ========================================================
 
 document.addEventListener('DOMContentLoaded', () => {

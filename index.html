@@ -34,15 +34,32 @@
         <div class="cabecalho-conteudo">
             <h1>Minha Lista de Animes</h1>
             <div class="cabecalho-utilitarios">
-                <div class="botoes-backup">
-                    <button id="btn-exportar" title="Baixar Backup (Salvar)" aria-label="Exportar catálogo" class="btn-icon-header">⬇️</button>
-                    <button id="btn-importar" title="Restaurar Backup (Carregar)" aria-label="Importar catálogo" class="btn-icon-header">⬆️</button>
-                    <input type="file" id="input-importar" accept=".json" class="oculto">
-                    <button id="btn-calendario" title="Calendário de Lançamentos" aria-label="Abrir calendário de lançamentos" class="btn-icon-header">📅</button>
-                    <button id="btn-stats" title="Ver Estatísticas" aria-label="Abrir estatísticas" class="btn-icon-header">📊</button>
-                    <button id="btn-roleta" title="Me sugira um anime!" aria-label="Sortear anime aleatório" class="btn-icon-header">🎲</button>
+                <div class="menu-perfil-container">
+                    <button id="btn-menu-perfil" class="btn-avatar" title="Menu do Usuário">
+                        <img src="https://placehold.co/40x40/d32f2f/white?text=P" alt="Usuário">
+                    </button>
+                    <div id="dropdown-opcoes" class="dropdown-conteudo">
+                        <div class="dropdown-cabecalho-info">
+                            <img src="https://placehold.co/40x40/d32f2f/white?text=P" alt="Usuário">
+                            <div class="info-texto">
+                                <strong>Meu Perfil</strong>
+                                <span>Catálogo de Animes</span>
+                            </div>
+                        </div>
+                        <hr class="dropdown-divisor">
+                        <button id="btn-calendario" class="dropdown-item"><span>📅</span> Calendário de Lançamentos</button>
+                        <button id="btn-stats" class="dropdown-item"><span>📊</span> Minhas Estatísticas</button>
+                        <button id="btn-roleta" class="dropdown-item"><span>🎲</span> Sortear um Anime</button>
+                        <hr class="dropdown-divisor">
+                        <button id="btn-exportar" class="dropdown-item"><span>⬇️</span> Fazer Backup (Salvar)</button>
+                        <button id="btn-importar-dropdown" class="dropdown-item" onclick="document.getElementById('input-importar').click()"><span>⬆️</span> Restaurar Backup</button>
+                        <input type="file" id="input-importar" accept=".json" class="oculto">
+                        <hr class="dropdown-divisor">
+                        <button id="btn-tema-dropdown" class="dropdown-item">
+                            <span class="icone-tema">☀️</span> Alterar Tema
+                        </button>
+                    </div>
                 </div>
-                <button id="dark-mode-icon-btn" aria-label="Modo Escuro"></button>
             </div>
         </div>
     </header>
@@ -57,12 +74,17 @@
                 <input 
                     type="search" 
                     id="campo-busca" 
-                    placeholder="Pesquise seu anime..." 
+                    placeholder="Pesquisar novos animes..." 
                     enterkeyhint="search"
                     autocapitalize="off"
                     autocomplete="off"
                     spellcheck="false"
                 />
+                
+                <button type="button" id="btn-toggle-busca" class="btn-toggle-modo" title="Modo Atual: Online">
+                    🌐
+                </button>
+
                 <button id="btn-buscar-lupa" class="btn-buscar-lupa" type="submit" aria-label="Pesquisar">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
@@ -163,8 +185,7 @@
     <dialog id="calendario-modal" class="modal-dialog">
         <button class="fechar-btn" id="fechar-calendario">&times;</button>
         <h2 class="titulo-centralizado" style="margin-top: 10px;">📅 Calendário de Lançamentos</h2>
-        <div id="calendario-conteudo" class="modal-tab-conteudo">
-        </div>
+        <div id="calendario-conteudo" class="modal-tab-conteudo"></div>
     </dialog>
 
     <button id="btn-topo" class="btn-topo" aria-label="Voltar ao topo">

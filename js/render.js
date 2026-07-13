@@ -210,6 +210,10 @@ function atualizarCardNaTela(malId, titulo, posterUrl, maxEpisodes, type, year, 
         const novoCard = renderizarCardAnime(animeDadosAPI, true, savedData, true);
         
         cardAntigo.replaceWith(novoCard);
+        
+        if (typeof filtrarAnimesSalvos === 'function') {
+            filtrarAnimesSalvos();
+        }
     }
 }
 

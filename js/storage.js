@@ -163,7 +163,7 @@ async function sincronizacaoInteligente() {
     });
     if (filaPendentes.length === 0) return;
 
-    for (const anime of filaPendentes.slice(0, 50)) {
+    for (const anime of filaPendentes.slice(0, 5)) {
         try {
             await new Promise(r => setTimeout(r, 3500));
 

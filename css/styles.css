@@ -110,56 +110,125 @@ button {
     display: none;
 }
 
-.botoes-backup {
-    display: flex;
-    gap: 10px;
-    margin-right: 15px;
+/* ==========================================================================
+   MENU DROPDOWN (Estilo Crunchyroll)
+   ========================================================================== */
+
+.menu-perfil-container {
+    position: relative;
+    display: inline-block;
 }
 
-.btn-icon-header {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1.2em;
-    width: 35px;
-    height: 35px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
-    color: white;
-}
-
-#dark-mode-icon-btn {
-    width: 40px;
-    height: 40px;
+.btn-avatar {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.5);
     border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    padding: 0;
     cursor: pointer;
-    border: 2px solid transparent;
-    transition: all 0.4s ease;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.btn-avatar:hover {
+    border-color: white;
+    transform: scale(1.05);
+}
+
+.btn-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.dropdown-conteudo {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 55px;
+    background-color: var(--cor-card-fundo);
+    min-width: 250px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border-radius: var(--raio-borda);
+    border: 1px solid var(--cor-borda);
+    z-index: 2000;
+    flex-direction: column;
+    overflow: hidden;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.dropdown-conteudo.mostrar {
+    display: flex;
+}
+
+.dropdown-cabecalho-info {
     display: flex;
     align-items: center;
-    justify-content: center;
-    background-color: #ffcc00;
-    box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+    padding: 15px;
+    gap: 15px;
+    background-color: rgba(0, 0, 0, 0.02);
 }
 
-#dark-mode-icon-btn::before {
-    content: '☀️';
-    font-size: 1.4em;
-    line-height: 1;
+body.dark-mode .dropdown-cabecalho-info {
+    background-color: rgba(255, 255, 255, 0.02);
 }
 
-body.dark-mode #dark-mode-icon-btn {
-    background-color: #4b4b8f;
-    box-shadow: 0 0 10px rgba(75, 75, 143, 0.8);
-    border-color: rgba(255, 255, 255, 0.2);
+.dropdown-cabecalho-info img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 1px solid var(--cor-borda);
 }
 
-body.dark-mode #dark-mode-icon-btn::before {
-    content: '🌙';
+.info-texto {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-texto strong {
+    color: var(--cor-texto-principal);
+    font-size: 1.1em;
+}
+
+.info-texto span {
+    color: var(--cor-texto-secundario);
+    font-size: 0.85em;
+}
+
+.dropdown-divisor {
+    border: none;
+    border-top: 1px solid var(--cor-borda);
+    margin: 0;
+}
+
+.dropdown-item {
+    background: transparent;
+    border: none;
+    padding: 12px 20px;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+    color: var(--cor-texto-principal);
+    font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item span {
     font-size: 1.2em;
+    width: 25px;
+    text-align: center;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--cor-primaria);
+}
+
+body.dark-mode .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 /* ==========================================================================
@@ -203,7 +272,7 @@ body.dark-mode #dark-mode-icon-btn::before {
 #campo-busca {
     width: 100%;
     flex: 1;
-    padding: 10px 35px 10px 15px;
+    padding: 10px 85px 10px 15px;
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
     background-color: var(--cor-card-fundo);
@@ -260,6 +329,32 @@ body.dark-mode #campo-busca::-webkit-search-cancel-button {
 
 .btn-buscar-lupa svg {
     pointer-events: none;
+}
+
+.btn-toggle-modo {
+    position: absolute;
+    right: 42px;
+    top: 0;
+    height: 100%;
+    width: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+    z-index: 10;
+    padding-bottom: 3px;
+}
+
+.btn-toggle-modo:hover {
+    transform: scale(1.1);
+}
+
+.btn-toggle-modo:active {
+    transform: scale(0.95);
 }
 
 #resultados-busca-api {
@@ -2349,7 +2444,6 @@ body.dark-mode .mini-card-anime {
         height: 20px !important;
         font-size: 0.65rem !important;
     }
-}
 
 /* --- MODO MOBILE: CALENDÁRIO --- */
     .calendario-grid {
@@ -2373,6 +2467,7 @@ body.dark-mode .mini-card-anime {
         font-size: 0.7rem !important;
         -webkit-line-clamp: 3 !important;
     }
+}
 
 @media (min-width: 601px) and (max-width: 900px) {
     .streaming-grid {
@@ -2385,16 +2480,6 @@ body.dark-mode .mini-card-anime {
    ========================================================================== */
 
 @media (hover: hover) {
-
-    /* --- CABEÇALHO --- */
-    .btn-icon-header:hover {
-        background-color: rgba(255, 255, 255, 0.4);
-    }
-    
-    #dark-mode-icon-btn:hover {
-        transform: scale(1.1);
-    }
-
     /* --- BARRA DE FERRAMENTAS --- */
     .btn-voltar-home:hover {
         background-color: #1976D2;
