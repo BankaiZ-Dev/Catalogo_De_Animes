@@ -135,24 +135,40 @@ function formatarListaSimples(arrayObjetos, limite = 3) {
             </span>`;
 }
 
-function formatarBroadcast(broadcast, status) {
-    if (!broadcast || !broadcast.day || !broadcast.time) return '';
+function converterHorarioJapaoParaBrasil(broadcast) {
+    if (!broadcast || !broadcast.day) return null;
 
     const diaIndexOriginal = DIAS_SEMANA_EN.indexOf(broadcast.day);
-    if (diaIndexOriginal === -1) return '';
+    if (diaIndexOriginal === -1) return null;
 
-    const [horasJapao, minutosJapao] = broadcast.time.split(':').map(Number);
-    let horasBrasil = horasJapao - 12;
     let diaIndexBrasil = diaIndexOriginal;
+    let horaFormatada = '';
 
-    if (horasBrasil < 0) {
-        horasBrasil += 24;
-        diaIndexBrasil = (diaIndexOriginal - 1 + 7) % 7;
+    if (broadcast.time) {
+        const [horasJapao, minutosJapao] = broadcast.time.split(':').map(Number);
+        let horasBrasil = horasJapao - 12;
+
+        if (horasBrasil < 0) {
+            horasBrasil += 24;
+            diaIndexBrasil = (diaIndexOriginal - 1 + 7) % 7;
+        }
+
+        horaFormatada = String(horasBrasil).padStart(2, '0') + ':' + String(minutosJapao || 0).padStart(2, '0');
     }
 
-    const horaFormatada = String(horasBrasil).padStart(2, '0') + ':' + String(minutosJapao).padStart(2, '0');
+    return {
+        diaIndex: diaIndexBrasil,
+        nomeDiaPt: DIAS_SEMANA_PT[diaIndexBrasil],
+        horaFormatada: horaFormatada
+    };
+}
+
+function formatarBroadcast(broadcast, status) {
+    const horarioConvertido = converterHorarioJapaoParaBrasil(broadcast);
     
+    if (!horarioConvertido || !horarioConvertido.horaFormatada) return '';
+
     const label = MAPA_BROADCAST_LABELS[status] || 'Era exibido:';
 
-    return `<p><strong>${label}</strong> ${DIAS_SEMANA_PT[diaIndexBrasil]} às ${horaFormatada} <span class="badge-tempo-total">(Horário de Brasília)</span></p>`;
+    return `<p><strong>${label}</strong> ${horarioConvertido.nomeDiaPt} às ${horarioConvertido.horaFormatada} <span class="badge-tempo-total">(Horário de Brasília)</span></p>`;
 }

@@ -282,7 +282,7 @@ function alternarModoBusca() {
         modoBuscaAtual = 'offline';
         btnToggle.innerHTML = '📁';
         btnToggle.title = 'Modo Atual: Seu Catálogo (Offline)';
-        DOM.busca.campo.placeholder = 'Procurar no seu Catálogo...)';
+        DOM.busca.campo.placeholder = 'Procurar no seu Catálogo...';
         showToast('Modo Offline: Buscando no seu catálogo', 'info');
         DOM.busca.resultados?.classList.add('oculto');
     } else {

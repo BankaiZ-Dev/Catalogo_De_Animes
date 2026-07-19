@@ -56,21 +56,10 @@ function agruparAnimesPorDia(animes) {
         const statusNormalizado = (animeSalvo.status || '').trim().toLowerCase();
         if (statusNormalizado !== 'quero ver' && statusNormalizado !== 'em andamento') return;
 
-        const diaIndexOriginal = DIAS_SEMANA_EN.indexOf(anime.broadcast.day);
+        const horarioConvertido = converterHorarioJapaoParaBrasil(anime.broadcast);
         
-        if (diaIndexOriginal !== -1) {
-            let diaIndexBrasil = diaIndexOriginal;
-            
-            if (anime.broadcast.time) {
-                const [horasJapao] = anime.broadcast.time.split(':').map(Number);
-                const horasBrasil = horasJapao - 12;
-                
-                if (horasBrasil < 0) {
-                    diaIndexBrasil = (diaIndexOriginal - 1 + 7) % 7;
-                }
-            }
-            const diaPt = DIAS_SEMANA_PT[diaIndexBrasil];
-            agrupado[diaPt].push(anime);
+        if (horarioConvertido) {
+            agrupado[horarioConvertido.nomeDiaPt].push(anime);
         }
     });
     return agrupado;

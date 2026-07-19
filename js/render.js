@@ -497,6 +497,15 @@ async function obterLinksStreaming(animeData) {
                 tipo: 'busca'
             });
         });
+
+        const urlGoogle = `https://www.google.com/search?q=${encodeURIComponent('Anime ' + tituloParaBusca)}`;
+        todosOsLinks.push({
+            nome: 'Google',
+            url: urlGoogle,
+            icon: 'https://www.google.com/s2/favicons?domain=google.com&sz=128',
+            cor: '#4285F4',
+            tipo: 'busca'
+        });
         
         return todosOsLinks;
     } catch (error) {
