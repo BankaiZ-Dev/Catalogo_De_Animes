@@ -52,6 +52,10 @@ function carregarAnimesSalvos() {
         switch (tipoOrdenacao) {
             case 'az': return a.title.localeCompare(b.title);
             case 'za': return b.title.localeCompare(a.title);
+            case 'lancamento-desc': 
+                return (parseInt(b.year) || 0) - (parseInt(a.year) || 0);
+            case 'lancamento-asc': 
+                return (parseInt(a.year) || 0) - (parseInt(b.year) || 0);
             case 'data-asc': return new Date(a.dateAdded) - new Date(b.dateAdded);
             case 'data-desc':
             default: return new Date(b.dateAdded) - new Date(a.dateAdded);
@@ -78,6 +82,10 @@ function carregarAnimesSalvos() {
 }
 
 function filtrarAnimesSalvos() {
+    if (modoBuscaAtual === 'online' && termoBuscaAtual !== '') {
+        return;
+    }
+
     const statusSelecionado = DOM.filtros.status?.value || 'todos';
     const termoBusca = (modoBuscaAtual === 'offline') ? (DOM.busca.campo?.value.toLowerCase().trim() || '') : '';
     
