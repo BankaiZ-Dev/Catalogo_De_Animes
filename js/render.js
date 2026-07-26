@@ -378,6 +378,7 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
         
         <div class="modal-tabs">
             <button class="tab-button ativo" onclick="mudarAba(event, 'sinopse')">📖 Sinopse</button>
+            <button class="tab-button" onclick="mudarAba(event, 'notas')">📝 Notas</button>
             <button class="tab-button" onclick="mudarAba(event, 'trailer')">🎥 Trailer</button>
             <button class="tab-button" onclick="mudarAba(event, 'musicas')">🎵 Músicas</button>
             <button class="tab-button" onclick="mudarAba(event, 'relacionados')">🔗 Relacionados</button>
@@ -387,6 +388,18 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
         <div class="modal-tab-conteudo">
             <div id="sinopse" class="tab-content ativo">
                 <div class="sinopse-texto">${sinopse}</div>
+            </div>
+
+            <div id="notas" class="tab-content oculto">
+                <div class="container-notas">
+                    <textarea 
+                        id="input-nota-anime" 
+                        class="textarea-notas" 
+                        placeholder="Escreva suas anotações, impressões ou lembretes sobre este anime..."
+                        oninput="salvarNotaLocal(${anime.mal_id}, this.value)"
+                    >${catalogoPessoal[anime.mal_id]?.notes || ''}</textarea>
+                    <span class="nota-status-salvo">💾 Salvo automaticamente</span>
+                </div>
             </div>
             
             ${trailerHTML}

@@ -3,11 +3,14 @@
 // Gerencia adição, remoção e atualização de animes no catálogo
 // ========================================================
 
-function fabricarAnimeSalvo(malId, titulo, poster, maxEpisodes, type, year, status = 'Quero Ver', statusLancamento = 'Unknown') {
+function fabricarAnimeSalvo(malId, titulo, poster, maxEpisodes, type, year, status = 'Quero Ver', statusLancamento = 'Unknown', synopsis = '', largePoster = '') {
     return {
         mal_id: parseInt(malId),
         title: titulo,
         poster: poster,
+        largePoster: largePoster || poster,
+        synopsis: synopsis || '',
+        notes: '',
         status: status,
         episode: 0,
         maxEpisodes: parseInt(maxEpisodes) || 0,
@@ -19,8 +22,8 @@ function fabricarAnimeSalvo(malId, titulo, poster, maxEpisodes, type, year, stat
     };
 }
 
-function salvarNovoAnimeNoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial, type, year, statusLancamento) {
-    const novoAnime = fabricarAnimeSalvo(malId, titulo, posterUrl, maxEpisodes, type, year, statusInicial, statusLancamento);
+function salvarNovoAnimeNoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial, type, year, statusLancamento, synopsis, largePoster) {
+    const novoAnime = fabricarAnimeSalvo(malId, titulo, posterUrl, maxEpisodes, statusInicial, type, year, statusLancamento, synopsis, largePoster);
     
     if (statusInicial === 'Concluído' && novoAnime.maxEpisodes) {
         novoAnime.episode = novoAnime.maxEpisodes;

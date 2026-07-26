@@ -48,7 +48,7 @@ async function apiBuscarSugestoes(query, signal) {
 
 async function apiObterDetalhesFull(malId) {
     const endpointJikan = `/${malId}/full`;
-    const endpointTenrai = `/${malId}`; 
+    const endpointTenrai = `/${malId}/full`; 
     return await fetchComFallback(endpointJikan, endpointTenrai);
 }
 

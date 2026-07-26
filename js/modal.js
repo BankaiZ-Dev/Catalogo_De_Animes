@@ -6,6 +6,54 @@
 async function abrirModal(malId) {
     const modalInfo = DOM.modais.animeInfo;
     const animeModal = DOM.modais.anime;
+    
+    const isSaved = catalogoPessoal.hasOwnProperty(malId);
+    const savedData = isSaved ? catalogoPessoal[malId] : null;
+
+    if (isSaved && savedData && savedData.synopsis) {
+        if (animeModal) {
+            animeModal.showModal();
+            animeModal.scrollTop = 0;
+        }
+        document.body.style.overflow = 'hidden';
+
+        const animeLocal = {
+            mal_id: savedData.mal_id,
+            title: savedData.title,
+            title_english: savedData.title,
+            images: { 
+                jpg: { 
+                    image_url: savedData.poster,
+                    large_image_url: savedData.largePoster || savedData.poster
+                } 
+            },
+            synopsis: savedData.synopsis,
+            type: savedData.type,
+            year: savedData.year,
+            episodes: savedData.maxEpisodes,
+            status: savedData.statusLancamento,
+            genres: savedData.genres || [],
+            studios: savedData.studios || [],
+            producers: savedData.producers || [],
+            licensors: savedData.licensors || [],
+            rating: savedData.rating || 'N/A',
+            season: savedData.season || '',
+            aired: savedData.aired || {},
+            duration: savedData.duration || 'N/A',
+            trailer: null,
+            theme: null,
+            relations: [],
+            streaming: []
+        };
+
+        const linksIniciais = [];
+        modalInfo.innerHTML = renderizarConteudoModal(animeLocal, savedData.synopsis, linksIniciais, true);
+        
+        if (navigator.onLine) {
+            carregarAbasDinamicasBackground(malId, animeLocal);
+        }
+        return;
+    }
 
     if (modalInfo) modalInfo.innerHTML = `
         <div class="modal-loading-container">
@@ -29,21 +77,60 @@ async function abrirModal(malId) {
             obterLinksStreaming(anime)
         ]);
 
-        const isSaved = catalogoPessoal.hasOwnProperty(malId);
+        if (isSaved) {
+            catalogoPessoal[malId].synopsis = sinopseTraduzida;
+            catalogoPessoal[malId].largePoster = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url;
+            catalogoPessoal[malId].genres = anime.genres;
+            catalogoPessoal[malId].studios = anime.studios;
+            catalogoPessoal[malId].producers = anime.producers;
+            catalogoPessoal[malId].licensors = anime.licensors;
+            catalogoPessoal[malId].rating = anime.rating;
+            catalogoPessoal[malId].season = anime.season;
+            catalogoPessoal[malId].aired = anime.aired;
+            catalogoPessoal[malId].duration = anime.duration;
+            salvarCatalogoImediato();
+        }
+
         modalInfo.innerHTML = renderizarConteudoModal(anime, sinopseTraduzida, linksStreaming, isSaved);
 
     } catch (error) {
         console.error(error);
+        if (modalInfo) modalInfo.innerHTML = '<p class="mensagem-erro-modal">Não foi possível carregar os detalhes.</p>';
+    }
+}
 
-        if (error.message === 'RATE_LIMIT') {
-            if (modalInfo) modalInfo.innerHTML = `
-                <div class="conteudo-vazio">
-                    <p>🚦 O servidor está ocupado.</p>
-                    <p style="font-size: 0.9em">Aguarde 5 segundos e tente novamente.</p>
-                </div>`;
-        } else {
-            if (modalInfo) modalInfo.innerHTML = '<p class="mensagem-erro-modal">Não foi possível carregar os detalhes.</p>';
+async function carregarAbasDinamicasBackground(malId, animeLocal) {
+    try {
+        const data = await apiObterDetalhesFull(malId);
+        const anime = data.data;
+        const linksStreaming = await obterLinksStreaming(anime);
+
+        animeLocal.trailer = anime.trailer;
+        animeLocal.theme = anime.theme;
+        animeLocal.relations = anime.relations;
+        animeLocal.streaming = anime.streaming;
+
+        const modalInfo = DOM.modais.animeInfo;
+        const modalAberto = DOM.modais.anime.hasAttribute('open');
+
+        if (modalAberto && modalInfo) {
+            const abaAtiva = modalInfo.querySelector('.tab-content.ativo')?.id || 'sinopse';
+            
+            const containerMusicas = modalInfo.querySelector('#musicas');
+            const containerRelacionados = modalInfo.querySelector('#relacionados');
+            const containerStreaming = modalInfo.querySelector('#streaming');
+            const containerTrailer = modalInfo.querySelector('#trailer');
+
+            if (containerMusicas) containerMusicas.innerHTML = renderizarAbaMusicas(anime.theme);
+            if (containerRelacionados) containerRelacionados.innerHTML = renderizarAbaRelacionados(anime.relations);
+            if (containerStreaming) containerStreaming.innerHTML = renderizarAbaStreaming(linksStreaming);
+            
+            if (containerTrailer && anime.trailer?.embed_url) {
+                const trailerUrl = anime.trailer.embed_url.replace(/[?&]autoplay=1/gi, '') + '&rel=0';
+                containerTrailer.innerHTML = `<div class="modal-trailer-container"><iframe src="${trailerUrl}" frameborder="0" allowfullscreen></iframe></div>`;
+            }
         }
+    } catch (e) {
     }
 }
 
@@ -293,9 +380,7 @@ function sugerirAnimeAleatorio() {
         const animeSorteado = animesCandidatos[index];
 
         hideGlobalLoading();
-        
         abrirModal(animeSorteado.mal_id);
-        
         showToast(`🎲 Sorteado: ${animeSorteado.title}`, "roleta");
         
     }, 800);

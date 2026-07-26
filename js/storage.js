@@ -183,3 +183,14 @@ async function sincronizacaoInteligente() {
         } catch (erro) { console.error(`[Sync] Falha ao atualizar ${anime.title}:`, erro); }
     }
 }
+
+// ========================================================
+// SALVAMENTO DAS NOTAS
+// ========================================================
+
+const salvarNotaLocal = debounce((malId, textoNota) => {
+    if (catalogoPessoal.hasOwnProperty(malId)) {
+        catalogoPessoal[malId].notes = textoNota;
+        salvarCatalogo();
+    }
+}, 500);
