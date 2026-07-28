@@ -4,6 +4,8 @@
 // ========================================================
 
 function fabricarAnimeSalvo(malId, titulo, poster, maxEpisodes, type, year, status = 'Quero Ver', statusLancamento = 'Unknown', synopsis = '', largePoster = '') {
+    const anoFormatado = (typeof year === 'string' && /^\d+$/.test(year)) ? parseInt(year, 10) : year;
+
     return {
         mal_id: parseInt(malId),
         title: titulo,
@@ -16,14 +18,14 @@ function fabricarAnimeSalvo(malId, titulo, poster, maxEpisodes, type, year, stat
         maxEpisodes: parseInt(maxEpisodes) || 0,
         dateAdded: new Date().toISOString(),
         type: type,
-        year: year,
+        year: anoFormatado,
         statusLancamento: statusLancamento,
         favorite: false
     };
 }
 
 function salvarNovoAnimeNoCatalogo(malId, titulo, posterUrl, maxEpisodes, statusInicial, type, year, statusLancamento, synopsis, largePoster) {
-    const novoAnime = fabricarAnimeSalvo(malId, titulo, posterUrl, maxEpisodes, statusInicial, type, year, statusLancamento, synopsis, largePoster);
+    const novoAnime = fabricarAnimeSalvo(malId, titulo, posterUrl, maxEpisodes, type, year, statusInicial, statusLancamento, synopsis, largePoster);
     
     if (statusInicial === 'Concluído' && novoAnime.maxEpisodes) {
         novoAnime.episode = novoAnime.maxEpisodes;
