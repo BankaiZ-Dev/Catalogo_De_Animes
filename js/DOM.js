@@ -32,7 +32,8 @@ const DOM = {
     // ========================================================
     filtros: {
         status: $('filtro-status'),
-        ordenacao: $('ordenacao-catalogo')
+        ordenacao: $('ordenacao-catalogo'),
+        tags: $('filtro-tags')
     },
 
     // ========================================================

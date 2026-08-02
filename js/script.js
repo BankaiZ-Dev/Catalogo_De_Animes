@@ -42,8 +42,17 @@ function carregarAnimesSalvos() {
         return;
     }
 
-    DOM.filtros.status?.classList.remove('oculto');
-    DOM.filtros.ordenacao?.classList.remove('oculto');
+    const btnToggleToolbar = document.getElementById('btn-toggle-toolbar');
+    const painelToolbarOpcoes = document.getElementById('painel-toolbar-opcoes');
+
+    btnToggleToolbar?.classList.remove('oculto');
+    painelToolbarOpcoes?.classList.remove('oculto');
+
+    painelToolbarOpcoes?.classList.remove('aberto');
+    if (btnToggleToolbar) {
+        btnToggleToolbar.innerHTML = '⚙️ Opções e Filtros ▾';
+    }
+
     DOM.busca.botaoVoltar?.classList.add('oculto');
 
     const tipoOrdenacao = DOM.filtros.ordenacao?.value || 'data-desc';
@@ -88,6 +97,7 @@ function filtrarAnimesSalvos() {
 
     const statusSelecionado = DOM.filtros.status?.value || 'todos';
     const termoBusca = (modoBuscaAtual === 'offline') ? (DOM.busca.campo?.value.toLowerCase().trim() || '') : '';
+    const filtroTagValor = DOM.filtros.tags?.value.toLowerCase().trim() || '';
     
     const cards = DOM.cards.lista.querySelectorAll('.card-anime');
     let animesVisiveis = 0;
@@ -102,17 +112,31 @@ function filtrarAnimesSalvos() {
         } else if (statusSelecionado !== 'todos') {
             if (!animeData || animeData.status !== statusSelecionado) mostrarCard = false;
         }
+
+        if (mostrarCard && filtroTagValor !== '') {
+            if (!animeData || !animeData.customTags || !animeData.customTags.includes(filtroTagValor)) {
+                mostrarCard = false;
+            }
+        }
         
         if (termoBusca && mostrarCard) {
             if (!animeData) {
                 mostrarCard = false;
             } else {
                 const tituloAnime = animeData.title.toLowerCase();
+                const termoLimpo = termoBusca.replace('#', '').trim();
                 
-                if (termoBusca.length === 1) {
-                    if (!tituloAnime.startsWith(termoBusca)) mostrarCard = false;
+                let matchTitulo = false;
+                if (termoLimpo.length === 1) {
+                    matchTitulo = tituloAnime.startsWith(termoLimpo);
                 } else {
-                    if (!tituloAnime.includes(termoBusca)) mostrarCard = false;
+                    matchTitulo = tituloAnime.includes(termoLimpo);
+                }
+                
+                const matchTag = animeData.customTags && animeData.customTags.some(tag => tag.includes(termoLimpo));
+                
+                if (!matchTitulo && !matchTag) {
+                    mostrarCard = false;
                 }
             }
         }
@@ -168,8 +192,10 @@ async function buscarAnimes(query, page = 1) {
         return;
     }
 
-    DOM.filtros.status?.classList.add('oculto');
-    DOM.filtros.ordenacao?.classList.add('oculto');
+    document.getElementById('btn-toggle-toolbar')?.classList.add('oculto');
+    document.getElementById('painel-toolbar-opcoes')?.classList.add('oculto');
+    document.getElementById('painel-toolbar-opcoes')?.classList.remove('aberto');
+
     DOM.busca.botaoVoltar?.classList.remove('oculto');
 
     try {
@@ -694,6 +720,21 @@ function setupListeners() {
             }
         }, 100);
     }
+
+    // Filtros
+    const btnToggleToolbar = document.getElementById('btn-toggle-toolbar');
+    const painelToolbarOpcoes = document.getElementById('painel-toolbar-opcoes');
+
+    if (btnToggleToolbar && painelToolbarOpcoes) {
+        btnToggleToolbar.addEventListener('click', () => {
+            const estaAberto = painelToolbarOpcoes.classList.toggle('aberto');
+            btnToggleToolbar.innerHTML = estaAberto ? '⚙️ Ocultar Opções e Filtros▴' : '⚙️ Opções e Filtros ▾';
+        });
+    }
+
+    if (DOM.filtros.tags) {
+        DOM.filtros.tags.addEventListener('input', filtrarAnimesSalvos);
+    }
 }
 
 // ========================================================
@@ -701,20 +742,16 @@ function setupListeners() {
 // ========================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Carrega preferências
     aplicarModoEscuroInicial();
     aplicarModoVisualizacaoInicial();
     aplicarPreferenciasFiltros();
     
-    // Carrega dados
     carregarCatalogo();
     carregarAnimesSalvos();
     
-    // Configura eventos
     setupListeners();
     setupServiceWorker();
     
-    // Verifica se teve atualização
     if (localStorage.getItem('app_updated')) {
         showToast('✅ App atualizado para a versão mais recente!', 'success');
         localStorage.removeItem('app_updated');

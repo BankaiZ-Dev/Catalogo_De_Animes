@@ -17,6 +17,9 @@ function carregarCatalogo() {
             if (!catalogoPessoal[malId].hasOwnProperty('favorite')) {
                 catalogoPessoal[malId].favorite = false;
             }
+            if (!catalogoPessoal[malId].hasOwnProperty('customTags')) {
+                catalogoPessoal[malId].customTags = [];
+            }
         });
         salvarCatalogo();
     }
@@ -90,6 +93,10 @@ function importarBackup(event) {
                     
                     if (!anime.hasOwnProperty('favorite')) {
                         anime.favorite = false;
+                    }
+
+                    if (!anime.hasOwnProperty('customTags')) {
+                        anime.customTags = [];
                     }
 
                     if (!anime.hasOwnProperty('year') || anime.year === undefined) {

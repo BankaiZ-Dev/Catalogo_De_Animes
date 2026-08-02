@@ -20,7 +20,8 @@ function fabricarAnimeSalvo(malId, titulo, poster, maxEpisodes, type, year, stat
         type: type,
         year: anoFormatado,
         statusLancamento: statusLancamento,
-        favorite: false
+        favorite: false,
+        customTags: []
     };
 }
 
@@ -284,4 +285,74 @@ function toggleFavorite(malId) {
             isFavorite ? 'fav-add' : 'fav-remove'
         );
     }
+}
+
+// ========================================================
+// SISTEMA DE TAGS PERSONALIZADAS
+// ========================================================
+
+function adicionarTagAoAnime(malId) {
+    const input = document.getElementById(`input-nova-tag-${malId}`);
+    if (!input) return;
+
+    const tagLimpa = input.value.trim().toLowerCase();
+
+    if (!tagLimpa) return;
+
+    if (catalogoPessoal.hasOwnProperty(malId)) {
+        if (!catalogoPessoal[malId].customTags) {
+            catalogoPessoal[malId].customTags = [];
+        }
+        
+        if (!catalogoPessoal[malId].customTags.includes(tagLimpa)) {
+            catalogoPessoal[malId].customTags.push(tagLimpa);
+            salvarCatalogoImediato();
+            
+            const container = document.getElementById(`container-pilulas-${malId}`);
+            if (container) {
+                container.innerHTML = renderizarPilulasTagsHTML(catalogoPessoal[malId].customTags, malId);
+            }
+            
+            atualizarDatalistTags();
+        } else {
+            showToast('Esta tag já está neste anime.', 'info');
+        }
+    }
+    
+    input.value = '';
+    input.focus();
+}
+
+function removerTagDoAnime(malId, tagParaRemover) {
+    if (catalogoPessoal.hasOwnProperty(malId) && catalogoPessoal[malId].customTags) {
+        catalogoPessoal[malId].customTags = catalogoPessoal[malId].customTags.filter(tag => tag !== tagParaRemover);
+        salvarCatalogoImediato();
+        
+        const container = document.getElementById(`container-pilulas-${malId}`);
+        if (container) {
+            container.innerHTML = renderizarPilulasTagsHTML(catalogoPessoal[malId].customTags, malId);
+        }
+        
+        atualizarDatalistTags();
+    }
+}
+
+function atualizarDatalistTags() {
+    const datalist = document.getElementById('lista-tags-salvas');
+    if (!datalist) return;
+    
+    const todasTags = new Set();
+    
+    Object.values(catalogoPessoal).forEach(anime => {
+        if (anime.customTags) {
+            anime.customTags.forEach(tag => todasTags.add(tag));
+        }
+    });
+    
+    datalist.innerHTML = '';
+    todasTags.forEach(tag => {
+        const option = document.createElement('option');
+        option.value = tag;
+        datalist.appendChild(option);
+    });
 }

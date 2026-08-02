@@ -392,6 +392,24 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
 
             <div id="notas" class="tab-content oculto">
                 <div class="container-notas">
+                    <div class="secao-tags">
+                        <div class="tags-input-group">
+                            <input 
+                                type="text" 
+                                id="input-nova-tag-${anime.mal_id}" 
+                                class="input-tag" 
+                                placeholder="Adicionar tag (ex: Maratona, incrivel)..." 
+                                list="lista-tags-salvas"
+                                onkeypress="if(event.key === 'Enter') adicionarTagAoAnime(${anime.mal_id})"
+                            >
+                            <button class="btn-add-tag" onclick="adicionarTagAoAnime(${anime.mal_id})">Adicionar</button>
+                        </div>
+                        
+                        <div id="container-pilulas-${anime.mal_id}" class="container-pilulas-tags">
+                            ${renderizarPilulasTagsHTML(catalogoPessoal[anime.mal_id]?.customTags || [], anime.mal_id)}
+                        </div>
+                    </div>
+
                     <textarea 
                         id="input-nota-anime" 
                         class="textarea-notas" 
@@ -416,6 +434,17 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
                 ${streamingHTML}
             </div>
         </div>`;
+}
+
+function renderizarPilulasTagsHTML(tagsArray, malId) {
+    if (!tagsArray || tagsArray.length === 0) return '<span class="sem-tags-msg">Nenhuma tag adicionada.</span>';
+    
+    return tagsArray.map(tag => `
+        <span class="pilula-tag">
+            #${tag} 
+            <button class="remover-tag-btn" onclick="removerTagDoAnime(${malId}, '${tag}')">&times;</button>
+        </span>
+    `).join('');
 }
 
 // --- COMPONENTES DE PAGINAÇÃO ---
