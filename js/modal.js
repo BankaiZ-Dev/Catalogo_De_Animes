@@ -49,6 +49,8 @@ async function abrirModal(malId) {
         const linksIniciais = [];
         modalInfo.innerHTML = renderizarConteudoModal(animeLocal, savedData.synopsis, linksIniciais, true);
         
+        atualizarDatalistTags();
+
         if (navigator.onLine) {
             carregarAbasDinamicasBackground(malId, animeLocal);
         }
@@ -92,6 +94,8 @@ async function abrirModal(malId) {
         }
 
         modalInfo.innerHTML = renderizarConteudoModal(anime, sinopseTraduzida, linksStreaming, isSaved);
+        
+        if (isSaved) atualizarDatalistTags();
 
     } catch (error) {
         console.error(error);
