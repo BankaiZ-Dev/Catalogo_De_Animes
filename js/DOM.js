@@ -17,7 +17,7 @@ const DOM = {
     },
 
     // ========================================================
-    // BUSCA & FILTROS
+    // BUSCA
     // ========================================================
     busca: {
         campo: $('campo-busca'),
@@ -28,12 +28,21 @@ const DOM = {
     },
 
     // ========================================================
+    // BARRA DE FERRAMENTAS E PAINEL
+    // ========================================================
+    barraFerramentas: {
+        botaoToggle: $('btn-toggle-toolbar'),
+        painelOpcoes: $('painel-toolbar-opcoes')
+    },
+
+    // ========================================================
     // FILTROS & ORDENAÇÃO
     // ========================================================
     filtros: {
         status: $('filtro-status'),
         ordenacao: $('ordenacao-catalogo'),
-        tags: $('filtro-tags')
+        tags: $('filtro-tags'),
+        tipo: $('filtro-tipo')
     },
 
     // ========================================================

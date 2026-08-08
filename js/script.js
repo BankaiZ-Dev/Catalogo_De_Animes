@@ -42,17 +42,8 @@ function carregarAnimesSalvos() {
         return;
     }
 
-    const btnToggleToolbar = document.getElementById('btn-toggle-toolbar');
-    const painelToolbarOpcoes = document.getElementById('painel-toolbar-opcoes');
-
-    btnToggleToolbar?.classList.remove('oculto');
-    painelToolbarOpcoes?.classList.remove('oculto');
-
-    painelToolbarOpcoes?.classList.remove('aberto');
-    if (btnToggleToolbar) {
-        btnToggleToolbar.innerHTML = '⚙️ Opções e Filtros ▾';
-    }
-
+    DOM.barraFerramentas.botaoToggle?.classList.remove('oculto');
+    DOM.barraFerramentas.painelOpcoes?.classList.remove('oculto');
     DOM.busca.botaoVoltar?.classList.add('oculto');
 
     const tipoOrdenacao = DOM.filtros.ordenacao?.value || 'data-desc';
@@ -96,6 +87,7 @@ function filtrarAnimesSalvos() {
     }
 
     const statusSelecionado = DOM.filtros.status?.value || 'todos';
+    const tipoSelecionado = DOM.filtros.tipo?.value || 'todos';
     const termoBusca = (modoBuscaAtual === 'offline') ? (DOM.busca.campo?.value.toLowerCase().trim() || '') : '';
     const filtroTagValor = DOM.filtros.tags?.value.toLowerCase().trim() || '';
     
@@ -111,6 +103,12 @@ function filtrarAnimesSalvos() {
             if (!animeData || !animeData.favorite) mostrarCard = false;
         } else if (statusSelecionado !== 'todos') {
             if (!animeData || animeData.status !== statusSelecionado) mostrarCard = false;
+        }
+
+        if (mostrarCard && tipoSelecionado !== 'todos') {
+            if (!animeData || animeData.type !== tipoSelecionado) {
+                mostrarCard = false;
+            }
         }
 
         if (mostrarCard && filtroTagValor !== '') {
@@ -187,15 +185,20 @@ async function buscarAnimes(query, page = 1) {
 
     if (query.trim() === '') {
         DOM.paginacao.container?.classList.add('oculto');
+        DOM.barraFerramentas.painelOpcoes?.classList.remove('aberto');
+
+        if (DOM.barraFerramentas.botaoToggle) {
+            DOM.barraFerramentas.botaoToggle.innerHTML = '⚙️ Opções e Filtros ▾';
+        }
+
         carregarAnimesSalvos();
         hideGlobalLoading();
         return;
     }
 
-    document.getElementById('btn-toggle-toolbar')?.classList.add('oculto');
-    document.getElementById('painel-toolbar-opcoes')?.classList.add('oculto');
-    document.getElementById('painel-toolbar-opcoes')?.classList.remove('aberto');
-
+    DOM.barraFerramentas.botaoToggle?.classList.add('oculto');
+    DOM.barraFerramentas.painelOpcoes?.classList.add('oculto');
+    DOM.barraFerramentas.painelOpcoes?.classList.remove('aberto');
     DOM.busca.botaoVoltar?.classList.remove('oculto');
 
     try {
@@ -306,6 +309,11 @@ function resetarInterfaceDeBusca() {
     DOM.busca.campo && (DOM.busca.campo.value = '');
     DOM.busca.resultados?.classList.add('oculto');
     DOM.busca.botaoVoltar?.classList.add('oculto');
+    DOM.barraFerramentas.painelOpcoes?.classList.remove('aberto');
+
+    if (DOM.barraFerramentas.botaoToggle) {
+        DOM.barraFerramentas.botaoToggle.innerHTML = '⚙️ Opções e Filtros ▾';
+    }
     carregarAnimesSalvos();
 }
 
@@ -357,6 +365,7 @@ function aplicarModoVisualizacaoInicial() {
 function aplicarPreferenciasFiltros() {
     const statusSalvo = localStorage.getItem(STORAGE_KEYS.FILTRO_STATUS);
     const ordemSalva = localStorage.getItem(STORAGE_KEYS.FILTRO_ORDEM);
+    const tipoSalvo = localStorage.getItem(STORAGE_KEYS.FILTRO_TIPO);
 
     if (statusSalvo && DOM.filtros.status) {
         DOM.filtros.status.value = statusSalvo;
@@ -364,6 +373,10 @@ function aplicarPreferenciasFiltros() {
 
     if (ordemSalva && DOM.filtros.ordenacao) {
         DOM.filtros.ordenacao.value = ordemSalva;
+    }
+
+    if (tipoSalvo && DOM.filtros.tipo) {
+        DOM.filtros.tipo.value = tipoSalvo;
     }
 }
 
@@ -722,19 +735,21 @@ function setupListeners() {
     }
 
     // Filtros
-    const btnToggleToolbar = document.getElementById('btn-toggle-toolbar');
-    const painelToolbarOpcoes = document.getElementById('painel-toolbar-opcoes');
-
-    if (btnToggleToolbar && painelToolbarOpcoes) {
-        btnToggleToolbar.addEventListener('click', () => {
-            const estaAberto = painelToolbarOpcoes.classList.toggle('aberto');
-            btnToggleToolbar.innerHTML = estaAberto ? '⚙️ Ocultar Opções e Filtros▴' : '⚙️ Opções e Filtros ▾';
+    if (DOM.barraFerramentas.botaoToggle && DOM.barraFerramentas.painelOpcoes) {
+        DOM.barraFerramentas.botaoToggle.addEventListener('click', () => {
+            const estaAberto = DOM.barraFerramentas.painelOpcoes.classList.toggle('aberto');
+            DOM.barraFerramentas.botaoToggle.innerHTML = estaAberto ? '⚙️ Ocultar Opções ▴' : '⚙️ Opções e Filtros ▾';
         });
     }
 
     if (DOM.filtros.tags) {
         DOM.filtros.tags.addEventListener('input', filtrarAnimesSalvos);
     }
+
+    DOM.filtros.tipo?.addEventListener('change', () => {
+        localStorage.setItem(STORAGE_KEYS.FILTRO_TIPO, DOM.filtros.tipo.value);
+        filtrarAnimesSalvos();
+    });
 }
 
 // ========================================================

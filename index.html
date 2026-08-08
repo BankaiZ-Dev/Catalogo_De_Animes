@@ -99,29 +99,11 @@
             </button>
 
             <div id="painel-toolbar-opcoes" class="painel-toolbar-opcoes">
-                
                 <div class="view-mode-toggle">
                     <button class="view-btn active" data-view="grid" title="Grade Normal">◫</button>
                     <button class="view-btn" data-view="compact" title="Grade Compacta">▦</button>
                     <button class="view-btn" data-view="list" title="Lista">☰</button>
                 </div>
-
-                <select id="filtro-status">
-                    <option value="todos">Todos os Status</option>
-                    <option value="Quero Ver">Quero Ver</option>
-                    <option value="Em Andamento">Em Andamento</option>
-                    <option value="Concluído">Concluído</option>
-                    <option value="favoritos">Favoritos</option> 
-                </select>
-
-                <input 
-                    type="search"
-                    id="filtro-tags" 
-                    class="input-filtro-tag" 
-                    placeholder="🏷️ Filtrar por tag..." 
-                    list="lista-tags-salvas"
-                    autocomplete="off"
-                >
 
                 <select id="ordenacao-catalogo">
                     <option value="data-asc">Primeiros Adicionados</option>
@@ -131,6 +113,35 @@
                     <option value="az">Nome (A-Z)</option>
                     <option value="za">Nome (Z-A)</option>
                 </select>
+
+                <select id="filtro-status">
+                    <option value="todos">Todos os Status</option>
+                    <option value="Quero Ver">Quero Ver</option>
+                    <option value="Em Andamento">Em Andamento</option>
+                    <option value="Concluído">Concluído</option>
+                    <option value="favoritos">Favoritos</option>
+                </select>
+
+                <select id="filtro-tipo">
+                    <option value="todos">Todos os Formatos</option>
+                    <option value="TV">Série de TV</option>
+                    <option value="Movie">Filme</option>
+                    <option value="OVA">OVA</option>
+                    <option value="ONA">Web ONA</option>
+                    <option value="Special">Especial</option>
+                    <option value="TV Special">Especial de TV</option>
+                    <option value="Music">Musical</option>
+                    <option value="Unknown">Desconhecido</option>
+                </select>
+
+                <input 
+                    type="search" 
+                    id="filtro-tags" 
+                    class="input-filtro-tag" 
+                    placeholder="🏷️ Filtrar por tag..." 
+                    list="lista-tags-salvas"
+                    autocomplete="off"
+                >
 
             </div>
         </div>
