@@ -56,7 +56,13 @@ function atualizarEpisodioEStatus(malId, change) {
     }
 
     salvarCatalogo();
-    limparCacheCalendario();
+    
+    const estavaNoCalendario = (statusBefore === 'Quero Ver' || statusBefore === 'Em Andamento');
+    const vaiEstarNoCalendario = (savedData.status === 'Quero Ver' || savedData.status === 'Em Andamento');
+
+    if (estavaNoCalendario !== vaiEstarNoCalendario) {
+        limparCacheCalendario();
+    }
 
     return { 
         statusChanged: savedData.status !== statusBefore,

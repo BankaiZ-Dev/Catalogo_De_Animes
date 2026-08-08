@@ -119,7 +119,6 @@
                     <option value="Quero Ver">Quero Ver</option>
                     <option value="Em Andamento">Em Andamento</option>
                     <option value="Concluído">Concluído</option>
-                    <option value="favoritos">Favoritos</option>
                 </select>
 
                 <select id="filtro-tipo">
@@ -134,15 +133,20 @@
                     <option value="Unknown">Desconhecido</option>
                 </select>
 
-                <input 
-                    type="search" 
-                    id="filtro-tags" 
-                    class="input-filtro-tag" 
-                    placeholder="🏷️ Filtrar por tag..." 
-                    list="lista-tags-salvas"
-                    autocomplete="off"
-                >
-
+                <div class="grupo-tags-favoritos">
+                    <input 
+                        type="search" 
+                        id="filtro-tags" 
+                        class="input-filtro-tag" 
+                        placeholder="🏷️ Filtrar por tag..." 
+                        list="lista-tags-salvas"
+                        autocomplete="off"
+                    >
+                    <button id="btn-filtro-favorito" class="btn-filtro-favorito" title="Mostrar apenas favoritos">
+                        ⭐
+                    </button>
+                </div>
+                
             </div>
         </div>
 

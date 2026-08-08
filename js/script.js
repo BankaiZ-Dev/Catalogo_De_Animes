@@ -90,6 +90,7 @@ function filtrarAnimesSalvos() {
     const tipoSelecionado = DOM.filtros.tipo?.value || 'todos';
     const termoBusca = (modoBuscaAtual === 'offline') ? (DOM.busca.campo?.value.toLowerCase().trim() || '') : '';
     const filtroTagValor = DOM.filtros.tags?.value.toLowerCase().trim() || '';
+    const mostrandoSomenteFavoritos = DOM.filtros.favorito?.classList.contains('ativo');
     
     const cards = DOM.cards.lista.querySelectorAll('.card-anime');
     let animesVisiveis = 0;
@@ -99,9 +100,11 @@ function filtrarAnimesSalvos() {
         const animeData = catalogoPessoal[malId];
         let mostrarCard = true;
         
-        if (statusSelecionado === 'favoritos') {
+        if (mostrarCard && mostrandoSomenteFavoritos) {
             if (!animeData || !animeData.favorite) mostrarCard = false;
-        } else if (statusSelecionado !== 'todos') {
+        }
+
+        if (mostrarCard && statusSelecionado !== 'todos') {
             if (!animeData || animeData.status !== statusSelecionado) mostrarCard = false;
         }
 
@@ -366,6 +369,7 @@ function aplicarPreferenciasFiltros() {
     const statusSalvo = localStorage.getItem(STORAGE_KEYS.FILTRO_STATUS);
     const ordemSalva = localStorage.getItem(STORAGE_KEYS.FILTRO_ORDEM);
     const tipoSalvo = localStorage.getItem(STORAGE_KEYS.FILTRO_TIPO);
+    const favoritoSalvo = localStorage.getItem(STORAGE_KEYS.FILTRO_FAVORITO);
 
     if (statusSalvo && DOM.filtros.status) {
         DOM.filtros.status.value = statusSalvo;
@@ -377,6 +381,10 @@ function aplicarPreferenciasFiltros() {
 
     if (tipoSalvo && DOM.filtros.tipo) {
         DOM.filtros.tipo.value = tipoSalvo;
+    }
+
+    if (favoritoSalvo === 'true' && DOM.filtros.favorito) {
+        DOM.filtros.favorito.classList.add('ativo');
     }
 }
 
@@ -600,7 +608,11 @@ function setupListeners() {
     dialogs.forEach(dialog => {
         dialog.addEventListener('click', (e) => {
             if (e.target === dialog) {
-                dialog.close();
+                if (dialog.id === 'anime-modal' && typeof fecharModal === 'function') {
+                    fecharModal();
+                } else {
+                    dialog.close();
+                }
             }
         });
     });
@@ -748,6 +760,13 @@ function setupListeners() {
 
     DOM.filtros.tipo?.addEventListener('change', () => {
         localStorage.setItem(STORAGE_KEYS.FILTRO_TIPO, DOM.filtros.tipo.value);
+        filtrarAnimesSalvos();
+    });
+
+    // Filtro de Favoritos (Botão)
+    DOM.filtros.favorito?.addEventListener('click', () => {
+        const estaAtivo = DOM.filtros.favorito.classList.toggle('ativo');
+        localStorage.setItem(STORAGE_KEYS.FILTRO_FAVORITO, estaAtivo ? 'true' : 'false');
         filtrarAnimesSalvos();
     });
 }

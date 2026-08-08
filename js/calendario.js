@@ -9,6 +9,11 @@ function limparCacheCalendario() {
 }
 
 async function carregarCalendarioSemanal() {
+    if (cacheCalendario) {
+        renderizarCalendario(cacheCalendario);
+        return; 
+    }
+        
     showGlobalLoading("Carregando calendário...");
 
     try {

@@ -15,7 +15,8 @@ const STORAGE_KEYS = {
     VIEW_MODE: 'view_mode_preferido',
     FILTRO_STATUS: 'filtro_status_pref',
     FILTRO_ORDEM: 'filtro_ordem_pref',
-    FILTRO_TIPO: 'filtro_tipo_pref'
+    FILTRO_TIPO: 'filtro_tipo_pref',
+    FILTRO_FAVORITO: 'filtro_favorito_pref'
 };
 
 const MAPA_GENEROS = {

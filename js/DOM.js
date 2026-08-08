@@ -42,7 +42,8 @@ const DOM = {
         status: $('filtro-status'),
         ordenacao: $('ordenacao-catalogo'),
         tags: $('filtro-tags'),
-        tipo: $('filtro-tipo')
+        tipo: $('filtro-tipo'),
+        favorito: $('btn-filtro-favorito')
     },
 
     // ========================================================
