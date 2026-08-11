@@ -115,8 +115,14 @@ function filtrarAnimesSalvos() {
         }
 
         if (mostrarCard && filtroTagValor !== '') {
-            if (!animeData || !animeData.customTags || !animeData.customTags.includes(filtroTagValor)) {
-                mostrarCard = false;
+            if (filtroTagValor === 'sem tag') {
+                if (animeData && animeData.customTags && animeData.customTags.length > 0) {
+                    mostrarCard = false;
+                }
+            } else {
+                if (!animeData || !animeData.customTags || !animeData.customTags.includes(filtroTagValor)) {
+                    mostrarCard = false;
+                }
             }
         }
         
@@ -611,9 +617,16 @@ function setupListeners() {
                 if (dialog.id === 'anime-modal' && typeof fecharModal === 'function') {
                     fecharModal();
                 } else {
-                    dialog.close();
+                    dialog.close(); 
                 }
             }
+        });
+
+        dialog.addEventListener('close', () => {
+            document.body.style.overflow = '';
+            
+            const iframe = dialog.querySelector('iframe');
+            if (iframe) iframe.src = ''; 
         });
     });
 
@@ -628,7 +641,7 @@ function setupListeners() {
 
     // Estatísticas & Roleta
     DOM.acoesGlobais.botaoStats?.addEventListener('click', calcularEstatisticas);
-    DOM.modais.statsFecharBtn?.addEventListener('click', () => DOM.modais.stats.close());;
+    DOM.modais.statsFecharBtn?.addEventListener('click', () => DOM.modais.stats.close());
     DOM.acoesGlobais.botaoRoleta?.addEventListener('click', sugerirAnimeAleatorio);
 
     // Modo de Visualização

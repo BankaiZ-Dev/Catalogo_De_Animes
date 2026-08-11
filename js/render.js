@@ -490,28 +490,6 @@ function renderizarNumerosPaginacao(paginaAtual, totalPaginas) {
     if (totalPaginas > 1) container.appendChild(criarBotao(totalPaginas));
 }
 
-// --- ATUALIZAÇÃO EM TEMPO REAL DO CARD ---
-function atualizarInterfaceCard(malId) {
-    const anime = catalogoPessoal[malId];
-    const card = getCardAnime(malId);
-    
-    if (!card) return;
-
-    const anoEl = card.querySelector('.anime-ano'); 
-    if (anoEl) anoEl.textContent = anime.year;
-
-    const progressoEl = getTextoProgresso(malId);
-    if (progressoEl) {
-        progressoEl.textContent = `Ep ${anime.episode}${anime.maxEpisodes ? ' / ' + anime.maxEpisodes : ''}`;
-    }
-    
-    const barra = getBarraProgresso(malId);
-    if (barra && anime.maxEpisodes > 0) {
-        const porc = (anime.episode / anime.maxEpisodes) * 100;
-        barra.style.width = porc + '%';
-    }
-}
-
 // --- OBTER LINKS DE STREAMING ---
 async function obterLinksStreaming(animeData) {
     try {

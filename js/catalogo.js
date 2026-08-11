@@ -361,4 +361,8 @@ function atualizarDatalistTags() {
         option.value = tag;
         datalist.appendChild(option);
     });
+    
+    const optionSemTag = document.createElement('option');
+    optionSemTag.value = 'sem tag';
+    datalist.appendChild(optionSemTag);
 }

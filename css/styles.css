@@ -106,10 +106,6 @@ button {
     gap: 15px;
 }
 
-.cabecalho-utilitarios p {
-    display: none;
-}
-
 /* ==========================================================================
    MENU DROPDOWN (Estilo Crunchyroll)
    ========================================================================== */
@@ -1084,8 +1080,7 @@ body.dark-mode .barra-progresso-fundo {
     justify-content: center;
 }
 
-.lista-cards.compact-view .card-anime.active-mobile .card-overlay-wrapper,
-.lista-cards.compact-view .card-anime.active-mobile .badge-favorito {
+.lista-cards.compact-view .card-anime.active-mobile .card-overlay-wrapper {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
@@ -1095,9 +1090,7 @@ body.dark-mode .barra-progresso-fundo {
     transform: translateY(-3px);
 }
 
-.lista-cards.compact-view .card-overlay-wrapper,
-.lista-cards.compact-view .btn-favorito-container,
-.lista-cards.compact-view .badge-favorito {
+.lista-cards.compact-view .card-overlay-wrapper {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease, transform 0.3s ease;
@@ -1821,15 +1814,6 @@ body.dark-mode .mini-card-anime {
     top: auto;
     left: auto;
     margin: 0;
-}
-
-#toast-container:popover-open {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    top: auto;
-    left: auto;
-    margin: 0;
     display: flex;
     flex-direction: column;
 }
@@ -2128,11 +2112,6 @@ body.dark-mode .mini-card-anime {
 
 /* Desktop */
 @media (min-width: 768px) {
-    .cabecalho-utilitarios p {
-        display: block;
-        font-size: 0.9em;
-    }
-    
     .cabecalho h1 {
         font-size: 1.8em;
     }
@@ -2220,7 +2199,7 @@ body.dark-mode .mini-card-anime {
         margin-bottom: 10px;
     }
 
-    #modal-anime {
+    #anime-modal {
         width: 95%;
         max-height: 90vh;
         position: fixed;
@@ -2713,8 +2692,7 @@ body.dark-mode .mini-card-anime {
         transform: translateY(-3px);
     }
 
-    .lista-cards.compact-view .card-anime:hover .card-overlay-wrapper,
-    .lista-cards.compact-view .card-anime:hover .badge-favorito {
+    .lista-cards.compact-view .card-anime:hover .card-overlay-wrapper {
         opacity: 1;
         pointer-events: auto;
     }
