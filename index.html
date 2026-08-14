@@ -218,6 +218,165 @@
         <p class="nota-rodape">*Estimativa baseada em 24min por episódio.</p>
     </dialog>
 
+    <dialog id="roleta-modal" class="modal-dialog modal-roleta">
+        <button class="fechar-btn" id="fechar-roleta">&times;</button>
+        
+        <div id="roleta-step-config" class="roleta-step ativo">
+            <h2 class="titulo-centralizado">🎲 O que vamos assistir hoje?</h2>
+            
+            <div class="roleta-filtros-grid">
+                <div class="roleta-filtro-grupo">
+                    <label class="roleta-label">Status da Lista:</label>
+                    <div class="roleta-pills">
+                        <input type="radio" name="rol-status" id="rol-st-qq" value="todos" checked>
+                        <label for="rol-st-qq" class="roleta-pill">Qualquer</label>
+                        
+                        <input type="radio" name="rol-status" id="rol-st-qv" value="Quero Ver">
+                        <label for="rol-st-qv" class="roleta-pill">Quero Ver</label>
+                        
+                        <input type="radio" name="rol-status" id="rol-st-ea" value="Em Andamento">
+                        <label for="rol-st-ea" class="roleta-pill">Em Andamento</label>
+                        
+                        <input type="radio" name="rol-status" id="rol-st-co" value="Concluído">
+                        <label for="rol-st-co" class="roleta-pill">Concluídos</label>
+                    </div>
+                </div>
+
+                <div class="roleta-filtro-grupo">
+                    <label class="roleta-label">Formato:</label>
+                    <div class="roleta-pills">
+                        <input type="radio" name="rol-tipo" id="rol-tp-qq" value="todos" checked>
+                        <label for="rol-tp-qq" class="roleta-pill">Qualquer</label>
+                        
+                        <input type="radio" name="rol-tipo" id="rol-tp-tv" value="TV">
+                        <label for="rol-tp-tv" class="roleta-pill">Série de TV</label>
+                        
+                        <input type="radio" name="rol-tipo" id="rol-tp-mv" value="Movie">
+                        <label for="rol-tp-mv" class="roleta-pill">Filme</label>
+                        
+                        <input type="radio" name="rol-tipo" id="rol-tp-ov" value="OVA">
+                        <label for="rol-tp-ov" class="roleta-pill">OVA</label>
+
+                        <input type="radio" name="rol-tipo" id="rol-tp-ona" value="ONA">
+                        <label for="rol-tp-ona" class="roleta-pill">Web ONA</label>
+
+                        <input type="radio" name="rol-tipo" id="rol-tp-sp" value="Special">
+                        <label for="rol-tp-sp" class="roleta-pill">Especial</label>
+                        
+                        <input type="radio" name="rol-tipo" id="rol-tp-tvsp" value="TV Special">
+                        <label for="rol-tp-tvsp" class="roleta-pill">TV Special</label>
+
+                        <input type="radio" name="rol-tipo" id="rol-tp-mu" value="Music">
+                        <label for="rol-tp-mu" class="roleta-pill">Musical</label>
+                    </div>
+                </div>
+
+                <div class="roleta-filtro-grupo">
+                    <label class="roleta-label">Tamanho (Episódios):</label>
+                    <div class="roleta-pills">
+                        <input type="radio" name="rol-eps" id="rol-ep-qq" value="todos" checked>
+                        <label for="rol-ep-qq" class="roleta-pill">Qualquer</label>
+                        
+                        <input type="radio" name="rol-eps" id="rol-ep-curto" value="curto">
+                        <label for="rol-ep-curto" class="roleta-pill">1 a 13 Eps</label>
+                        
+                        <input type="radio" name="rol-eps" id="rol-ep-medio" value="medio">
+                        <label for="rol-ep-medio" class="roleta-pill">14 a 26 Eps</label>
+                        
+                        <input type="radio" name="rol-eps" id="rol-ep-longo" value="longo">
+                        <label for="rol-ep-longo" class="roleta-pill">27 a 50 Eps</label>
+                        
+                        <input type="radio" name="rol-eps" id="rol-ep-epico" value="epico">
+                        <label for="rol-ep-epico" class="roleta-pill">51+ Eps</label>
+                    </div>
+                </div>
+
+                <div class="roleta-filtro-grupo">
+                    <label class="roleta-label">Época (Lançamento):</label>
+                    <div class="roleta-pills">
+                        <input type="radio" name="rol-ano" id="rol-an-qq" value="todos" checked>
+                        <label for="rol-an-qq" class="roleta-pill">Qualquer Época</label>
+                        
+                        <input type="radio" name="rol-ano" id="rol-an-classico" value="classico">
+                        <label for="rol-an-classico" class="roleta-pill">Clássicos (&lt; 2000)</label>
+                        
+                        <input type="radio" name="rol-ano" id="rol-an-2000" value="2000">
+                        <label for="rol-an-2000" class="roleta-pill">Anos 2000</label>
+                        
+                        <input type="radio" name="rol-ano" id="rol-an-2010" value="2010">
+                        <label for="rol-an-2010" class="roleta-pill">Anos 2010</label>
+                        
+                        <input type="radio" name="rol-ano" id="rol-an-atual" value="atual">
+                        <label for="rol-an-atual" class="roleta-pill">Atuais (2020+)</label>
+                    </div>
+                </div>
+
+                <div class="roleta-filtro-grupo roleta-grupo-especial">
+                    <div class="roleta-toggle-favorito">
+                        <input type="checkbox" id="rol-fav">
+                        <label for="rol-fav" class="roleta-pill-fav"><i class="emoji-fix">⭐</i> Apenas Favoritos</label>
+                    </div>
+                    
+                    <div class="roleta-tag-select">
+                        <label class="roleta-label">Com a Tag:</label>
+                        <input type="text" id="rol-tag" class="input-filtro-tag" placeholder="🏷️ Selecione..." list="lista-tags-salvas">
+                    </div>
+                </div>
+            </div>
+
+            <div class="roleta-acoes-principais">
+                <button id="btn-rol-girar" class="btn-destaque-modal roleta-btn-girar">
+                    <span class="icone-girar">🎲</span> Girar Roleta Personalizada
+                </button>
+                <button id="btn-rol-surpresa" class="btn-modal-action btn-modal-surpresa">
+                    <i class="emoji-fix">🔥</i> Surpreenda-me (Aleatório)
+                </button>
+            </div>
+        </div>
+
+        <div id="roleta-step-animacao" class="roleta-step ativo">
+            <h2 class="titulo-centralizado">Embaralhando o catálogo...</h2>
+            <div class="roleta-card-misterio roleta-shaking">
+                <span class="roleta-interrogacao">?</span>
+            </div>
+        </div>
+
+        <div id="roleta-step-resultado" class="roleta-step oculto">
+            <h2 class="titulo-centralizado">Temos um vencedor! 🎉</h2>
+            
+            <div class="roleta-resultado-container">
+                <img id="rol-res-poster" src="https://placehold.co/170x260" alt="Poster Sorteado" class="roleta-poster-resultado">
+                
+                <div class="roleta-info-resultado">
+                    <h3 id="rol-res-titulo" class="card-titulo">Título do Anime Aqui</h3>
+                    
+                    <div class="roleta-match-area">
+                        <span class="roleta-match-titulo">Por que este anime foi sorteado?</span>
+                        <div id="rol-res-matches" class="roleta-match-pills">
+                            <span class="match-pill"><i class="emoji-fix">✔️</i> Quero Ver</span>
+                            <span class="match-pill"><i class="emoji-fix">✔️</i> Filme</span>
+                            <span class="match-pill"><i class="emoji-fix">✔️</i> Curto (12 Eps)</span>
+                            <span class="match-pill"><i class="emoji-fix">✔️</i> Clássico (1998)</span>
+                            <span class="match-pill"><i class="emoji-fix">✔️</i> ⭐ Favorito</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="roleta-acoes-finais">
+                <button id="btn-rol-ver-detalhes" class="btn-destaque-modal">
+                    👁️ Ver Detalhes Completos
+                </button>
+                <button id="btn-rol-reroll" class="btn-modal-action roleta-btn-secundario">
+                    🔁 Sortear Outro
+                </button>
+                <button id="btn-rol-voltar" class="btn-modal-action roleta-btn-secundario">
+                    ⚙️ Mudar Filtros
+                </button>
+            </div>
+        </div>
+    </dialog>
+
     <dialog id="calendario-modal" class="modal-dialog">
         <button class="fechar-btn" id="fechar-calendario">&times;</button>
         <h2 class="titulo-centralizado" style="margin-top: 10px;">📅 Calendário de Lançamentos</h2>

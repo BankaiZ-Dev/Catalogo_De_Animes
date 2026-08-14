@@ -213,6 +213,10 @@ async function buscarAnimes(query, page = 1) {
     try {
         const data = await apiBuscarAnimes(query, page, searchController.signal);
 
+        if (!data || data.status === 429 || data.error) {
+            throw new Error('RATE_LIMIT');
+        }
+
         if (data.data && data.data.length > 0) {
             data.data.forEach(anime => renderizarCardAnime(anime));
             
@@ -225,8 +229,13 @@ async function buscarAnimes(query, page = 1) {
                 DOM.paginacao.botaoProxima.disabled = !data.pagination.has_next_page;
             }
         } else {
-            DOM.cards.lista.innerHTML = '<p class="mensagem-centro">Nenhum anime encontrado.</p>';
-            DOM.paginacao.container?.classList.add('oculto');
+            if (page > 1) {
+                DOM.cards.lista.innerHTML = '<p class="mensagem-centro">Fim dos resultados válidos. As páginas seguintes contêm itens restritos ou vazios.</p>';
+                if (DOM.paginacao.botaoProxima) DOM.paginacao.botaoProxima.disabled = true;
+            } else {
+                DOM.cards.lista.innerHTML = '<p class="mensagem-centro">Nenhum anime encontrado.</p>';
+                DOM.paginacao.container?.classList.add('oculto');
+            }
         }
 
     } catch (error) {
@@ -236,7 +245,7 @@ async function buscarAnimes(query, page = 1) {
         }
         if (error.message === 'RATE_LIMIT') {
             showToast('🚦 Muita velocidade! Aguarde um pouco e tente novamente.', 'warning');
-            DOM.cards.lista.innerHTML = '<p class="mensagem-centro">Muitas requisições. Aguarde...</p>';
+            DOM.cards.lista.innerHTML = '<p class="mensagem-centro">Muitas requisições. Aguarde um momento para continuar navegando...</p>';
         } else {
             DOM.cards.lista.innerHTML = '<p class="mensagem-centro">Erro na conexão com a API.</p>';
         }
@@ -642,7 +651,7 @@ function setupListeners() {
     // Estatísticas & Roleta
     DOM.acoesGlobais.botaoStats?.addEventListener('click', calcularEstatisticas);
     DOM.modais.statsFecharBtn?.addEventListener('click', () => DOM.modais.stats.close());
-    DOM.acoesGlobais.botaoRoleta?.addEventListener('click', sugerirAnimeAleatorio);
+    DOM.acoesGlobais.botaoRoleta?.addEventListener('click', abrirModalRoleta);
 
     // Modo de Visualização
     DOM.visualizacao.botoes.forEach(btn => {

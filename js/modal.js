@@ -369,23 +369,199 @@ function calcularEstatisticas() {
     DOM.modais.stats?.showModal();
 }
 
-// --- 4. ALEATORIEDADE ---
-function sugerirAnimeAleatorio() {
-    const animesCandidatos = Object.values(catalogoPessoal).filter(anime => anime.status === 'Quero Ver');
+// --- 4. ROLETA INTELIGENTE ---
+function abrirModalRoleta() {
+    const modal = document.getElementById('roleta-modal');
+    if (!modal) return;
     
-    if (animesCandidatos.length === 0) {
-        return showToast("Lista 'Quero Ver' vazia! Adicione animes para sortear.", "info");
+    if (typeof atualizarDatalistTags === 'function') atualizarDatalistTags(); 
+    irParaEtapaRoleta('config');
+    
+    document.body.style.overflow = 'hidden'; 
+    
+    modal.showModal();
+}
+
+function fecharModalRoleta() {
+    const modal = document.getElementById('roleta-modal');
+    if (modal) modal.close();
+}
+
+function irParaEtapaRoleta(etapa) {
+    document.querySelectorAll('.roleta-step').forEach(step => {
+        step.classList.remove('ativo');
+        step.classList.add('oculto');
+    });
+    
+    const etapaAlvo = document.getElementById(`roleta-step-${etapa}`);
+    if (etapaAlvo) {
+        etapaAlvo.classList.remove('oculto');
+        etapaAlvo.classList.add('ativo');
+    }
+}
+
+function executarFiltroRoleta() {
+    const status = document.querySelector('input[name="rol-status"]:checked').value;
+    const tipo = document.querySelector('input[name="rol-tipo"]:checked').value;
+    const eps = document.querySelector('input[name="rol-eps"]:checked').value;
+    const ano = document.querySelector('input[name="rol-ano"]:checked').value;
+    const fav = document.getElementById('rol-fav').checked;
+    const tag = document.getElementById('rol-tag').value.trim().toLowerCase();
+
+    let animes = Object.values(catalogoPessoal);
+
+    if (status !== 'todos') animes = animes.filter(a => a.status === status);
+    
+    if (tipo !== 'todos') animes = animes.filter(a => a.type === tipo);
+    
+    if (eps !== 'todos') {
+        animes = animes.filter(a => {
+            const ep = a.maxEpisodes || 0;
+            if (eps === 'curto') return ep >= 1 && ep <= 13;
+            if (eps === 'medio') return ep >= 14 && ep <= 26;
+            if (eps === 'longo') return ep >= 27 && ep <= 50;
+            if (eps === 'epico') return ep >= 51;
+            return false;
+        });
+    }
+
+    if (ano !== 'todos') {
+        animes = animes.filter(a => {
+            const y = parseInt(a.year) || 0;
+            if (y === 0) return false; 
+            if (ano === 'classico') return y <= 1999;
+            if (ano === '2000') return y >= 2000 && y <= 2009;
+            if (ano === '2010') return y >= 2010 && y <= 2019;
+            if (ano === 'atual') return y >= 2020;
+            return false;
+        });
+    }
+
+    if (fav) animes = animes.filter(a => a.favorite === true);
+    if (tag) animes = animes.filter(a => a.customTags && a.customTags.includes(tag));
+
+    return { resultados: animes, filtrosUsados: { status, tipo, eps, ano, fav, tag } };
+}
+
+function gerarPillsDeMatch(filtros, anime) {
+    let html = '';
+    
+    if (filtros.status !== 'todos') html += `<span class="match-pill"><i class="emoji-fix">✔️</i> ${anime.status}</span>`;
+    
+    if (filtros.tipo !== 'todos') {
+        const nomeTipo = MAPA_TIPOS_MIDIA[anime.type] || anime.type || 'N/A';
+        html += `<span class="match-pill"><i class="emoji-fix">✔️</i> ${nomeTipo}</span>`;
     }
     
-    showGlobalLoading("🎲 Rolando os dados...");
+    if (filtros.eps !== 'todos') html += `<span class="match-pill"><i class="emoji-fix">✔️</i> ${anime.maxEpisodes || '?'} Eps</span>`;
+    
+    if (filtros.ano !== 'todos') html += `<span class="match-pill"><i class="emoji-fix">✔️</i> Lançado em ${anime.year}</span>`;
+    
+    if (filtros.fav) html += `<span class="match-pill"><i class="emoji-fix">✔️</i> ⭐ Favorito</span>`;
+    
+    if (filtros.tag) html += `<span class="match-pill"><i class="emoji-fix">✔️</i> #${filtros.tag}</span>`;
+
+    if (html === '') html = `<span class="match-pill"><i class="emoji-fix">🎲</i> Sorteio 100% Aleatório</span>`;
+
+    return html;
+}
+
+function processarSorteioRoleta() {
+    const { resultados, filtrosUsados } = executarFiltroRoleta();
+    
+    if (resultados.length === 0) {
+        showToast("🕵️‍♂️ Nenhum anime sobreviveu a essa combinação! Flexibilize os filtros.", "warning");
+        return;
+    }
+    
+    irParaEtapaRoleta('animacao');
     
     setTimeout(() => {
-        const index = Math.floor(Math.random() * animesCandidatos.length);
-        const animeSorteado = animesCandidatos[index];
-
-        hideGlobalLoading();
-        abrirModal(animeSorteado.mal_id);
-        showToast(`🎲 Sorteado: ${animeSorteado.title}`, "roleta");
+        const index = Math.floor(Math.random() * resultados.length);
+        const animeSorteado = resultados[index];
         
-    }, 800);
+        const posterEl = document.getElementById('rol-res-poster');
+        posterEl.src = animeSorteado.largePoster || animeSorteado.poster || CONFIG.PLACEHOLDER_IMAGE;
+        document.getElementById('rol-res-titulo').textContent = animeSorteado.title;
+        document.getElementById('rol-res-matches').innerHTML = gerarPillsDeMatch(filtrosUsados, animeSorteado);
+        
+        const btnDetalhes = document.getElementById('btn-rol-ver-detalhes');
+        btnDetalhes.onclick = () => {
+            fecharModalRoleta();
+            abrirModal(animeSorteado.mal_id);
+        };
+        
+        irParaEtapaRoleta('resultado');
+    }, 1500);
 }
+
+async function animacaoSurpresaRoleta() {
+    const todos = Object.values(catalogoPessoal);
+    if(todos.length === 0) {
+        showToast("Seu catálogo está vazio!", "info");
+        return;
+    }
+
+    const modal = document.getElementById('roleta-modal');
+        if (modal) modal.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    const btnSurpresa = document.getElementById('btn-rol-surpresa');
+    const btnGirar = document.getElementById('btn-rol-girar');
+    btnSurpresa.disabled = true;
+    btnGirar.disabled = true;
+    btnSurpresa.style.opacity = '0.5';
+
+    const escolhido = todos[Math.floor(Math.random() * todos.length)];
+    
+    const esperar = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    const tempoPasso = 500;
+    
+    const mapStatus = { 'Quero Ver': 'qv', 'Em Andamento': 'ea', 'Concluído': 'co' };
+    if(mapStatus[escolhido.status]) document.getElementById('rol-st-' + mapStatus[escolhido.status]).checked = true;
+    else document.getElementById('rol-st-qq').checked = true;
+    await esperar(tempoPasso);
+    
+    const mapTipo = { 'TV': 'tv', 'Movie': 'mv', 'OVA': 'ov', 'ONA': 'ona', 'Special': 'sp', 'TV Special': 'tvsp', 'Music': 'mu' };
+    if(mapTipo[escolhido.type]) document.getElementById('rol-tp-' + mapTipo[escolhido.type]).checked = true;
+    else document.getElementById('rol-tp-qq').checked = true;
+    await esperar(tempoPasso);
+    
+    const ep = escolhido.maxEpisodes || 0;
+    if (ep >= 1 && ep <= 13) document.getElementById('rol-ep-curto').checked = true;
+    else if (ep >= 14 && ep <= 26) document.getElementById('rol-ep-medio').checked = true;
+    else if (ep >= 27 && ep <= 50) document.getElementById('rol-ep-longo').checked = true;
+    else if (ep >= 51) document.getElementById('rol-ep-epico').checked = true;
+    else document.getElementById('rol-ep-qq').checked = true;
+    await esperar(tempoPasso);
+    
+    const y = parseInt(escolhido.year) || 0;
+    if (y > 0 && y <= 1999) document.getElementById('rol-an-classico').checked = true;
+    else if (y >= 2000 && y <= 2009) document.getElementById('rol-an-2000').checked = true;
+    else if (y >= 2010 && y <= 2019) document.getElementById('rol-an-2010').checked = true;
+    else if (y >= 2020) document.getElementById('rol-an-atual').checked = true;
+    else document.getElementById('rol-an-qq').checked = true;
+    await esperar(tempoPasso);
+
+    document.getElementById('rol-fav').checked = escolhido.favorite;
+    const tagInput = document.getElementById('rol-tag');
+    if (escolhido.customTags && escolhido.customTags.length > 0) {
+        tagInput.value = escolhido.customTags[Math.floor(Math.random() * escolhido.customTags.length)];
+    } else {
+        tagInput.value = '';
+    }
+    
+    await esperar(600);
+
+    btnSurpresa.disabled = false;
+    btnGirar.disabled = false;
+    btnSurpresa.style.opacity = '1';
+    processarSorteioRoleta();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('fechar-roleta')?.addEventListener('click', fecharModalRoleta);
+    document.getElementById('btn-rol-girar')?.addEventListener('click', processarSorteioRoleta);
+    document.getElementById('btn-rol-surpresa')?.addEventListener('click', animacaoSurpresaRoleta);
+    document.getElementById('btn-rol-reroll')?.addEventListener('click', processarSorteioRoleta);
+    document.getElementById('btn-rol-voltar')?.addEventListener('click', () => irParaEtapaRoleta('config'));
+});
