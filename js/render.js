@@ -284,43 +284,52 @@ function atualizarVisualDoCard(card, savedData) {
 
 // --- ORQUESTRADOR DO CONTEÚDO DO MODAL ---
 function renderizarConteudoModal(anime, sinopse, links, isSaved) {
+    const reqInternet = 'Requer conexão';
+    const isOffline = anime.isOffline === true;
+
     const generos = traduzirListaGeneros(anime.genres);
     const tipo = MAPA_TIPOS_MIDIA[anime.type] || anime.type || 'N/A';
-    
     const status = MAPA_STATUS[anime.status] || anime.status;
-    const rating = MAPA_RATING[anime.rating] || anime.rating || 'N/A';
+    const rating = isOffline ? reqInternet : (MAPA_RATING[anime.rating] || anime.rating || 'N/A');
+    
     const season = anime.season ? MAPA_SEASONS[anime.season] : '';
     const seasonYear = anime.year || '';
-    const temporadaFormatada = (season && seasonYear) ? `${season} de ${seasonYear}` : 'N/A';
-    const episodiosHTML = anime.episodes > 1 
-        ? `<p><strong>Episódios:</strong> ${anime.episodes}</p>` 
-        : '';
+    let temporadaFormatada = 'N/A';
+    if (season && seasonYear) {
+        temporadaFormatada = `${season} de ${seasonYear}`;
+    } else if (isOffline && !season) {
+        temporadaFormatada = reqInternet;
+    }
+    
+    const episodiosHTML = anime.episodes > 1 ? `<p><strong>Episódios:</strong> ${anime.episodes}</p>` : '';
 
-    const dataInicio = anime.aired?.from ? formatarDataCompleta(anime.aired.from) : '?';
-    const dataFim = anime.aired?.to ? formatarDataCompleta(anime.aired.to) : '?';
-    const periodoExibicao = (anime.status === 'Currently Airing') 
-        ? `De ${dataInicio} (Em andamento)`
-        : (dataInicio !== '?' && dataFim !== '?') ? `${dataInicio} até ${dataFim}` : dataInicio;
-    const broadcastHTML = formatarBroadcast(anime.broadcast, anime.status);
+    let periodoExibicao = isOffline ? reqInternet : 'N/A';
+    if (anime.aired && anime.aired.from) {
+        const dataInicio = formatarDataCompleta(anime.aired.from);
+        const dataFim = anime.aired.to ? formatarDataCompleta(anime.aired.to) : '?';
+        periodoExibicao = (anime.status === 'Currently Airing') 
+            ? `De ${dataInicio} (Em andamento)`
+            : (dataFim !== '?') ? `${dataInicio} até ${dataFim}` : dataInicio;
+    }
+
+    const broadcastHTML = isOffline ? '' : formatarBroadcast(anime.broadcast, anime.status);
 
     const estudios = formatarListaSimples(anime.studios, 2);
-    const produtores = formatarListaSimples(anime.producers, 2);
-    const licenciadores = formatarListaSimples(anime.licensors, 2);
+    const produtores = isOffline ? reqInternet : formatarListaSimples(anime.producers, 2);
+    const licenciadores = isOffline ? reqInternet : formatarListaSimples(anime.licensors, 2);
 
     let duracaoRaw = anime.duration || 'N/A';
     let duracaoFormatada = duracaoRaw
-    .replace(/Unknown/gi, 'Desconhecida')
-    .replace(/per ep/g, 'por ep')
-    .replace(/min/g, 'min')
-    .replace(/sec/g, 'seg')
-    .replace(/hr/g, 'h')
-    .replace(/(\d+)\s+(min|seg|h)/g, '$1$2');
+        .replace(/Unknown/gi, 'Desconhecida')
+        .replace(/per ep/g, 'por ep')
+        .replace(/min/g, 'min')
+        .replace(/sec/g, 'seg')
+        .replace(/hr/g, 'h')
+        .replace(/(\d+)\s+(min|seg|h)/g, '$1$2');
 
     let tempoTotalHTML = '';
-
-    if (anime.episodes > 1 && anime.duration && !anime.duration.toLowerCase().includes('unknown')) {
+    if (!isOffline && anime.episodes > 1 && anime.duration && !anime.duration.toLowerCase().includes('unknown')) {
         const valorNumerico = parseInt(anime.duration);
-        
         if (!isNaN(valorNumerico)) {
             if (anime.duration.toLowerCase().includes('min')) {
                 const totalMinutos = anime.episodes * valorNumerico;
@@ -342,6 +351,7 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
     const trailerUrl = anime.trailer?.embed_url 
         ? anime.trailer.embed_url.replace(/[?&]autoplay=1/gi, '') + '&rel=0'
         : null;
+
     const trailerHTML = trailerUrl 
         ? `<div id="trailer" class="tab-content oculto"><div class="modal-trailer-container"><iframe src="${trailerUrl}" frameborder="0" allowfullscreen></iframe></div></div>`
         : `<div id="trailer" class="tab-content oculto"><div class="conteudo-vazio"><p>🎬 Trailer não disponível</p></div></div>`;

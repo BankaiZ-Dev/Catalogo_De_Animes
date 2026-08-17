@@ -1377,6 +1377,7 @@ body.dark-mode .barra-progresso-fundo {
 .btn-destaque-modal {
     background: var(--cor-primaria) !important;
     color: white !important;
+    border: none !important;
     padding: 6px 16px !important;
     height: 40px !important; 
     width: fit-content !important;
@@ -2202,11 +2203,6 @@ body.dark-mode .mini-card-anime {
     #anime-modal {
         width: 95%;
         max-height: 90vh;
-        position: fixed;
-        top: 15px;
-        left: 50%;
-        transform: translateX(-50%);
-        margin: 0;
         padding: 0;
         border: 1px solid var(--cor-borda);
     }
@@ -2833,6 +2829,7 @@ body.dark-mode .mini-card-anime {
     width: 100%;
     text-align: center;
     padding: 20px;
+    grid-column: 1 / -1;
 }
 
 .mensagem-vazia-titulo {

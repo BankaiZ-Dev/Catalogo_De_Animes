@@ -231,7 +231,14 @@ async function buscarAnimes(query, page = 1) {
         } else {
             if (page > 1) {
                 DOM.cards.lista.innerHTML = '<p class="mensagem-centro">Fim dos resultados válidos. As páginas seguintes contêm itens restritos ou vazios.</p>';
-                if (DOM.paginacao.botaoProxima) DOM.paginacao.botaoProxima.disabled = true;
+                
+                if (DOM.paginacao.container) {
+                    DOM.paginacao.container.classList.remove('oculto');
+                    if (DOM.paginacao.botaoAnterior) DOM.paginacao.botaoAnterior.disabled = false;
+                    if (DOM.paginacao.botaoProxima) DOM.paginacao.botaoProxima.disabled = true;
+                    
+                    renderizarNumerosPaginacao(page, page); 
+                }
             } else {
                 DOM.cards.lista.innerHTML = '<p class="mensagem-centro">Nenhum anime encontrado.</p>';
                 DOM.paginacao.container?.classList.add('oculto');

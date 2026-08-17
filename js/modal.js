@@ -10,65 +10,64 @@ async function abrirModal(malId) {
     const isSaved = catalogoPessoal.hasOwnProperty(malId);
     const savedData = isSaved ? catalogoPessoal[malId] : null;
 
-    if (isSaved && savedData && savedData.synopsis) {
-        if (animeModal) {
-            animeModal.showModal();
-            animeModal.scrollTop = 0;
-        }
-        document.body.style.overflow = 'hidden';
-
-        const animeLocal = {
-            mal_id: savedData.mal_id,
-            title: savedData.title,
-            title_english: savedData.title,
-            images: { 
-                jpg: { 
-                    image_url: savedData.poster,
-                    large_image_url: savedData.largePoster || savedData.poster
-                } 
-            },
-            synopsis: savedData.synopsis,
-            type: savedData.type,
-            year: savedData.year,
-            episodes: savedData.maxEpisodes,
-            status: savedData.statusLancamento,
-            genres: savedData.genres || [],
-            studios: savedData.studios || [],
-            producers: savedData.producers || [],
-            licensors: savedData.licensors || [],
-            rating: savedData.rating || 'N/A',
-            season: savedData.season || '',
-            aired: savedData.aired || {},
-            duration: savedData.duration || 'N/A',
-            trailer: null,
-            theme: null,
-            relations: [],
-            streaming: []
-        };
-
-        const linksIniciais = [];
-        modalInfo.innerHTML = renderizarConteudoModal(animeLocal, savedData.synopsis, linksIniciais, true);
-        
-        atualizarDatalistTags();
-
-        if (navigator.onLine) {
-            carregarAbasDinamicasBackground(malId, animeLocal);
-        }
-        return;
-    }
-
-    if (modalInfo) modalInfo.innerHTML = `
-        <div class="modal-loading-container">
-            <div class="spinner modal-spinner-margin"></div>
-            <p class="loading-text modal-loading-text-content">Carregando detalhes...</p>
-        </div>`;
-    
     if (animeModal) {
         animeModal.showModal();
         animeModal.scrollTop = 0;
     }
-
     document.body.style.overflow = 'hidden';
+
+    // ==========================================
+    // 🌍 MODO OFFLINE (Eco Mode)
+    // ==========================================
+    if (!navigator.onLine) {
+        if (isSaved) {
+            const reqInternet = 'Requer conexão';
+            
+            const converterParaObjeto = (arr) => 
+                (arr && arr.length > 0) ? arr.map(item => ({ name: typeof item === 'string' ? item : item.name })) : [{ name: reqInternet }];
+
+            const animeEco = {
+                isOffline: true,
+                mal_id: savedData.mal_id,
+                title: savedData.title,
+                title_english: savedData.title,
+                images: { jpg: { large_image_url: savedData.largePoster || savedData.poster } }, 
+                type: savedData.type,
+                year: savedData.year,
+                episodes: savedData.maxEpisodes,
+                status: savedData.statusLancamento,
+                duration: savedData.duration || reqInternet,
+                aired: savedData.aired || null, 
+                rating: reqInternet,
+                season: savedData.season || '',
+                genres: converterParaObjeto(savedData.genres),
+                studios: converterParaObjeto(savedData.studios),
+                producers: [{name: reqInternet}],
+                licensors: [{name: reqInternet}],
+                relations: [], 
+                streaming: [],
+                trailer: null
+            };
+
+            const sinopseExibicao = savedData.synopsis || "🌐 Você está offline. Conecte-se à internet para ler a sinopse completa e ver o trailer. <br><br> ✅ Suas Notas e Tags estão liberadas para edição!";
+
+            modalInfo.innerHTML = renderizarConteudoModal(animeEco, sinopseExibicao, [], true);
+            atualizarDatalistTags();
+            
+        } else {
+            modalInfo.innerHTML = '<p class="mensagem-erro-modal">Conecte-se à internet para ver os detalhes deste anime.</p>';
+        }
+        return;
+    }
+
+    // ==========================================
+    // 🌐 MODO ONLINE (Busca e Salva)
+    // ==========================================
+    if (modalInfo) modalInfo.innerHTML = `
+        <div class="modal-loading-container">
+            <div class="spinner modal-spinner-margin"></div>
+            <p class="loading-text modal-loading-text-content">Buscando detalhes...</p>
+        </div>`;
 
     try {
         const data = await apiObterDetalhesFull(malId);
@@ -80,61 +79,25 @@ async function abrirModal(malId) {
         ]);
 
         if (isSaved) {
+            if (anime.images?.jpg?.large_image_url && !savedData.largePoster) {
+                catalogoPessoal[malId].largePoster = anime.images.jpg.large_image_url;
+            }
             catalogoPessoal[malId].synopsis = sinopseTraduzida;
-            catalogoPessoal[malId].largePoster = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url;
-            catalogoPessoal[malId].genres = anime.genres;
-            catalogoPessoal[malId].studios = anime.studios;
-            catalogoPessoal[malId].producers = anime.producers;
-            catalogoPessoal[malId].licensors = anime.licensors;
-            catalogoPessoal[malId].rating = anime.rating;
-            catalogoPessoal[malId].season = anime.season;
-            catalogoPessoal[malId].aired = anime.aired;
             catalogoPessoal[malId].duration = anime.duration;
+            catalogoPessoal[malId].aired = anime.aired; 
+            catalogoPessoal[malId].season = anime.season || ''; 
+            catalogoPessoal[malId].genres = anime.genres ? anime.genres.map(g => g.name) : [];
+            catalogoPessoal[malId].studios = anime.studios ? anime.studios.map(s => s.name) : [];
+            
             salvarCatalogoImediato();
         }
 
         modalInfo.innerHTML = renderizarConteudoModal(anime, sinopseTraduzida, linksStreaming, isSaved);
-        
         if (isSaved) atualizarDatalistTags();
 
     } catch (error) {
-        console.error(error);
-        if (modalInfo) modalInfo.innerHTML = '<p class="mensagem-erro-modal">Não foi possível carregar os detalhes.</p>';
-    }
-}
-
-async function carregarAbasDinamicasBackground(malId, animeLocal) {
-    try {
-        const data = await apiObterDetalhesFull(malId);
-        const anime = data.data;
-        const linksStreaming = await obterLinksStreaming(anime);
-
-        animeLocal.trailer = anime.trailer;
-        animeLocal.theme = anime.theme;
-        animeLocal.relations = anime.relations;
-        animeLocal.streaming = anime.streaming;
-
-        const modalInfo = DOM.modais.animeInfo;
-        const modalAberto = DOM.modais.anime.hasAttribute('open');
-
-        if (modalAberto && modalInfo) {
-            const abaAtiva = modalInfo.querySelector('.tab-content.ativo')?.id || 'sinopse';
-            
-            const containerMusicas = modalInfo.querySelector('#musicas');
-            const containerRelacionados = modalInfo.querySelector('#relacionados');
-            const containerStreaming = modalInfo.querySelector('#streaming');
-            const containerTrailer = modalInfo.querySelector('#trailer');
-
-            if (containerMusicas) containerMusicas.innerHTML = renderizarAbaMusicas(anime.theme);
-            if (containerRelacionados) containerRelacionados.innerHTML = renderizarAbaRelacionados(anime.relations);
-            if (containerStreaming) containerStreaming.innerHTML = renderizarAbaStreaming(linksStreaming);
-            
-            if (containerTrailer && anime.trailer?.embed_url) {
-                const trailerUrl = anime.trailer.embed_url.replace(/[?&]autoplay=1/gi, '') + '&rel=0';
-                containerTrailer.innerHTML = `<div class="modal-trailer-container"><iframe src="${trailerUrl}" frameborder="0" allowfullscreen></iframe></div>`;
-            }
-        }
-    } catch (e) {
+        console.error("Erro ao abrir modal online:", error);
+        if (modalInfo) modalInfo.innerHTML = '<p class="mensagem-erro-modal">Falha na conexão. Tente novamente mais tarde.</p>';
     }
 }
 
@@ -376,10 +339,32 @@ function abrirModalRoleta() {
     
     if (typeof atualizarDatalistTags === 'function') atualizarDatalistTags(); 
     irParaEtapaRoleta('config');
+
+    resetarFiltrosRoleta();
     
     document.body.style.overflow = 'hidden'; 
     
     modal.showModal();
+}
+
+function resetarFiltrosRoleta() {
+    const elStatus = document.getElementById('rol-st-qq');
+    if(elStatus) elStatus.checked = true;
+    
+    const elTipo = document.getElementById('rol-tp-qq');
+    if(elTipo) elTipo.checked = true;
+    
+    const elEps = document.getElementById('rol-ep-qq');
+    if(elEps) elEps.checked = true;
+    
+    const elAno = document.getElementById('rol-an-qq');
+    if(elAno) elAno.checked = true;
+    
+    const elFav = document.getElementById('rol-fav');
+    if(elFav) elFav.checked = false;
+    
+    const elTag = document.getElementById('rol-tag');
+    if(elTag) elTag.value = '';
 }
 
 function fecharModalRoleta() {
