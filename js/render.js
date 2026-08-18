@@ -219,12 +219,29 @@ function atualizarCardNaTela(malId, titulo, posterUrl, maxEpisodes, type, year, 
 
 function atualizarElementosDoCard(malId, savedData, statusChanged) {
     const card = getCardAnime(malId);
+    
     const inputElement = getInputEpisodios(malId);
     if (inputElement) inputElement.value = savedData.episode;
+
+    const modalInput = document.getElementById(`modal-episode-input-${malId}`);
+    if (modalInput) modalInput.value = savedData.episode;
 
     updateProgressoDisplay(malId, savedData.episode, savedData.maxEpisodes)
 
     if (statusChanged) {
+        const modalMeuStatusText = document.getElementById(`modal-meu-status-text-${malId}`);
+        if (modalMeuStatusText) {
+            modalMeuStatusText.textContent = savedData.status;
+            
+            if (savedData.status === 'Concluído') {
+                modalMeuStatusText.style.color = 'var(--status-concluido)';
+            } else if (savedData.status === 'Em Andamento') {
+                modalMeuStatusText.style.color = 'var(--status-andamento)';
+            } else {
+                modalMeuStatusText.style.color = 'var(--status-querover)';
+            }
+        }
+
         const filtroAtual = DOM.filtros.status ? DOM.filtros.status.value : 'todos';
         let deveSairDaTela = false;
         
@@ -237,7 +254,6 @@ function atualizarElementosDoCard(malId, savedData, statusChanged) {
         if (deveSairDaTela) {
             if (card) {
                 card.classList.add('card-animacao-saida');
-                
                 setTimeout(() => {
                     card.classList.add('oculto');
                     card.classList.remove('card-animacao-saida');
@@ -290,8 +306,17 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
     const generos = traduzirListaGeneros(anime.genres);
     const tipo = MAPA_TIPOS_MIDIA[anime.type] || anime.type || 'N/A';
     const status = MAPA_STATUS[anime.status] || anime.status;
+    let meuStatusHTML = '';
+    if (isSaved) {
+        const meuStatus = catalogoPessoal[anime.mal_id].status;
+        let corStatus = 'var(--status-querover)'; 
+        
+        if (meuStatus === 'Concluído') corStatus = 'var(--status-concluido)';
+        else if (meuStatus === 'Em Andamento') corStatus = 'var(--status-andamento)';
+        
+        meuStatusHTML = `<p><strong>Meu Status:</strong> <span id="modal-meu-status-text-${anime.mal_id}" style="color: ${corStatus}; font-weight: bold;">${meuStatus}</span></p>`;
+    }
     const rating = isOffline ? reqInternet : (MAPA_RATING[anime.rating] || anime.rating || 'N/A');
-    
     const season = anime.season ? MAPA_SEASONS[anime.season] : '';
     const seasonYear = anime.year || '';
     let temporadaFormatada = 'N/A';
@@ -371,7 +396,8 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
                 <div class="flex-grow">
                      <p><strong>Gêneros:</strong> ${generos}</p>
                      <p><strong>Tipo:</strong> ${tipo}</p>
-                     <p><strong>Status:</strong> ${status}</p>
+                     <p><strong>Status (Obra):</strong> ${status}</p>
+                     ${meuStatusHTML}
                      ${broadcastHTML}
                      ${episodiosHTML}
                      <p><strong>Duração:</strong> ${duracaoFormatada}${tempoTotalHTML}</p>

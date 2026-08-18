@@ -239,7 +239,6 @@ function concluirAnimeRapido(malId) {
         atualizarElementosDoCard(malId, anime, statusMudou);
 
         showToast('Anime marcado como Concluído! 🎉', 'success');
-        fecharModal();
     }
 }
 
@@ -320,6 +319,7 @@ function adicionarTagAoAnime(malId) {
             }
             
             atualizarDatalistTags();
+            verificarFiltroTagDinamico(malId);
         } else {
             showToast('Esta tag já está neste anime.', 'info');
         }
@@ -340,6 +340,7 @@ function removerTagDoAnime(malId, tagParaRemover) {
         }
         
         atualizarDatalistTags();
+        verificarFiltroTagDinamico(malId);
     }
 }
 
@@ -365,4 +366,41 @@ function atualizarDatalistTags() {
     const optionSemTag = document.createElement('option');
     optionSemTag.value = 'sem tag';
     datalist.appendChild(optionSemTag);
+}
+
+function verificarFiltroTagDinamico(malId) {
+    const filtroTagValor = DOM.filtros.tags?.value.toLowerCase().trim() || '';
+    if (filtroTagValor === '') return;
+
+    const animeData = catalogoPessoal[malId];
+    const card = getCardAnime(malId);
+    if (!card || !animeData) return;
+
+    let deveSairDaTela = false;
+
+    if (filtroTagValor === 'sem tag') {
+        if (animeData.customTags && animeData.customTags.length > 0) {
+            deveSairDaTela = true;
+        }
+    } 
+    else {
+        if (!animeData.customTags || !animeData.customTags.includes(filtroTagValor)) {
+            deveSairDaTela = true;
+        }
+    }
+
+    if (deveSairDaTela) {
+        card.classList.add('card-animacao-saida'); 
+        
+        setTimeout(() => {
+            card.classList.add('oculto');
+            card.classList.remove('card-animacao-saida');
+            
+            if (typeof filtrarAnimesSalvos === 'function') filtrarAnimesSalvos();
+        }, 300);
+    } else {
+        card.classList.remove('oculto');
+        card.classList.remove('card-animacao-saida');
+        if (typeof filtrarAnimesSalvos === 'function') filtrarAnimesSalvos();
+    }
 }

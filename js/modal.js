@@ -139,16 +139,28 @@ function mudarAba(event, nomeAba) {
     }
 }
 
-// --- 2. COMPONENTES VISUAIS DO MODAL ---
 function gerarBotoesAcaoModal(anime, isSaved) {
     if (isSaved) {
+        const savedData = catalogoPessoal[anime.mal_id];
+        const maxEps = savedData.maxEpisodes || '?';
+        const epAtual = savedData.episode || 0;
+
         return `
-            <div class="modal-actions-row">
+            <div class="modal-actions-row centralizado">
                 <button onclick="concluirAnimeRapido(${anime.mal_id})" class="btn-modal-action btn-modal-concluir" title="Marcar como Concluído">
                     ✅ Concluído
                 </button>
+                
+                <div class="controle-individual modal-controle-episodios">
+                    <span class="modal-texto-eps">Eps:</span>
+                    <button class="btn-progresso btn-menos" onclick="decrementarEpisodio(${anime.mal_id})">-</button>
+                    <input type="number" id="modal-episode-input-${anime.mal_id}" value="${epAtual}" min="0" class="input-progresso-base" onchange="atualizarEpisodio(${anime.mal_id}, this.value)" />
+                    <button class="btn-progresso btn-mais" onclick="incrementarEpisodio(${anime.mal_id})">+</button>
+                    <span style="font-size: 0.85em;">/ ${maxEps}</span>
+                </div>
+
                 <button onclick="removerDoCatalogo(${anime.mal_id})" class="btn-modal-action btn-modal-excluir" title="Remover do Catálogo">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="modal-icone-acao" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="3 6 5 6 21 6"></polyline>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                     </svg>
@@ -432,20 +444,14 @@ function gerarPillsDeMatch(filtros, anime) {
     let html = '';
     
     if (filtros.status !== 'todos') html += `<span class="match-pill"><i class="emoji-fix">✔️</i> ${anime.status}</span>`;
-    
     if (filtros.tipo !== 'todos') {
         const nomeTipo = MAPA_TIPOS_MIDIA[anime.type] || anime.type || 'N/A';
         html += `<span class="match-pill"><i class="emoji-fix">✔️</i> ${nomeTipo}</span>`;
     }
-    
     if (filtros.eps !== 'todos') html += `<span class="match-pill"><i class="emoji-fix">✔️</i> ${anime.maxEpisodes || '?'} Eps</span>`;
-    
     if (filtros.ano !== 'todos') html += `<span class="match-pill"><i class="emoji-fix">✔️</i> Lançado em ${anime.year}</span>`;
-    
     if (filtros.fav) html += `<span class="match-pill"><i class="emoji-fix">✔️</i> ⭐ Favorito</span>`;
-    
     if (filtros.tag) html += `<span class="match-pill"><i class="emoji-fix">✔️</i> #${filtros.tag}</span>`;
-
     if (html === '') html = `<span class="match-pill"><i class="emoji-fix">🎲</i> Sorteio 100% Aleatório</span>`;
 
     return html;

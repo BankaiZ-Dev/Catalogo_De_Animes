@@ -1342,6 +1342,33 @@ body.dark-mode .barra-progresso-fundo {
     align-items: center;
 }
 
+.modal-actions-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.modal-acoes-input-grupo {
+    background: rgba(0, 0, 0, 0.15);
+    padding: 4px 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.modal-acoes-input-base {
+    width: 40px;
+    text-align: center;
+    padding: 2px;
+}
+
+.status-cor-concluido { color: var(--status-concluido); }
+.status-cor-andamento { color: var(--status-andamento); }
+.status-cor-quero-ver  { color: var(--status-querover); }
+
 .btn-modal-action {
     display: flex;
     align-items: center;
@@ -3548,4 +3575,45 @@ body.dark-mode .match-pill {
         margin-right: 0 !important;
         margin-left: 0 !important;
     }
+}
+
+/* ======================================================== */
+/* COMPONENTES DO MODAL (CONTROLE DE EPISÓDIOS E BOTÕES)   */
+/* ======================================================== */
+
+.modal-actions-row.centralizado {
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 6px;
+}
+
+.modal-actions-row.centralizado .btn-modal-action {
+    white-space: nowrap; 
+    padding: 6px 10px; 
+}
+
+.modal-controle-episodios {
+    background: rgba(0, 0, 0, 0.15);
+    padding: 4px 6px;
+    border-radius: var(--raio-borda); 
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.modal-controle-episodios .input-progresso-base {
+    width: 40px;
+    padding: 2px;
+    text-align: center;
+}
+
+.modal-texto-eps {
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+.modal-icone-acao {
+    width: 18px;
+    height: 18px;
+    display: flex;
 }
