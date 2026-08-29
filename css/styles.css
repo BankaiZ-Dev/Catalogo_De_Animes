@@ -24,7 +24,7 @@
     --sombra-texto-contorno: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
 
-body.dark-mode {
+html:has(body.dark-mode) {
     --cor-fundo: #000000;
     --cor-texto-principal: #e0e0e0;
     --cor-texto-secundario: #aaa;
@@ -74,6 +74,19 @@ button {
     transform: none !important;
     opacity: 1 !important;
     transition: none !important;
+}
+
+html {
+    scrollbar-color: var(--cor-primaria) var(--cor-fundo);
+}
+
+html:has(body.dark-mode) {
+    scrollbar-color: var(--cor-primaria) var(--cor-card-fundo);
+}
+
+*:focus-visible {
+    outline: 2px solid var(--cor-primaria);
+    outline-offset: 2px;
 }
 
 /* ==========================================================================
@@ -3616,4 +3629,14 @@ body.dark-mode .match-pill {
     width: 18px;
     height: 18px;
     display: flex;
+}
+
+/* ======================================================== */
+/* AVISO DE JAVASCRIPT DESATIVADO                           */
+/* ======================================================== */
+.alerta-noscript {
+    text-align: center;
+    padding: 50px;
+    color: white;
+    background-color: #ff5252;
 }

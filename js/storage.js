@@ -39,13 +39,19 @@ const salvarCatalogo = debounce(() => {
 
 function toggleDarkMode() {
     const isDarkMode = document.body.classList.toggle('dark-mode');
+    document.documentElement.classList.toggle('dark-mode', isDarkMode);
     localStorage.setItem(STORAGE_KEYS.DARK_MODE, isDarkMode ? 'true' : 'false');
 }
 
 function aplicarModoEscuroInicial() {
     const isDarkMode = localStorage.getItem(STORAGE_KEYS.DARK_MODE) === 'true';
-    if (isDarkMode) document.body.classList.add('dark-mode');
-    else document.body.classList.remove('dark-mode');
+    if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+        document.documentElement.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+        document.documentElement.classList.remove('dark-mode');
+    }
 }
 
 // ========================================================

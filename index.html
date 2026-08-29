@@ -9,6 +9,9 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff4081">
+    <meta name="description" content="Meu catálogo pessoal para gerenciar, acompanhar e sortear animes.">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="png/icon.png">
 
     <script src="js/dados.js" defer></script>
@@ -24,6 +27,12 @@
 </head>
 
 <body>
+    <noscript>
+        <div class="alerta-noscript">
+            <h2>JavaScript Desativado</h2>
+            <p>Este aplicativo precisa do JavaScript ativado para funcionar corretamente.</p>
+        </div>
+    </noscript>
     
     <div id="global-loading-overlay" class="oculto">
         <div class="spinner"></div>
@@ -70,7 +79,7 @@
                 🏠 Meu Catálogo
             </button>
 
-            <form class="busca-input-container" role="search" onsubmit="event.preventDefault();">
+            <form class="busca-input-container" role="search">
                 <input 
                     type="search" 
                     id="campo-busca" 
@@ -79,6 +88,7 @@
                     autocapitalize="off"
                     autocomplete="off"
                     spellcheck="false"
+                    aria-label="Pesquisar animes"
                 />
                 
                 <button type="button" id="btn-toggle-busca" class="btn-toggle-modo" title="Modo Atual: Online">
@@ -162,12 +172,12 @@
     </main>
 
     <dialog id="anime-modal" class="modal-dialog">
-        <button class="fechar-btn" id="fechar-modal-detalhes">&times;</button>
+        <button class="fechar-btn" id="fechar-modal-detalhes" aria-label="Fechar">&times;</button>
         <div id="modal-info"></div>
     </dialog>
 
     <dialog id="stats-modal" class="modal-dialog modal-pequeno">
-        <button class="fechar-btn" id="fechar-stats">&times;</button>
+        <button class="fechar-btn" id="fechar-stats" aria-label="Fechar">&times;</button>
         <h2 class="titulo-centralizado">Suas Estatísticas 📈</h2>
         
         <div class="stats-grid">
@@ -219,7 +229,7 @@
     </dialog>
 
     <dialog id="roleta-modal" class="modal-dialog modal-roleta">
-        <button class="fechar-btn" id="fechar-roleta">&times;</button>
+        <button class="fechar-btn" id="fechar-roleta" aria-label="Fechar">&times;</button>
         
         <div id="roleta-step-config" class="roleta-step ativo">
             <h2 class="titulo-centralizado">🎲 O que vamos assistir hoje?</h2>
@@ -378,7 +388,7 @@
     </dialog>
 
     <dialog id="calendario-modal" class="modal-dialog">
-        <button class="fechar-btn" id="fechar-calendario">&times;</button>
+        <button class="fechar-btn" id="fechar-calendario" aria-label="Fechar">&times;</button>
         <h2 class="titulo-centralizado" style="margin-top: 10px;">📅 Calendário de Lançamentos</h2>
         <div id="calendario-conteudo" class="modal-tab-conteudo"></div>
     </dialog>

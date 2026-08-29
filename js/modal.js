@@ -53,6 +53,7 @@ async function abrirModal(malId) {
 
             modalInfo.innerHTML = renderizarConteudoModal(animeEco, sinopseExibicao, [], true);
             atualizarDatalistTags();
+            ativarScrollHorizontalAbas(modalInfo);
             
         } else {
             modalInfo.innerHTML = '<p class="mensagem-erro-modal">Conecte-se à internet para ver os detalhes deste anime.</p>';
@@ -94,6 +95,7 @@ async function abrirModal(malId) {
 
         modalInfo.innerHTML = renderizarConteudoModal(anime, sinopseTraduzida, linksStreaming, isSaved);
         if (isSaved) atualizarDatalistTags();
+        ativarScrollHorizontalAbas(modalInfo);
 
     } catch (error) {
         console.error("Erro ao abrir modal online:", error);
@@ -136,6 +138,18 @@ function mudarAba(event, nomeAba) {
     if (conteudoAlvo) {
         conteudoAlvo.classList.remove('oculto');
         conteudoAlvo.classList.add('ativo');
+    }
+}
+
+function ativarScrollHorizontalAbas(modalElement) {
+    const abasContainer = modalElement.querySelector('.modal-tabs');
+    if (abasContainer) {
+        abasContainer.addEventListener('wheel', (e) => {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                abasContainer.scrollLeft += e.deltaY;
+            }
+        });
     }
 }
 

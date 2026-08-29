@@ -366,6 +366,10 @@ function atualizarDatalistTags() {
     const optionSemTag = document.createElement('option');
     optionSemTag.value = 'sem tag';
     datalist.appendChild(optionSemTag);
+
+    const optionComTag = document.createElement('option');
+    optionComTag.value = 'com tag';
+    datalist.appendChild(optionComTag);
 }
 
 function verificarFiltroTagDinamico(malId) {
@@ -383,6 +387,11 @@ function verificarFiltroTagDinamico(malId) {
             deveSairDaTela = true;
         }
     } 
+    else if (filtroTagValor === 'com tag') {
+        if (!animeData.customTags || animeData.customTags.length === 0) {
+            deveSairDaTela = true;
+        }
+    }
     else {
         if (!animeData.customTags || !animeData.customTags.includes(filtroTagValor)) {
             deveSairDaTela = true;

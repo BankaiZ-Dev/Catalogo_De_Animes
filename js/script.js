@@ -119,6 +119,10 @@ function filtrarAnimesSalvos() {
                 if (animeData && animeData.customTags && animeData.customTags.length > 0) {
                     mostrarCard = false;
                 }
+            } else if (filtroTagValor === 'com tag') {
+                if (!animeData || !animeData.customTags || animeData.customTags.length === 0) {
+                    mostrarCard = false;
+                }
             } else {
                 if (!animeData || !animeData.customTags || !animeData.customTags.includes(filtroTagValor)) {
                     mostrarCard = false;
