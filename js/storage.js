@@ -1,6 +1,5 @@
 // ========================================================
 // STORAGE & BACKUP
-// Gerencia persistência de dados no localStorage
 // ========================================================
 
 // ========================================================
@@ -165,6 +164,10 @@ function verificarAtualizacaoLancamento(malId, statusApi) {
     return false;
 }
 
+// ========================================================
+// SINCRONIZAÇÃO INTELIGENTE ROTATIVA
+// ========================================================
+
 async function sincronizacaoInteligente() {
     if (!navigator.onLine) return;
 
@@ -174,26 +177,64 @@ async function sincronizacaoInteligente() {
         const faltaStatus = (!anime.statusLancamento || anime.statusLancamento === 'Unknown');
         return faltaEpisodios || faltaAno || faltaStatus;
     });
+
     if (filaPendentes.length === 0) return;
 
-    for (const anime of filaPendentes.slice(0, 5)) {
+    const animesSorteados = filaPendentes
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 5);
+
+    console.log(`[Sync] ${filaPendentes.length} anime(s) na fila. Verificando rodada:`);
+    animesSorteados.forEach(a => console.log(`   ↳ "${a.title}"`));
+
+    for (const anime of animesSorteados) {
+        if (!navigator.onLine) break;
+
         try {
             await new Promise(r => setTimeout(r, 3500));
 
             const json = await apiObterDadosSimples(anime.mal_id);
             const dadosNovos = json.data;
 
-            let houveMudanca = false;
+            if (!dadosNovos) continue;
 
-            if (verificarAtualizacaoAno(anime.mal_id, dadosNovos.year || dadosNovos.aired?.prop?.from?.year)) houveMudanca = true;
-            if (verificarAtualizacaoEpisodios(anime.mal_id, dadosNovos.episodes)) houveMudanca = true;
-            if (verificarAtualizacaoLancamento(anime.mal_id, dadosNovos.status)) houveMudanca = true;
+            const alteracoes = [];
 
-            if (houveMudanca) {
-                salvarCatalogoImediato();
-                atualizarCardNaTela(anime.mal_id, anime.title, anime.poster, anime.maxEpisodes, anime.type, anime.year, anime.statusLancamento);
+            const anoAPI = dadosNovos.year || dadosNovos.aired?.prop?.from?.year;
+            if (verificarAtualizacaoAno(anime.mal_id, anoAPI)) {
+                alteracoes.push(`Ano: ${anime.year}`);
             }
-        } catch (erro) { console.error(`[Sync] Falha ao atualizar ${anime.title}:`, erro); }
+
+            if (verificarAtualizacaoEpisodios(anime.mal_id, dadosNovos.episodes)) {
+                alteracoes.push(`Eps: ${anime.maxEpisodes}`);
+            }
+
+            if (verificarAtualizacaoLancamento(anime.mal_id, dadosNovos.status)) {
+                alteracoes.push(`Status: ${anime.statusLancamento}`);
+            }
+
+            if (alteracoes.length > 0) {
+                salvarCatalogoImediato();
+                atualizarCardNaTela(
+                    anime.mal_id, 
+                    anime.title, 
+                    anime.poster, 
+                    anime.maxEpisodes, 
+                    anime.type, 
+                    anime.year, 
+                    anime.statusLancamento
+                );
+
+                const resumoMudancas = alteracoes.join(' | ');
+
+                showToast(`🔄 ${anime.title} ➔ ${resumoMudancas}`, 'info');
+
+                console.log(`[Sync] ✅ Atualizado: "${anime.title}" [${resumoMudancas}]`);
+            }
+
+        } catch (erro) {
+            console.error(`[Sync] Falha ao atualizar ${anime.title}:`, erro);
+        }
     }
 }
 
@@ -207,3 +248,62 @@ const salvarNotaLocal = debounce((malId, textoNota) => {
         salvarCatalogo();
     }
 }, 500);
+
+async function precarregarImagensSegundoPlano() {
+    if (!navigator.onLine || !('caches' in window)) return;
+
+    const animes = Object.values(catalogoPessoal);
+    if (animes.length === 0) return;
+
+    try {
+        const imageCache = await caches.open('anime-images-cache');
+        const urlsParaVerificar = [];
+
+        animes.forEach(anime => {
+            if (anime.poster && !anime.poster.includes('placehold.co')) {
+                urlsParaVerificar.push(anime.poster);
+            }
+            if (anime.largePoster && !anime.largePoster.includes('placehold.co')) {
+                urlsParaVerificar.push(anime.largePoster);
+            }
+        });
+
+        const urlsUnicas = [...new Set(urlsParaVerificar)];
+        let baixadasAgora = 0;
+        let jaExistentes = 0;
+
+        console.log(`[Cache] Analisando ${urlsUnicas.length} pôsteres do catálogo...`);
+
+        for (let i = 0; i < urlsUnicas.length; i++) {
+            if (!navigator.onLine) {
+                console.warn('[Cache] Conexão perdida. Pausando pré-carregamento.');
+                break;
+            }
+
+            const url = urlsUnicas[i];
+            const jaSalvo = await imageCache.match(url);
+            
+            if (jaSalvo) {
+                jaExistentes++;
+            } else {
+                await new Promise((resolve) => {
+                    const img = new Image();
+                    img.src = url;
+                    img.onload = () => resolve();
+                    img.onerror = () => resolve();
+                });
+
+                baixadasAgora++;
+                if (baixadasAgora % 15 === 0) {
+                    console.log(`[Cache] Progresso: ${baixadasAgora} novas imagens salvas no disco...`);
+                }
+
+                await new Promise(r => setTimeout(r, 200));
+            }
+        }
+        
+        console.log(`[Cache] Concluído! ${jaExistentes} já estavam no cache, ${baixadasAgora} foram baixadas agora.`);
+    } catch (erro) {
+        console.warn('[Cache] Falha na rotina de pré-carregamento:', erro);
+    }
+}

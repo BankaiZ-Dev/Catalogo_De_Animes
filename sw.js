@@ -1,8 +1,10 @@
 // ========================================================
-// SERVICE WORKER
+// SERVICE WORKER - ARQUITETURA DE CACHE DUPLO
 // ========================================================
 
-const CACHE_NAME = 'anime-catalog-v4.1';
+const CACHE_STATIC_NAME = 'anime-app-v4.2';
+const CACHE_IMAGE_NAME = 'anime-images-cache';
+
 const URLS_TO_CACHE = [
   './',
   './index.html',
@@ -25,7 +27,7 @@ const URLS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   console.log('[SW] Instalando arquivos...');
   event.waitUntil(
-    caches.open(CACHE_NAME)
+    caches.open(CACHE_STATIC_NAME)
       .then((cache) => cache.addAll(URLS_TO_CACHE))
   );
 });
@@ -42,7 +44,8 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName !== CACHE_STATIC_NAME && cacheName !== CACHE_IMAGE_NAME) {
+            console.log(`[SW] Removendo cache obsoleto: ${cacheName}`);
             return caches.delete(cacheName);
           }
         })
@@ -54,13 +57,43 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
+  const url = event.request.url;
+  const isImage = event.request.destination === 'image' || url.includes('cdn.myanimelist.net');
+
+  if (isImage) {
+    event.respondWith(
+      caches.open(CACHE_IMAGE_NAME).then(async (imageCache) => {
+        const cachedResponse = await imageCache.match(event.request);
         if (cachedResponse) {
           return cachedResponse;
         }
-        return fetch(event.request);
+
+        try {
+          const networkResponse = await fetch(event.request);
+
+          if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
+            imageCache.put(event.request, networkResponse.clone());
+          }
+
+          return networkResponse;
+        } catch (error) {
+          console.warn(`[SW] Imagem indisponível offline: ${url}`);
+          return new Response('', { status: 408, statusText: 'Offline' });
+        }
       })
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      
+      return fetch(event.request).catch((err) => {
+        console.warn(`[SW] Falha ao requisitar recurso: ${url}`);
+      });
+    })
   );
 });

@@ -142,6 +142,7 @@ function removerDoCatalogo(malId) {
         delete catalogoPessoal[malId];
         salvarCatalogoImediato();
         limparCacheCalendario();
+        atualizarDatalistTags();
 
         const card = getCardAnime(malId);
         const isSearchMode = DOM.busca.campo.value.trim().length > 0 || (DOM.busca.resultados && !DOM.busca.resultados.classList.contains('oculto'));
@@ -345,18 +346,26 @@ function removerTagDoAnime(malId, tagParaRemover) {
 }
 
 function atualizarDatalistTags() {
-    const datalist = document.getElementById('lista-tags-salvas');
-    if (!datalist) return;
+    let datalist = document.getElementById('lista-tags-salvas');
     
+    if (!datalist) {
+        datalist = document.createElement('datalist');
+        datalist.id = 'lista-tags-salvas';
+        document.body.appendChild(datalist);
+    } else if (datalist.closest('dialog')) {
+        document.body.appendChild(datalist);
+    }
+
     const todasTags = new Set();
     
     Object.values(catalogoPessoal).forEach(anime => {
-        if (anime.customTags) {
+        if (anime.customTags && Array.isArray(anime.customTags)) {
             anime.customTags.forEach(tag => todasTags.add(tag));
         }
     });
     
     datalist.innerHTML = '';
+    
     todasTags.forEach(tag => {
         const option = document.createElement('option');
         option.value = tag;
@@ -370,6 +379,12 @@ function atualizarDatalistTags() {
     const optionComTag = document.createElement('option');
     optionComTag.value = 'com tag';
     datalist.appendChild(optionComTag);
+
+    const inputFiltro = DOM?.filtros?.tags || document.querySelector('input[list="lista-tags-salvas"]');
+    if (inputFiltro) {
+        inputFiltro.removeAttribute('list');
+        inputFiltro.setAttribute('list', 'lista-tags-salvas');
+    }
 }
 
 function verificarFiltroTagDinamico(malId) {

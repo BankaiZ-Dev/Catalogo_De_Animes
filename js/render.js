@@ -387,11 +387,15 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
     const acoesHTML = gerarBotoesAcaoModal(anime, isSaved);
     const streamingHTML = renderizarAbaStreaming(links);
 
+    const posterReserva = (isSaved && catalogoPessoal[anime.mal_id]?.poster) 
+    || anime.images?.jpg?.image_url 
+    || CONFIG.PLACEHOLDER_IMAGE;
+
     return `
         <h2 id="modal-titulo">${anime.title_english || anime.title}</h2>
         
         <div class="modal-poster-detalhes">
-            <img id="modal-poster" src="${anime.images.jpg.large_image_url}" alt="Poster">
+            <img id="modal-poster" src="${anime.images?.jpg?.large_image_url || posterReserva}" alt="Poster" onerror="this.onerror=null; this.src='${posterReserva}';" >
             <div id="modal-detalhes-rapidos">
                 <div class="flex-grow">
                      <p><strong>Gêneros:</strong> ${generos}</p>

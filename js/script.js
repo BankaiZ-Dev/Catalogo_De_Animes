@@ -815,6 +815,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     carregarCatalogo();
     carregarAnimesSalvos();
+    atualizarDatalistTags();
     
     setupListeners();
     setupServiceWorker();
@@ -824,5 +825,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('app_updated');
     }
 
+    setTimeout(precarregarImagensSegundoPlano, 3000);
     setTimeout(sincronizacaoInteligente, 5000);
 });
