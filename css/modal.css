@@ -1,0 +1,803 @@
+/* ==========================================================================
+   MODAL DE DETALHES DO ANIME (Abas, Sinopse, Notas, Tags, Músicas, etc.)
+   ========================================================================== */
+
+/* 1. Estrutura Base do Dialog e Backdrop */
+.modal-dialog {
+    background-color: var(--cor-card-fundo);
+    color: var(--cor-texto-principal);
+    border: none;
+    border-radius: var(--raio-borda);
+    padding: 20px;
+    max-width: 800px;
+    width: 90%;
+    margin: auto; 
+    position: fixed;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.3s ease, transform 0.3s ease, display 0.3s allow-discrete;
+}
+
+.modal-dialog[open] {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.modal-dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    animation: fadeInBackdrop 0.3s ease-out;
+}
+
+.fechar-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--cor-primaria);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    padding: 0;
+    z-index: 10;
+}
+
+/* 2. Topo do Modal (Pôster, Detalhes e Ações) */
+.modal-poster-detalhes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+#modal-poster {
+    max-width: 200px;
+    border-radius: var(--raio-borda);
+}
+
+#modal-detalhes-rapidos {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.modal-actions-row {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 15px;
+    align-items: center;
+}
+
+.modal-actions-row.centralizado {
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 6px;
+}
+
+.modal-actions-row.centralizado .btn-modal-action {
+    white-space: nowrap; 
+    padding: 6px 10px; 
+}
+
+.btn-modal-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 14px;
+    font-size: 0.9em;
+    width: fit-content;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-modal-concluir {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    text-shadow: var(--sombra-texto-contorno);
+}
+
+.btn-modal-excluir {
+    background-color: #ff5252;
+    padding: 6px 10px;
+}
+
+.btn-modal-excluir svg {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-destaque-modal {
+    background: var(--cor-primaria);
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    height: 40px; 
+    width: fit-content;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-right: auto;
+    text-shadow: var(--sombra-texto-contorno);
+    font-weight: 600;
+    font-size: 0.9em;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.btn-destaque-modal svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 3;
+    filter: drop-shadow(1px 0px 0px #000) 
+            drop-shadow(-1px 0px 0px #000) 
+            drop-shadow(0px 1px 0px #000) 
+            drop-shadow(0px -1px 0px #000);
+    display: block;
+}
+
+.btn-destaque-modal:active {
+    transform: scale(0.96);
+    opacity: 0.9;
+}
+
+.modal-controle-episodios {
+    background: rgba(0, 0, 0, 0.15);
+    padding: 4px 6px;
+    border-radius: var(--raio-borda); 
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.modal-controle-episodios .input-progresso-base {
+    width: 40px;
+    padding: 2px;
+    text-align: center;
+}
+
+.modal-texto-eps {
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+.modal-icone-acao {
+    width: 18px;
+    height: 18px;
+    display: flex;
+}
+
+/* 3. Navegação por Abas */
+.modal-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--cor-borda);
+    padding-bottom: 2px;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.modal-tabs::-webkit-scrollbar {
+    display: none; 
+}
+
+.tab-button {
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    color: var(--cor-texto-secundario);
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.tab-button.ativo {
+    color: var(--cor-primaria);
+    border-bottom-color: var(--cor-primaria);
+}
+
+body.dark-mode .tab-button.ativo {
+    color: #ff6b6b;
+    border-bottom-color: #ff6b6b;
+}
+
+.modal-tab-conteudo {
+    margin: 20px 0;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.tab-content.ativo {
+    display: block;
+}
+
+/* 4. Abas: Sinopse e Trailer */
+.sinopse-texto {
+    line-height: 1.6;
+    color: var(--cor-texto-principal);
+    font-size: 0.95em;
+}
+
+.modal-trailer-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border-radius: var(--raio-borda);
+    background: black;
+}
+
+.modal-trailer-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.conteudo-vazio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    background-color: rgba(128, 128, 128, 0.1); 
+    border-radius: var(--raio-borda);
+    border: 2px dashed var(--cor-borda);
+    color: var(--cor-texto-secundario);
+    font-weight: bold;
+    width: 100%;
+}
+
+.conteudo-vazio p {
+    margin: 0;
+    font-size: 1.1em;
+}
+
+/* 5. Aba: Onde Assistir (Streaming) */
+.streaming-container {
+    padding: 10px 0;
+}
+
+.streaming-section {
+    margin-bottom: 30px;
+}
+
+.streaming-section:last-child {
+    margin-bottom: 0;
+}
+
+.streaming-titulo {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--cor-texto-principal);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.streaming-descricao {
+    font-size: 0.85em;
+    color: var(--cor-texto-secundario);
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: var(--cor-fundo);
+    border-radius: 6px;
+    border-left: 3px solid var(--cor-primaria);
+}
+
+.streaming-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+}
+
+.streaming-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 8px;
+    background-color: var(--cor-card-fundo);
+    border: 2px solid var(--cor-borda);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--cor-texto-principal);
+    font-weight: 500;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.streaming-link.oficial {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+    border: none;
+    font-weight: 600;
+}
+
+.streaming-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.streaming-nome {
+    flex-grow: 1;
+    font-size: 0.85em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.streaming-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.streaming-nota-texto {
+    font-size: 0.85em;
+    color: var(--cor-primaria);
+}
+
+.streaming-link-busca {
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+/* 6. Aba: Notas e Tags Pessoais */
+.container-notas {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.textarea-notas {
+    width: 100%;
+    height: 180px;
+    padding: 12px;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-borda);
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto-principal);
+    font-family: inherit;
+    font-size: 0.95em;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.textarea-notas:focus {
+    border-color: var(--cor-primaria);
+    outline: none;
+}
+
+.nota-status-salvo {
+    font-size: 0.75em;
+    color: var(--cor-texto-secundario);
+    text-align: right;
+    font-style: italic;
+}
+
+.secao-tags {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed var(--cor-borda);
+}
+
+.tags-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.input-tag {
+    flex-grow: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-borda);
+    background-color: var(--cor-card-fundo);
+    color: var(--cor-texto-principal);
+}
+
+.input-tag:focus {
+    border-color: var(--cor-primaria);
+    outline: none;
+}
+
+.btn-add-tag {
+    background-color: var(--cor-primaria);
+    color: white;
+    border: none;
+    padding: 0 15px;
+    border-radius: var(--raio-borda);
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.container-pilulas-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sem-tags-msg {
+    font-size: 0.85em;
+    color: var(--cor-texto-secundario);
+    font-style: italic;
+}
+
+.pilula-tag {
+    background-color: rgba(33, 150, 243, 0.1);
+    color: var(--cor-acento);
+    border: 1px solid rgba(33, 150, 243, 0.3);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+body.dark-mode .pilula-tag {
+    background-color: rgba(33, 150, 243, 0.2);
+}
+
+.remover-tag-btn {
+    background: transparent;
+    border: none;
+    color: var(--cor-acento);
+    font-size: 1.2em;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remover-tag-btn:hover {
+    color: var(--status-erro);
+    transform: scale(1.1);
+}
+
+/* 7. Abas: Músicas e Relacionados (Colapsáveis) */
+.grupo-colapsavel {
+    margin-bottom: 10px;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-borda);
+    overflow: hidden;
+    background-color: rgba(128, 128, 128, 0.05);
+}
+
+.grupo-colapsavel summary {
+    padding: 12px 15px;
+    cursor: pointer;
+    font-weight: bold;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s;
+    user-select: none;
+}
+
+.grupo-colapsavel summary::after {
+    content: '▶';
+    font-size: 0.8em;
+    transition: transform 0.3s;
+    opacity: 0.6;
+}
+
+.grupo-colapsavel[open] summary::after {
+    transform: rotate(90deg);
+}
+
+.grupo-colapsavel .conteudo-colapsavel {
+    padding: 10px;
+    border-top: 1px solid var(--cor-borda);
+    background-color: var(--cor-card-fundo);
+}
+
+.container-musicas {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.bloco-musica {
+    background-color: var(--cor-card-fundo);
+    border-radius: var(--raio-borda);
+    padding: 15px;
+    border: 1px solid var(--cor-borda);
+}
+
+.titulo-musica {
+    margin: 0 0 10px 0;
+    color: var(--cor-primaria);
+    font-size: 1em;
+    border-bottom: 2px solid var(--cor-borda);
+    padding-bottom: 5px;
+}
+
+.lista-musicas {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.item-musica {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--cor-texto-principal);
+    font-size: 0.9em;
+    padding: 8px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+    background-color: rgba(255,255,255, 0.03);
+}
+
+.icone-play {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    fill: currentColor;
+    opacity: 0.8;
+}
+
+.container-relacionados {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px 0;
+}
+
+.grupo-relacionado {
+    background-color: var(--cor-card-fundo);
+    border-radius: var(--raio-borda);
+    padding: 12px;
+    border-left: 4px solid var(--cor-primaria);
+}
+
+.tipo-relacao {
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--cor-texto-principal);
+    opacity: 0.7;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.lista-relacoes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.item-relacionado {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background-color: rgba(255,255,255, 0.05);
+    border-radius: 4px;
+    font-size: 0.9em;
+    text-decoration: none;
+    color: var(--cor-texto-principal);
+    transition: all 0.2s;
+}
+
+.item-relacionado.item-externo {
+    opacity: 0.7;
+}
+
+.item-relacionado.link-anime {
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.item-relacionado.link-anime:active {
+    background-color: var(--cor-primaria);
+    color: white;
+    transform: scale(0.98);
+    transition: 0.1s;
+}
+
+.tag-midia {
+    font-size: 0.7em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background-color: rgba(0,0,0,0.3);
+    color: #fff;
+    flex-shrink: 0;
+}
+
+/* 8. Estados de Loading e Erro Internos do Modal */
+.modal-loading-container {
+    text-align: center;
+    padding: 50px 0;
+}
+
+.modal-spinner-margin {
+    margin: 0 auto 15px auto;
+}
+
+.mensagem-erro-modal {
+    text-align: center;
+    color: var(--status-erro);
+    padding: 20px;
+}
+
+/* 9. Interações com Mouse (Hover) */
+@media (hover: hover) {
+    .fechar-btn:hover {
+        background-color: var(--cor-primaria-hover);
+        transform: scale(1.1);
+    }
+
+    .btn-modal-action:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .tab-button:hover {
+        color: var(--cor-texto-principal);
+        background-color: rgba(128, 128, 128, 0.1);
+    }
+
+    .streaming-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-color: #cbd5e0;
+    }
+
+    body.dark-mode .streaming-link:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .item-relacionado.link-anime:hover {
+        background-color: var(--cor-primaria);
+        color: white;
+        border-color: var(--cor-primaria);
+        transform: translateX(5px);
+    }
+
+    .streaming-link.oficial:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
+    }
+
+    .item-musica:hover {
+        background-color: var(--cor-primaria);
+        color: white;
+    }
+
+    .grupo-colapsavel summary:hover {
+        background-color: rgba(128, 128, 128, 0.08);
+    }
+}
+
+/* 10. Responsividade Móvel */
+@media (max-width: 600px) {
+    #anime-modal {
+        width: 95%;
+        max-height: 90vh;
+        padding: 0;
+        border: 1px solid var(--cor-borda);
+    }
+
+    #modal-titulo {
+        padding: 8px 40px 4px 40px;
+        font-size: 1.05rem;
+        text-align: center;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .modal-poster-detalhes {
+        display: flex;
+        flex-direction: column;
+        align-items: center; 
+        gap: 8px;
+        padding: 5px 15px 10px 15px;
+    }
+
+    #modal-poster {
+        width: 170px;
+        height: auto;
+        border-radius: 8px;
+        margin: 0 auto;
+    }
+
+    #modal-detalhes-rapidos {
+        width: 100%;
+        text-align: left;
+        font-size: 0.8rem;
+        gap: 3px;
+    }
+
+    .modal-tab-conteudo {
+        min-height: 180px;
+        padding: 10px 15px;
+    }
+
+    .tab-button {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    .modal-actions-row {
+        justify-content: center;
+        margin-top: 15px;
+        width: 100%;
+    }
+
+    .btn-modal-action {
+        width: 100%;
+    }
+
+    .modal-tabs {
+        gap: 5px;
+    }
+
+    .streaming-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .streaming-link {
+        padding: 12px;
+    }
+
+    .streaming-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .streaming-nome {
+        font-size: 0.9em;
+    }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+    .streaming-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}

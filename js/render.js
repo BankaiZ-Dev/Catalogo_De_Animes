@@ -226,7 +226,7 @@ function atualizarElementosDoCard(malId, savedData, statusChanged) {
     const modalInput = document.getElementById(`modal-episode-input-${malId}`);
     if (modalInput) modalInput.value = savedData.episode;
 
-    updateProgressoDisplay(malId, savedData.episode, savedData.maxEpisodes)
+    updateProgressoDisplay(malId, savedData.episode, savedData.maxEpisodes);
 
     if (statusChanged) {
         const modalMeuStatusText = document.getElementById(`modal-meu-status-text-${malId}`);
@@ -243,10 +243,11 @@ function atualizarElementosDoCard(malId, savedData, statusChanged) {
         }
 
         const filtroAtual = DOM.filtros.status ? DOM.filtros.status.value : 'todos';
+        const mostrandoFavoritos = DOM.filtros.favorito?.classList.contains('ativo');
         let deveSairDaTela = false;
         
-        if (filtroAtual === 'favoritos') {
-            if (!savedData.favorite) deveSairDaTela = true;
+        if (mostrandoFavoritos && !savedData.favorite) {
+            deveSairDaTela = true;
         } else if (filtroAtual !== 'todos' && filtroAtual !== savedData.status) {
             deveSairDaTela = true;
         }

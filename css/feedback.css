@@ -1,0 +1,300 @@
+/* ==========================================================================
+   FEEDBACK, NOTIFICAÇÕES (TOASTS), PWA & CONTROLES FLUTUANTES
+   ========================================================================== */
+
+/* 1. Container de Toasts e Balões de Mensagem */
+#toast-container {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    top: auto; 
+    left: auto;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: max-content;
+    max-width: 80vw;
+    height: auto;
+    overflow: visible;
+    z-index: 9999;
+}
+
+#toast-container:not(:empty),
+#toast-container:popover-open {
+    display: flex;
+}
+
+.toast {
+    position: relative;
+    padding: 12px 24px;
+    border-radius: 50px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    text-shadow: var(--sombra-texto-contorno);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: slide-in-right 0.3s forwards;
+}
+
+.toast.error,
+.toast.fav-remove {
+    background-color: #ff5252;
+}
+
+.toast.fav-add {
+    background-color: #FFC107;
+}
+
+.toast.success {
+    background-color: var(--status-concluido);
+}
+
+.toast.info {
+    background-color: var(--status-querover);
+}
+
+.toast.warning {
+    background-color: var(--status-andamento);
+}
+
+.toast.roleta {
+    background-color: #7B1FA2; 
+    color: white;
+    border-left: 5px solid #E1BEE7;
+    box-shadow: 0 4px 15px rgba(123, 31, 162, 0.4);
+}
+
+.toast.roleta .toast-icon {
+    font-size: 1.2em;
+    margin-right: 8px;
+}
+
+/* 2. Notificação de Atualização PWA (Service Worker) */
+.update-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    animation: slideInUp 0.4s ease-out;
+    max-width: 350px;
+}
+
+.update-notification.saindo {
+    animation: slideOutDown 0.4s ease-in forwards;
+}
+
+.update-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.update-icon {
+    font-size: 1.8em;
+    flex-shrink: 0;
+    animation: spin 2s linear infinite;
+}
+
+.update-text {
+    flex: 1;
+}
+
+.update-text strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 1em;
+}
+
+.update-text p {
+    margin: 0;
+    font-size: 0.85em;
+    opacity: 0.95;
+}
+
+.update-buttons {
+    display: flex;
+    gap: 8px;
+    margin-left: 10px;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.btn-atualizar-agora,
+.btn-atualizar-depois {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 600;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-atualizar-agora {
+    background: white;
+    color: #667eea;
+}
+
+.btn-atualizar-depois {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* 3. Overlay Global de Carregamento */
+#global-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid var(--cor-primaria);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+.loading-text {
+    color: white;
+    font-weight: bold;
+}
+
+/* 4. Botão Flutuante Voltar ao Topo */
+.btn-topo {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 45px;
+    height: 45px;
+    background-color: var(--cor-primaria);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 99;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-topo.visivel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.btn-topo svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* 5. Interações com Mouse (Hover) */
+@media (hover: hover) {
+    .btn-atualizar-agora:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-atualizar-depois:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-topo:hover {
+        background-color: var(--cor-primaria-hover);
+        transform: translateY(-3px);
+    }
+}
+
+/* 6. Responsividade Móvel (< 600px) */
+@media (max-width: 600px) {
+    .update-notification {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+        bottom: calc(20px + env(safe-area-inset-bottom));
+        border-radius: 12px;
+    }
+    
+    .update-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .update-buttons {
+        margin-left: 0;
+        margin-top: 10px;
+        flex-direction: row;
+        width: 100%;
+    }
+    
+    .btn-atualizar-agora,
+    .btn-atualizar-depois {
+        flex: 1;
+    }
+
+    .btn-topo {
+        bottom: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* 7. Animações Dedicadas */
+@keyframes slide-in-right {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fade-out {
+    to { opacity: 0; transform: translateX(20px); }
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutDown {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(400px);
+        opacity: 0;
+    }
+}

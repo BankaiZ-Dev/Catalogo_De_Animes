@@ -75,7 +75,6 @@ const DOM = {
     // AÇÕES GLOBAIS (Header)
     // ========================================================
     acoesGlobais: {
-        botaoDarkMode: $('dark-mode-icon-btn'),
         botaoExportar: $('btn-exportar'),
         botaoImportar: $('btn-importar'),
         inputImportar: $('input-importar'),

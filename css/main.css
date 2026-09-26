@@ -1,0 +1,207 @@
+/* ==========================================================================
+   1. VARIÁVEIS CSS E TEMAS
+   ========================================================================== */
+:root {
+    --cor-fundo: #f4f4f9;
+    --cor-texto-principal: #333;
+    --cor-texto-secundario: #666;
+    --cor-card-fundo: #ffffff;
+    --cor-borda: #ccc;
+
+    --cor-primaria: #d32f2f;
+    --cor-primaria-hover: #b71c1c;
+    --cor-acento: #2196F3;
+
+    --status-concluido: #4CAF50;
+    --status-andamento: #FF9800;
+    --status-querover: #2196F3;
+    --status-erro: #ff5252;
+
+    --largura-maxima: 1200px;
+    --raio-borda: 8px;
+
+    --sombra-padrao: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --sombra-texto-contorno: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+html:has(body.dark-mode),
+html.dark-mode {
+    --cor-fundo: #000000;
+    --cor-texto-principal: #e0e0e0;
+    --cor-texto-secundario: #aaa;
+    --cor-card-fundo: #1e1e1e;
+    --cor-borda: #444;
+    --sombra-padrao: 0 4px 8px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+}
+
+/* ==========================================================================
+   2. RESET E ESTILOS GLOBAIS
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto-principal);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+h1, h2, h3, p {
+    margin: 0;
+}
+
+button {
+    font-family: inherit;
+}
+
+.container-catalogo {
+    width: 90%;
+    max-width: var(--largura-maxima);
+    margin: 0 auto 50px auto;
+    padding-top: 0;
+}
+
+/* Scrollbars & Acessibilidade */
+html {
+    scrollbar-color: var(--cor-primaria) var(--cor-fundo);
+}
+
+html:has(body.dark-mode),
+html.dark-mode {
+    scrollbar-color: var(--cor-primaria) var(--cor-card-fundo);
+}
+
+*:focus-visible {
+    outline: 2px solid var(--cor-primaria);
+    outline-offset: 2px;
+}
+
+/* Aviso de Fallback */
+.alerta-noscript {
+    text-align: center;
+    padding: 50px;
+    color: white;
+    background-color: #ff5252;
+}
+
+/* Modo Offline (PWA) */
+body.modo-offline {
+    padding-top: 25px;
+}
+
+body.modo-offline::before {
+    content: '📡 MODO OFFLINE';
+    display: block;
+    background-color: #ff9800;
+    color: #fff;
+    text-align: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    padding: 5px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* ==========================================================================
+   3. CLASSES UTILITÁRIAS COMPARTILHADAS (Manipuladas via JS)
+   ========================================================================== */
+.oculto {
+    display: none !important;
+}
+
+.sem-animacao {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
+}
+
+.icone-pequeno {
+    width: 18px;
+    height: 18px;
+}
+
+.flex-coluna {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-grow {
+    flex-grow: 1;
+}
+
+.flex-row-between {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.mensagem-centro {
+    width: 100%;
+    text-align: center;
+    padding: 20px;
+    grid-column: 1 / -1;
+}
+
+.mensagem-vazia-titulo {
+    width: 100%;
+    text-align: center;
+    padding: 40px;
+}
+
+.margem-direita-auto {
+    margin-right: auto;
+}
+
+.badge-tempo-total {
+    font-size: 0.9em;
+    color: var(--cor-texto-secundario);
+    margin-left: 4px;
+    font-weight: normal;
+}
+
+/* ==========================================================================
+   4. ANIMAÇÕES GLOBAIS (@keyframes)
+   ========================================================================== */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInBackdrop {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

@@ -276,7 +276,8 @@ function toggleFavorite(malId) {
             }, 300);
         }
 
-        const deveSair = DOM.filtros.status?.value === 'favoritos' && !isFavorite;
+        const mostrandoFavoritos = DOM.filtros.favorito?.classList.contains('ativo');
+        const deveSair = mostrandoFavoritos && !isFavorite;
         if (deveSair) {
             card.classList.add('card-animacao-saida');
 

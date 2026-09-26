@@ -2,7 +2,7 @@
 // SERVICE WORKER - ARQUITETURA DE CACHE DUPLO
 // ========================================================
 
-const CACHE_STATIC_NAME = 'anime-app-v4.2';
+const CACHE_STATIC_NAME = 'anime-app-v4.4';
 const CACHE_IMAGE_NAME = 'anime-images-cache';
 
 const URLS_TO_CACHE = [
@@ -18,7 +18,14 @@ const URLS_TO_CACHE = [
   './js/modal.js',
   './js/script.js',
   './js/calendario.js',
-  './css/styles.css',
+  './css/main.css',
+  './css/cabecalho.css',
+  './css/toolbar.css',
+  './css/cards.css',
+  './css/modal.css',
+  './css/estatisticas.css',
+  './css/ferramentas.css',
+  './css/feedback.css',
   './manifest.json',
   './png/icon-192.png',
   './png/icon-512.png'

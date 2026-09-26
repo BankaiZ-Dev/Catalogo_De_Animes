@@ -488,9 +488,6 @@ function hideUpdateNotification() {
 // ========================================================
 
 function setupListeners() {
-    // Dark Mode
-    DOM.acoesGlobais.botaoDarkMode?.addEventListener('click', toggleDarkMode);
-
     // Paginação
     DOM.paginacao.botaoAnterior?.addEventListener('click', () => mudarPagina(-1));
     DOM.paginacao.botaoProxima?.addEventListener('click', () => mudarPagina(1));
