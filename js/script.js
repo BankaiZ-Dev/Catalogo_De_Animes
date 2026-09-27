@@ -20,7 +20,10 @@ let termoBuscaAtual = '';
 let currentViewMode = 'grid';
 let newWorker;
 let searchController = null;
-let modoBuscaAtual = 'online'
+let modoBuscaAtual = 'online';
+if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+}
 
 // ========================================================
 // 2. CARDS
@@ -36,7 +39,11 @@ function carregarAnimesSalvos() {
     let animesArray = Object.values(catalogoPessoal);
     
     if (animesArray.length === 0) {
-        DOM.cards.lista.innerHTML = '<h2 class="mensagem-vazia-titulo">Seu Catálogo está vazio.<br>Pesquise por um anime acima!</h2>';
+        DOM.cards.lista.innerHTML = `
+            <div class="mensagem-centro">
+                <h2>Seu Catálogo está vazio 📂</h2>
+                <p style="color: var(--cor-texto-secundario); margin-top: 8px;">Pesquise por novos animes no campo de busca acima!</p>
+            </div>`;
         DOM.filtros.status?.classList.add('oculto');
         DOM.filtros.ordenacao?.classList.add('oculto');
         return;
@@ -215,7 +222,8 @@ async function buscarAnimes(query, page = 1) {
     DOM.busca.botaoVoltar?.classList.remove('oculto');
 
     try {
-        const data = await apiBuscarAnimes(query, page, searchController.signal);
+        const limite = CONFIG.LIMITES_PAGINACAO[currentViewMode] || 9;
+        const data = await apiBuscarAnimes(query, page, searchController.signal, limite);
 
         if (!data || data.status === 429 || data.error) {
             throw new Error('RATE_LIMIT');

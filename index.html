@@ -6,6 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Catálogo Pessoal de Animes</title>
 
+    <!-- Script Anti-Flash: Executa antes do primeiro frame da página -->
+    <script>
+        (function() {
+            try {
+                if (localStorage.getItem('dark_mode_ativado') === 'true') {
+                    document.documentElement.classList.add('dark-mode');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
     <!-- CSS Modular -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/cabecalho.css">
@@ -40,6 +51,12 @@
 </head>
 
 <body>
+    <script>
+        if (localStorage.getItem('dark_mode_ativado') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+    
     <noscript>
         <div class="alerta-noscript">
             <h2>JavaScript Desativado</h2>
@@ -397,6 +414,15 @@
                     ⚙️ Mudar Filtros
                 </button>
             </div>
+        </div>
+    </dialog>
+
+    <dialog id="confirmacao-modal" class="modal-dialog modal-confirmacao">
+        <h3 id="confirm-titulo" class="titulo-centralizado">Confirmação</h3>
+        <p id="confirm-mensagem" class="confirm-texto"></p>
+        <div class="modal-actions-row centralizado">
+            <button id="confirm-btn-aceitar" class="btn-modal-action btn-modal-excluir">Confirmar</button>
+            <button id="confirm-btn-cancelar" class="btn-modal-action roleta-btn-secundario">Cancelar</button>
         </div>
     </dialog>
 

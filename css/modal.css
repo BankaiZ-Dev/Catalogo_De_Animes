@@ -666,6 +666,19 @@ body.dark-mode .pilula-tag {
     padding: 20px;
 }
 
+.modal-confirmacao {
+    max-width: 420px;
+    padding: 25px 20px;
+    text-align: center;
+}
+
+.confirm-texto {
+    font-size: 0.95em;
+    line-height: 1.5;
+    margin: 15px 0 25px 0;
+    color: var(--cor-texto-principal);
+}
+
 /* 9. Interações com Mouse (Hover) */
 @media (hover: hover) {
     .fechar-btn:hover {

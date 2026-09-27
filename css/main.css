@@ -154,12 +154,6 @@ body.modo-offline::before {
     grid-column: 1 / -1;
 }
 
-.mensagem-vazia-titulo {
-    width: 100%;
-    text-align: center;
-    padding: 40px;
-}
-
 .margem-direita-auto {
     margin-right: auto;
 }

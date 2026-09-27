@@ -172,3 +172,39 @@ function formatarBroadcast(broadcast, status) {
 
     return `<p><strong>${label}</strong> ${horarioConvertido.nomeDiaPt} às ${horarioConvertido.horaFormatada} <span class="badge-tempo-total">(Horário de Brasília)</span></p>`;
 }
+
+function confirmarAcao(mensagem, titulo = 'Tem certeza?', textoConfirmar = 'Confirmar', perigo = true) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirmacao-modal');
+        if (!modal) {
+            resolve(window.confirm(mensagem));
+            return;
+        }
+
+        const elTitulo = document.getElementById('confirm-titulo');
+        const elMensagem = document.getElementById('confirm-mensagem');
+        const btnAceitar = document.getElementById('confirm-btn-aceitar');
+        const btnCancelar = document.getElementById('confirm-btn-cancelar');
+
+        elTitulo.textContent = titulo;
+        elMensagem.textContent = mensagem;
+        btnAceitar.textContent = textoConfirmar;
+
+        if (perigo) {
+            btnAceitar.className = 'btn-modal-action btn-modal-excluir';
+        } else {
+            btnAceitar.className = 'btn-modal-action btn-modal-concluir';
+        }
+
+        const fecharComResposta = (resposta) => {
+            modal.close();
+            resolve(resposta);
+        };
+
+        btnAceitar.onclick = () => fecharComResposta(true);
+        btnCancelar.onclick = () => fecharComResposta(false);
+        modal.onclose = () => resolve(false);
+
+        modal.showModal();
+    });
+}

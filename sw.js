@@ -2,7 +2,7 @@
 // SERVICE WORKER - ARQUITETURA DE CACHE DUPLO
 // ========================================================
 
-const CACHE_STATIC_NAME = 'anime-app-v4.4';
+const CACHE_STATIC_NAME = 'anime-app-v4.5';
 const CACHE_IMAGE_NAME = 'anime-images-cache';
 
 const URLS_TO_CACHE = [

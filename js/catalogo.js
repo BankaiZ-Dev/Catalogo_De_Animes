@@ -122,10 +122,15 @@ function adicionarRapido(malId, tituloEncoded, poster, episodes, type, year, sta
     }
 }
 
-function removerDoCatalogo(malId) {
-    if (!confirm("Tem certeza que deseja remover este anime? Todo o progresso será perdido.")) {
-        return;
-    }
+async function removerDoCatalogo(malId) {
+    const confirmou = await confirmarAcao(
+        "Tem certeza que deseja remover este anime? Todo o progresso será perdido.",
+        "Remover Anime",
+        "Sim, Remover",
+        true
+    );
+
+    if (!confirmou) return;
 
     if (catalogoPessoal.hasOwnProperty(malId)) {
         const animeTitulo = catalogoPessoal[malId].title;
@@ -153,14 +158,14 @@ function removerDoCatalogo(malId) {
                 card.replaceWith(novoCardElement);
             }
         } else {
-        if (card) {
-            card.classList.add('card-animacao-saida');
-            setTimeout(() => card.remove(), 300);
+            if (card) {
+                card.classList.add('card-animacao-saida');
+                setTimeout(() => card.remove(), 300);
+            }
+            if (Object.keys(catalogoPessoal).length === 0) {
+                setTimeout(() => carregarAnimesSalvos(), 300);
+            }
         }
-        if (Object.keys(catalogoPessoal).length === 0) {
-            setTimeout(() => carregarAnimesSalvos(), 300);
-        }
-    }
 
         showToast(`${animeTitulo} Removido do catálogo.`, 'error');
         fecharModal();

@@ -36,8 +36,8 @@ async function fetchComFallback(endpointJikan, endpointTenrai, options = {}) {
     }
 }
 
-async function apiBuscarAnimes(query, page = 1, signal) {
-    const endpoint = `?q=${encodeURIComponent(query)}&limit=${CONFIG.ANIME_LIMIT_PER_PAGE}&page=${page}`;
+async function apiBuscarAnimes(query, page = 1, signal, limit = 9) {
+    const endpoint = `?q=${encodeURIComponent(query)}&limit=${limit}&page=${page}`;
     return await fetchComFallback(endpoint, endpoint, { signal }); 
 }
 

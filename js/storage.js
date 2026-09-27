@@ -88,11 +88,19 @@ function importarBackup(event) {
     const arquivo = event.target.files[0];
     if (!arquivo) return;
     const leitor = new FileReader();
-    leitor.onload = function(e) {
+    leitor.onload = async function(e) {
         try {
             const dados = JSON.parse(e.target.result);
             if (typeof dados !== 'object') throw new Error();
-            if (confirm("Isso substituirá seu catálogo atual, quer continuar?")) {
+
+            const confirmou = await confirmarAcao(
+                "Isso substituirá todo o seu catálogo atual pelos dados do arquivo. Deseja continuar?",
+                "Restaurar Backup",
+                "Restaurar",
+                true
+            );
+
+            if (confirmou) {
                 Object.keys(dados).forEach(malId => {
                     const anime = dados[malId];
                     
@@ -178,7 +186,10 @@ async function sincronizacaoInteligente() {
         return faltaEpisodios || faltaAno || faltaStatus;
     });
 
-    if (filaPendentes.length === 0) return;
+    if (filaPendentes.length === 0) {
+        console.log('[Sync] Catálogo completo: nenhum anime com dados pendentes.');
+        return;
+    }
 
     const animesSorteados = filaPendentes
         .sort(() => Math.random() - 0.5)
@@ -186,6 +197,8 @@ async function sincronizacaoInteligente() {
 
     console.log(`[Sync] ${filaPendentes.length} anime(s) na fila. Verificando rodada:`);
     animesSorteados.forEach(a => console.log(`   ↳ "${a.title}"`));
+
+    let totalAtualizados = 0;
 
     for (const anime of animesSorteados) {
         if (!navigator.onLine) break;
@@ -214,6 +227,7 @@ async function sincronizacaoInteligente() {
             }
 
             if (alteracoes.length > 0) {
+                totalAtualizados++;
                 salvarCatalogoImediato();
                 atualizarCardNaTela(
                     anime.mal_id, 
@@ -235,6 +249,10 @@ async function sincronizacaoInteligente() {
         } catch (erro) {
             console.error(`[Sync] Falha ao atualizar ${anime.title}:`, erro);
         }
+    }
+
+    if (totalAtualizados === 0 && animesSorteados.length > 0) {
+        showToast(`🔍 Sincronização: ${animesSorteados.length} animes verificados, sem novidades na API.`, 'info');
     }
 }
 

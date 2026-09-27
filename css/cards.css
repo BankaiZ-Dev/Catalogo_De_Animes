@@ -17,8 +17,9 @@
     overflow: hidden;
     position: relative;
     border-left: 5px solid var(--cor-atual, transparent);
-    transition: transform 0.2s, border-left-color 0.5s ease;
-    animation: fadeInUp 0.6s ease-out;
+    transition: transform 0.2s ease, border-left-color 0.5s ease;
+    animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity;
 }
 
 /* Cores dinâmicas de status */
@@ -41,7 +42,7 @@
     height: auto;
     object-fit: cover;
     flex-shrink: 0;
-    background-color: var(--cor-borda); 
+    background-color: rgba(128, 128, 128, 0.15); 
     border-radius: var(--raio-borda) var(--raio-borda) 0 0;
 }
 
@@ -658,7 +659,7 @@
     }
 
     .lista-cards:not(.compact-view) .card-anime {
-        display: flex !important;
+        display: flex;
         flex-direction: row !important;
         height: auto !important; 
         min-height: 115px !important;
@@ -773,7 +774,7 @@
     }
 
     .lista-cards.list-view .card-anime {
-        display: flex !important;
+        display: flex;
         flex-direction: row !important;
         height: 135px !important;
         min-height: 135px !important;
