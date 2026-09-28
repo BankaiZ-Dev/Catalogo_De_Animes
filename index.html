@@ -6,17 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Catálogo Pessoal de Animes</title>
 
-    <!-- Script Anti-Flash: Executa antes do primeiro frame da página -->
-    <script>
-        (function() {
-            try {
-                if (localStorage.getItem('dark_mode_ativado') === 'true') {
-                    document.documentElement.classList.add('dark-mode');
-                }
-            } catch (e) {}
-        })();
-    </script>
-
     <!-- CSS Modular -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/cabecalho.css">
@@ -29,7 +18,7 @@
 
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📺</text></svg>">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ff4081">
+    <meta name="theme-color" content="#000000">
     <meta name="description" content="Meu catálogo pessoal para gerenciar, acompanhar e sortear animes.">
     
     <meta name="mobile-web-app-capable" content="yes">
@@ -51,12 +40,6 @@
 </head>
 
 <body>
-    <script>
-        if (localStorage.getItem('dark_mode_ativado') === 'true') {
-            document.body.classList.add('dark-mode');
-        }
-    </script>
-    
     <noscript>
         <div class="alerta-noscript">
             <h2>JavaScript Desativado</h2>
@@ -93,10 +76,6 @@
                         <button id="btn-exportar" class="dropdown-item"><span>⬇️</span> Fazer Backup (Salvar)</button>
                         <button id="btn-importar" class="dropdown-item"><span>⬆️</span> Restaurar Backup</button>
                         <input type="file" id="input-importar" accept=".json" class="oculto">
-                        <hr class="dropdown-divisor">
-                        <button id="btn-tema-dropdown" class="dropdown-item">
-                            <span class="icone-tema">☀️</span> Alterar Tema
-                        </button>
                     </div>
                 </div>
             </div>

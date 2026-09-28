@@ -33,27 +33,6 @@ const salvarCatalogo = debounce(() => {
 }, 500);
 
 // ========================================================
-// MODO ESCURO
-// ========================================================
-
-function toggleDarkMode() {
-    const isDarkMode = document.body.classList.toggle('dark-mode');
-    document.documentElement.classList.toggle('dark-mode', isDarkMode);
-    localStorage.setItem(STORAGE_KEYS.DARK_MODE, isDarkMode ? 'true' : 'false');
-}
-
-function aplicarModoEscuroInicial() {
-    const isDarkMode = localStorage.getItem(STORAGE_KEYS.DARK_MODE) === 'true';
-    if (isDarkMode) {
-        document.body.classList.add('dark-mode');
-        document.documentElement.classList.add('dark-mode');
-    } else {
-        document.body.classList.remove('dark-mode');
-        document.documentElement.classList.remove('dark-mode');
-    }
-}
-
-// ========================================================
 // MODO DE VISUALIZAÇÃO
 // ========================================================
 
@@ -151,7 +130,7 @@ function verificarAtualizacaoAno(malId, anoApi) {
 
 function verificarAtualizacaoEpisodios(malId, totalEpsApi) {
     const anime = catalogoPessoal[malId];
-    if (anime && (!anime.maxEpisodes || anime.maxEpisodes === 0) && totalEpsApi > 0) {
+    if (anime && totalEpsApi && totalEpsApi > 0 && anime.maxEpisodes !== totalEpsApi) {
         anime.maxEpisodes = totalEpsApi;
         if (anime.episode >= anime.maxEpisodes && anime.status !== 'Concluído') {
             anime.status = 'Concluído';
@@ -164,7 +143,7 @@ function verificarAtualizacaoEpisodios(malId, totalEpsApi) {
 
 function verificarAtualizacaoLancamento(malId, statusApi) {
     const anime = catalogoPessoal[malId];
-    if (anime && (!anime.statusLancamento || anime.statusLancamento === 'Unknown') && statusApi) {
+    if (anime && statusApi && anime.statusLancamento !== statusApi) {
         anime.statusLancamento = statusApi;
         console.log(`[Sync] Status de Lançamento atualizado: ${anime.title} -> ${statusApi}`);
         return true;
@@ -183,7 +162,8 @@ async function sincronizacaoInteligente() {
         const faltaEpisodios = (!anime.maxEpisodes || anime.maxEpisodes === 0);
         const faltaAno = (anime.year === '----' || !anime.year);
         const faltaStatus = (!anime.statusLancamento || anime.statusLancamento === 'Unknown');
-        return faltaEpisodios || faltaAno || faltaStatus;
+        const emExibicao = (anime.statusLancamento === 'Currently Airing');
+        return faltaEpisodios || faltaAno || faltaStatus || emExibicao;
     });
 
     if (filaPendentes.length === 0) {
@@ -206,7 +186,7 @@ async function sincronizacaoInteligente() {
         try {
             await new Promise(r => setTimeout(r, 3500));
 
-            const json = await apiObterDadosSimples(anime.mal_id);
+            const json = await apiObterDetalhesFull(anime.mal_id);
             const dadosNovos = json.data;
 
             if (!dadosNovos) continue;

@@ -766,24 +766,6 @@ function setupListeners() {
         });
     });
 
-    const btnTemaDropdown = document.getElementById('btn-tema-dropdown');
-    if (btnTemaDropdown) {
-        btnTemaDropdown.addEventListener('click', () => {
-            if (typeof toggleDarkMode === 'function') toggleDarkMode();
-            const icone = btnTemaDropdown.querySelector('.icone-tema');
-            if (icone) {
-                icone.textContent = document.body.classList.contains('dark-mode') ? '🌙' : '☀️';
-            }
-        });
-        
-        setTimeout(() => {
-            const icone = btnTemaDropdown.querySelector('.icone-tema');
-            if (icone && document.body.classList.contains('dark-mode')) {
-                icone.textContent = '🌙';
-            }
-        }, 100);
-    }
-
     // Filtros
     if (DOM.barraFerramentas.botaoToggle && DOM.barraFerramentas.painelOpcoes) {
         DOM.barraFerramentas.botaoToggle.addEventListener('click', () => {
@@ -814,7 +796,6 @@ function setupListeners() {
 // ========================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    aplicarModoEscuroInicial();
     aplicarModoVisualizacaoInicial();
     aplicarPreferenciasFiltros();
     

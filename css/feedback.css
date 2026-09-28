@@ -30,43 +30,48 @@
 
 .toast {
     position: relative;
-    padding: 12px 24px;
-    border-radius: 50px;
-    color: #fff;
-    font-weight: bold;
-    font-size: 1rem;
-    letter-spacing: 0.5px;
-    text-shadow: var(--sombra-texto-contorno);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    padding: 12px 22px;
+    border-radius: 10px;
+    color: var(--cor-texto-principal);
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+    background-color: rgba(9, 9, 12, 0.95);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--cor-borda);
     animation: slide-in-right 0.3s forwards;
+}
+
+.toast.success {
+    border-color: var(--status-concluido);
+    box-shadow: 0 0 15px rgba(4, 120, 87, 0.35), 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.toast.warning {
+    border-color: var(--status-andamento);
+    box-shadow: 0 0 15px rgba(234, 88, 12, 0.35), 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.toast.info {
+    border-color: var(--status-querover);
+    box-shadow: 0 0 15px rgba(29, 78, 216, 0.35), 0 8px 24px rgba(0, 0, 0, 0.6);
 }
 
 .toast.error,
 .toast.fav-remove {
-    background-color: #ff5252;
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 15px rgba(217, 4, 41, 0.4), 0 8px 24px rgba(0, 0, 0, 0.6);
 }
 
 .toast.fav-add {
-    background-color: #FFC107;
-}
-
-.toast.success {
-    background-color: var(--status-concluido);
-}
-
-.toast.info {
-    background-color: var(--status-querover);
-}
-
-.toast.warning {
-    background-color: var(--status-andamento);
+    border-color: var(--cor-favorito);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4), 0 8px 24px rgba(0, 0, 0, 0.6);
 }
 
 .toast.roleta {
-    background-color: #7B1FA2; 
-    color: white;
-    border-left: 5px solid #E1BEE7;
-    box-shadow: 0 4px 15px rgba(123, 31, 162, 0.4);
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 15px rgba(217, 4, 41, 0.4), 0 8px 24px rgba(0, 0, 0, 0.6);
 }
 
 .toast.roleta .toast-icon {
@@ -75,15 +80,18 @@
 }
 
 /* 2. Notificação de Atualização PWA (Service Worker) */
+/* 2. Notificação de Atualização PWA (Service Worker) */
 .update-notification {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background-color: rgba(9, 9, 12, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--cor-borda);
+    color: var(--cor-texto-principal);
     border-radius: 12px;
     padding: 16px 20px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
     z-index: 9999;
     animation: slideInUp 0.4s ease-out;
     max-width: 350px;
@@ -102,6 +110,7 @@
 .update-icon {
     font-size: 1.8em;
     flex-shrink: 0;
+    color: var(--cor-primaria);
     animation: spin 2s linear infinite;
 }
 
@@ -113,12 +122,13 @@
     display: block;
     margin-bottom: 4px;
     font-size: 1em;
+    color: var(--cor-texto-principal);
 }
 
 .update-text p {
     margin: 0;
     font-size: 0.85em;
-    opacity: 0.95;
+    color: var(--cor-texto-secundario);
 }
 
 .update-buttons {
@@ -132,7 +142,6 @@
 .btn-atualizar-agora,
 .btn-atualizar-depois {
     padding: 6px 12px;
-    border: none;
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.85em;
@@ -142,13 +151,24 @@
 }
 
 .btn-atualizar-agora {
-    background: white;
-    color: #667eea;
+    background: var(--cor-primaria);
+    color: white;
+    border: none;
+}
+
+.btn-atualizar-agora:hover {
+    background-color: var(--cor-primaria-hover);
 }
 
 .btn-atualizar-depois {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
+    background: var(--cor-input-fundo);
+    color: var(--cor-texto-secundario);
+    border: 1px solid var(--cor-borda);
+}
+
+.btn-atualizar-depois:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--cor-texto-principal);
 }
 
 /* 3. Overlay Global de Carregamento */
@@ -229,6 +249,7 @@
     .btn-topo:hover {
         background-color: var(--cor-primaria-hover);
         transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(217, 4, 41, 0.4);
     }
 }
 

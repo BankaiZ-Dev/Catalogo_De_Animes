@@ -1,37 +1,38 @@
 /* ==========================================================================
-   1. VARIÁVEIS CSS E TEMAS
+   1. VARIÁVEIS CSS E DESIGN TOKENS (TEMA NATIVO ESCURO)
    ========================================================================== */
 :root {
-    --cor-fundo: #f4f4f9;
-    --cor-texto-principal: #333;
-    --cor-texto-secundario: #666;
-    --cor-card-fundo: #ffffff;
-    --cor-borda: #ccc;
+    /* Superfícies e Camadas */
+    --cor-fundo: #000000;
+    --cor-card-fundo: #09090c;
+    --cor-input-fundo: #131318;
+    --cor-borda: rgba(255, 255, 255, 0.08);
 
-    --cor-primaria: #d32f2f;
-    --cor-primaria-hover: #b71c1c;
-    --cor-acento: #2196F3;
+    /* Tipografia */
+    --cor-texto-principal: #E2E8F0;
+    --cor-texto-secundario: #9ca3af;
 
-    --status-concluido: #4CAF50;
-    --status-andamento: #FF9800;
-    --status-querover: #2196F3;
-    --status-erro: #ff5252;
+    /* Ação e Identidade */
+    --cor-primaria: #d90429;
+    --cor-primaria-hover: #b00424;
+    --cor-primaria-ambiente: rgba(217, 4, 41, 0.12);
+    --cor-acento: #1d4ed8;
 
+    /* Status Harmonizados */
+    --status-concluido: #047857;
+    --status-andamento: #ea580c;
+    --status-querover: #1d4ed8;
+    --status-erro: #d90429;
+
+    /* Destaques */
+    --cor-favorito: #f59e0b;
+
+    /* Layout & Sombras */
     --largura-maxima: 1200px;
     --raio-borda: 8px;
-
-    --sombra-padrao: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --sombra-padrao: 0 4px 14px rgba(0, 0, 0, 0.6);
     --sombra-texto-contorno: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-}
 
-html:has(body.dark-mode),
-html.dark-mode {
-    --cor-fundo: #000000;
-    --cor-texto-principal: #e0e0e0;
-    --cor-texto-secundario: #aaa;
-    --cor-card-fundo: #1e1e1e;
-    --cor-borda: #444;
-    --sombra-padrao: 0 4px 8px rgba(0, 0, 0, 0.5);
     color-scheme: dark;
 }
 
@@ -48,7 +49,6 @@ body {
     padding: 0;
     background-color: var(--cor-fundo);
     color: var(--cor-texto-principal);
-    transition: background-color 0.3s, color 0.3s;
 }
 
 h1, h2, h3, p {
@@ -68,17 +68,7 @@ button {
 
 /* Scrollbars & Acessibilidade */
 html {
-    scrollbar-color: var(--cor-primaria) var(--cor-fundo);
-}
-
-html:has(body.dark-mode),
-html.dark-mode {
     scrollbar-color: var(--cor-primaria) var(--cor-card-fundo);
-}
-
-*:focus-visible {
-    outline: 2px solid var(--cor-primaria);
-    outline-offset: 2px;
 }
 
 /* Aviso de Fallback */

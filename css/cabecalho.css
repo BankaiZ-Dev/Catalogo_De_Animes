@@ -78,7 +78,7 @@
     align-items: center;
     padding: 15px;
     gap: 15px;
-    background-color: rgba(128, 128, 128, 0.05);
+    background-color: var(--cor-input-fundo);
 }
 
 .dropdown-cabecalho-info img {
@@ -138,8 +138,8 @@
     }
 
     .dropdown-item:hover {
-        background-color: rgba(128, 128, 128, 0.1);
-        color: var(--cor-primaria);
+        background-color: var(--cor-primaria-ambiente);
+        color: var(--cor-texto-principal);
     }
 }
 

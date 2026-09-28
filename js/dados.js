@@ -15,7 +15,6 @@ const CONFIG = {
 
 const STORAGE_KEYS = {
     CATALOGO: 'meu_catalogo_animes_v2',
-    DARK_MODE: 'dark_mode_ativado',
     VIEW_MODE: 'view_mode_preferido',
     FILTRO_STATUS: 'filtro_status_pref',
     FILTRO_ORDEM: 'filtro_ordem_pref',

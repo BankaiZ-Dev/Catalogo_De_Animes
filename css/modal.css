@@ -6,7 +6,7 @@
 .modal-dialog {
     background-color: var(--cor-card-fundo);
     color: var(--cor-texto-principal);
-    border: none;
+    border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
     padding: 20px;
     max-width: 800px;
@@ -106,13 +106,17 @@
 }
 
 .btn-modal-concluir {
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    background-color: var(--status-concluido);
     text-shadow: var(--sombra-texto-contorno);
 }
 
 .btn-modal-excluir {
-    background-color: #ff5252;
+    background-color: var(--cor-primaria);
     padding: 6px 10px;
+}
+
+.btn-modal-excluir:hover {
+    background-color: var(--cor-primaria-hover);
 }
 
 .btn-modal-excluir svg {
@@ -157,12 +161,20 @@
 }
 
 .modal-controle-episodios {
-    background: rgba(0, 0, 0, 0.15);
+    background: var(--cor-input-fundo);
+    border: 1px solid var(--cor-borda);
     padding: 4px 6px;
     border-radius: var(--raio-borda); 
     display: flex;
     align-items: center;
     gap: 4px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modal-controle-episodios:hover,
+.modal-controle-episodios:focus-within {
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 8px rgba(217, 4, 41, 0.3);
 }
 
 .modal-controle-episodios .input-progresso-base {
@@ -215,11 +227,6 @@
 .tab-button.ativo {
     color: var(--cor-primaria);
     border-bottom-color: var(--cor-primaria);
-}
-
-body.dark-mode .tab-button.ativo {
-    color: #ff6b6b;
-    border-bottom-color: #ff6b6b;
 }
 
 .modal-tab-conteudo {
@@ -392,7 +399,7 @@ body.dark-mode .tab-button.ativo {
     padding: 12px;
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
-    background-color: var(--cor-fundo);
+    background-color: var(--cor-input-fundo);
     color: var(--cor-texto-principal);
     font-family: inherit;
     font-size: 0.95em;
@@ -429,7 +436,7 @@ body.dark-mode .tab-button.ativo {
     padding: 8px 12px;
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
-    background-color: var(--cor-card-fundo);
+    background-color: var(--cor-input-fundo);
     color: var(--cor-texto-principal);
 }
 
@@ -461,9 +468,9 @@ body.dark-mode .tab-button.ativo {
 }
 
 .pilula-tag {
-    background-color: rgba(33, 150, 243, 0.1);
-    color: var(--cor-acento);
-    border: 1px solid rgba(33, 150, 243, 0.3);
+    background-color: var(--cor-primaria-ambiente);
+    color: var(--cor-texto-principal);
+    border: 1px solid rgba(217, 4, 41, 0.3);
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 0.85em;
@@ -471,10 +478,6 @@ body.dark-mode .tab-button.ativo {
     display: flex;
     align-items: center;
     gap: 6px;
-}
-
-body.dark-mode .pilula-tag {
-    background-color: rgba(33, 150, 243, 0.2);
 }
 
 .remover-tag-btn {
@@ -700,10 +703,6 @@ body.dark-mode .pilula-tag {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         border-color: #cbd5e0;
-    }
-
-    body.dark-mode .streaming-link:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     }
 
     .item-relacionado.link-anime:hover {

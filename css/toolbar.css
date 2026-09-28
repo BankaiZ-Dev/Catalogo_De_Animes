@@ -45,7 +45,7 @@
     padding: 10px 85px 10px 15px;
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
-    background-color: var(--cor-card-fundo);
+    background-color: var(--cor-input-fundo);
     color: var(--cor-texto-principal);
     font-size: 1em;
     height: 42px;
@@ -62,23 +62,12 @@
     -webkit-appearance: none;
     height: 18px;
     width: 18px;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d32f2f' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='6' x2='6' y2='18'></line><line x1='6' y1='6' x2='18' y2='18'></line></svg>");
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E2E8F0' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='6' x2='6' y2='18'></line><line x1='6' y1='6' x2='18' y2='18'></line></svg>");
     background-repeat: no-repeat;
     background-position: center;
     transition: transform 0.2s ease, filter 0.2s ease;
     cursor: pointer;
     margin-right: 8px;
-}
-
-body.dark-mode #campo-busca::-webkit-search-cancel-button,
-body.dark-mode .input-filtro-tag::-webkit-search-cancel-button {
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='6' x2='6' y2='18'></line><line x1='6' y1='6' x2='18' y2='18'></line></svg>");
-    -webkit-appearance: none;
-    height: 16px;
-    width: 16px;
-    background-repeat: no-repeat;
-    background-position: center;
-    margin-right: 10px;
 }
 
 .btn-buscar-lupa {
@@ -129,7 +118,7 @@ body.dark-mode .input-filtro-tag::-webkit-search-cancel-button {
 .btn-toggle-toolbar {
     height: 42px;
     padding: 0 20px;
-    background-color: var(--cor-card-fundo);
+    background-color: var(--cor-input-fundo);
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
     color: var(--cor-texto-principal);
@@ -170,7 +159,7 @@ body.dark-mode .input-filtro-tag::-webkit-search-cancel-button {
     height: 42px;
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
-    background-color: var(--cor-card-fundo);
+    background-color: var(--cor-input-fundo);
     color: var(--cor-texto-principal);
     font-size: 0.95em;
     padding: 0 15px;
@@ -191,8 +180,8 @@ body.dark-mode .input-filtro-tag::-webkit-search-cancel-button {
 }
 
 .grupo-tags-favoritos .input-filtro-tag {
-    flex: 1 !important;
-    width: auto !important;
+    flex: 1;
+    width: auto;
     min-width: 0;
 }
 
@@ -200,7 +189,7 @@ body.dark-mode .input-filtro-tag::-webkit-search-cancel-button {
     width: 42px;
     height: 42px;
     flex-shrink: 0;
-    background-color: var(--cor-card-fundo);
+    background-color: var(--cor-input-fundo);
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
     cursor: pointer;
@@ -267,7 +256,7 @@ body.dark-mode .input-filtro-tag::-webkit-search-cancel-button {
     height: 42px;
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
-    background-color: var(--cor-card-fundo);
+    background-color: var(--cor-input-fundo);
     color: var(--cor-texto-principal);
     font-size: 0.95em;
     cursor: pointer;
@@ -277,7 +266,7 @@ body.dark-mode .input-filtro-tag::-webkit-search-cancel-button {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E2E8F0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 15px center;
     background-size: 16px;
@@ -294,14 +283,8 @@ body.dark-mode .input-filtro-tag::-webkit-search-cancel-button {
 #filtro-status option,
 #ordenacao-catalogo option,
 #filtro-tipo option {
-    background-color: var(--cor-card-fundo);
+    background-color: var(--cor-input-fundo);
     color: var(--cor-texto-principal);
-}
-
-body.dark-mode #filtro-status,
-body.dark-mode #ordenacao-catalogo,
-body.dark-mode #filtro-tipo {
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
 }
 
 /* 6. Alternador de Modo de Visualização (Grid, Compacto, Lista) */
@@ -311,7 +294,7 @@ body.dark-mode #filtro-tipo {
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
     overflow: hidden;
-    background-color: var(--cor-card-fundo);
+    background-color: var(--cor-input-fundo);
     margin-right: 0px;
     height: 42px;
 }
@@ -343,8 +326,9 @@ body.dark-mode #filtro-tipo {
 /* 7. Interações de Hover */
 @media (hover: hover) {
     .btn-voltar-home:hover {
-        background-color: #1976D2;
+        background-color: #173ea8;
         transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(29, 78, 216, 0.4);
     }
 
     .btn-buscar-lupa:hover {
@@ -358,35 +342,18 @@ body.dark-mode #filtro-tipo {
         cursor: pointer;
     }
 
-    body.dark-mode #campo-busca::-webkit-search-cancel-button:hover {
-        filter: brightness(1.5) drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
-        transform: scale(1.1);
-    }
-
     #filtro-status:hover,
     #ordenacao-catalogo:hover,
     #filtro-tipo:hover {
         border-color: var(--cor-primaria);
-        background-color: #f9f9f9;
+        background-color: #1a1a22;
         transform: translateY(-1px);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-
-    body.dark-mode #filtro-status:hover,
-    body.dark-mode #ordenacao-catalogo:hover,
-    body.dark-mode #filtro-tipo:hover {
-        background-color: #333333;
-        border-color: var(--cor-primaria);
-        color: #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     }
 
     .btn-filtro-favorito:hover {
         border-color: var(--cor-primaria);
         opacity: 1;
-    }
-
-    body.dark-mode .btn-filtro-favorito:hover {
-        background-color: rgba(255, 255, 255, 0.1);
     }
 
     .view-btn:hover:not(.active) {

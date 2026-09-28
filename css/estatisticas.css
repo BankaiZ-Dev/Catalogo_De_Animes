@@ -15,27 +15,27 @@
 }
 
 .stat-card {
-    background-color: var(--cor-fundo);
+    background-color: var(--cor-card-fundo);
     padding: 20px;
     border-radius: var(--raio-borda);
     border: 1px solid var(--cor-borda);
     display: flex;
     align-items: center;
     gap: 15px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--sombra-padrao);
     transition: transform 0.2s;
 }
 
 .stat-icon {
     font-size: 2.2em;
-    background-color: var(--cor-card-fundo);
+    background-color: var(--cor-input-fundo);
     width: 60px;
     height: 60px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
     line-height: 1;
     padding-top: 2px;
     text-shadow: var(--sombra-texto-contorno);
