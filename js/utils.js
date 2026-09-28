@@ -37,7 +37,7 @@ function hideGlobalLoading() {
     if (DOM.loading.overlay) DOM.loading.overlay.classList.add('oculto');
 }
 
-function showToast(message, type = 'info') {
+function showToast(message, type = 'info', duracao = 3000) {
     const container = DOM.notificacoes.toastContainer;
     if (!container) return;
 
@@ -55,6 +55,7 @@ function showToast(message, type = 'info') {
 
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
+    toast.style.whiteSpace = 'pre-line';
     toast.textContent = message;
     
     container.appendChild(toast);
@@ -72,7 +73,7 @@ function showToast(message, type = 'info') {
                 }
             }
         }, 500);
-    }, 3000);
+    }, duracao);
 }
 
 // ========================================================
