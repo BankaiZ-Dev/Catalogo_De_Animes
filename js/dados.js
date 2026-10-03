@@ -110,16 +110,16 @@ const PLATAFORMAS_STREAMING = {
         cor: '#00a8e1'
     },
     hbomax: {
-        nome: 'HBO Max',
-        baseUrl: 'https://max.com/search?q=',
+        nome: 'Max',
+        baseUrl: 'https://play.max.com/search?q=',
         icon: 'https://www.google.com/s2/favicons?domain=max.com&sz=128',
-        cor: '#000000ff'
+        cor: '#002be7'
     },
     disney: {
         nome: 'Disney+',
-        baseUrl: 'https://www.disneyplus.com/search?q=',
+        baseUrl: 'https://www.google.com/search?q=site:disneyplus.com+',
         icon: 'https://www.google.com/s2/favicons?domain=disneyplus.com&sz=128',
-        cor: '#113dcfcc'
+        cor: '#0063e5'
     },
 };
 

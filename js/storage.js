@@ -1,12 +1,9 @@
 // ========================================================
-// STORAGE & BACKUP
-// ========================================================
-
-// ========================================================
 // CARREGAR E SALVAR CATÁLOGO
 // ========================================================
 
 let catalogoPessoal = {};
+let rodadaSyncAtual = 0;
 
 function carregarCatalogo() { 
     const data = localStorage.getItem(STORAGE_KEYS.CATALOGO); 
@@ -183,6 +180,16 @@ function verificarAtualizacaoTitulo(malId, dadosNovos) {
     return false;
 }
 
+async function apagarImagemDoCache(url) {
+    if (!url || url.includes('placehold.co') || !('caches' in window)) return;
+    try {
+        const imageCache = await caches.open('anime-images-cache');
+        await imageCache.delete(url);
+    } catch (e) {
+        console.warn('[Cache] Falha ao remover imagem antiga:', e);
+    }
+}
+
 function verificarAtualizacaoPosters(malId, dadosNovos) {
     const anime = catalogoPessoal[malId];
     if (!anime || !dadosNovos?.images?.jpg) return false;
@@ -191,18 +198,26 @@ function verificarAtualizacaoPosters(malId, dadosNovos) {
     const novoLargePoster = dadosNovos.images.jpg.large_image_url || novoPoster;
     let alterou = false;
 
-    if (novoPoster && (!anime.poster || anime.poster.includes('placehold.co') || anime.poster !== novoPoster)) {
+    if (novoPoster && anime.poster && anime.poster !== novoPoster) {
+        apagarImagemDoCache(anime.poster);
+        anime.poster = novoPoster;
+        alterou = true;
+    } else if (novoPoster && (!anime.poster || anime.poster.includes('placehold.co'))) {
         anime.poster = novoPoster;
         alterou = true;
     }
 
-    if (novoLargePoster && (!anime.largePoster || anime.largePoster.includes('placehold.co') || anime.largePoster !== novoLargePoster)) {
+    if (novoLargePoster && anime.largePoster && anime.largePoster !== novoLargePoster) {
+        apagarImagemDoCache(anime.largePoster);
+        anime.largePoster = novoLargePoster;
+        alterou = true;
+    } else if (novoLargePoster && (!anime.largePoster || anime.largePoster.includes('placehold.co'))) {
         anime.largePoster = novoLargePoster;
         alterou = true;
     }
 
     if (alterou) {
-        console.log(`[Sync] Pôster/Capa atualizada: ${anime.title}`);
+        console.log(`[Sync] Pôster atualizado e cache antigo descartado: ${anime.title}`);
     }
 
     return alterou;
@@ -270,7 +285,12 @@ function verificarAtualizacaoMetadadosCompletos(malId, dadosNovos) {
 // ========================================================
 
 async function sincronizacaoInteligente() {
-    if (!navigator.onLine) return;
+    if (!navigator.onLine) {
+        if (typeof agendarSincronizacao === 'function') agendarSincronizacao(60000);
+        return;
+    }
+
+    rodadaSyncAtual++;
 
     const agora = Date.now();
     const INTERVALO_QUENTE_MS = 12 * 60 * 60 * 1000;
@@ -315,38 +335,31 @@ async function sincronizacaoInteligente() {
     const filaTotal = [...filaQuente, ...filaFria];
 
     if (filaTotal.length === 0) {
-        console.log('[Sync] ✅ Catálogo 100% atualizado! Nenhuma obra pendente de verificação.');
+        console.log(`[Sync] ✅ Rodada #${rodadaSyncAtual}: Catálogo 100% atualizado. Próxima checagem em 3 minutos.`);
+        if (typeof agendarSincronizacao === 'function') agendarSincronizacao(3 * 60 * 1000);
         return;
     }
 
-    console.group(`[Sync] 📊 Fila de Monitoramento: ${filaTotal.length} elegíveis (${filaQuente.length} 🔥 Quente | ${filaFria.length} ❄️ Fria/7d)`);
-    console.table(filaTotal.map((a, idx) => {
-        const ehQuente = filaQuente.includes(a);
-        return {
-            Posição: `#${idx + 1}`,
-            Prioridade: ehQuente ? '🔥 Quente (12h)' : '❄️ Fria (7d)',
-            Título: a.title,
-            Status: a.statusLancamento || 'Unknown',
-            Eps: `${a.episode}/${a.maxEpisodes || '?'}`,
-            ÚltimoSync: a.lastSync ? new Date(a.lastSync).toLocaleDateString('pt-BR') + ' ' + new Date(a.lastSync).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 'Nunca verificado'
-        };
-    }));
+    console.group(`[Sync] 📊 Rodada #${rodadaSyncAtual} — Fila: ${filaTotal.length} elegíveis (${filaQuente.length} 🔥 Quente | ${filaFria.length} ❄️ Fria)`);
+    console.table(filaTotal.map((a, idx) => ({
+        Posição: `#${idx + 1}`,
+        Prioridade: filaQuente.includes(a) ? '🔥 Quente (12h)' : '❄️ Fria (7d)',
+        Título: a.title,
+        Status: a.statusLancamento || 'Unknown',
+        Eps: `${a.episode}/${a.maxEpisodes || '?'}`,
+        ÚltimoSync: a.lastSync ? new Date(a.lastSync).toLocaleTimeString('pt-BR') : 'Nunca verificado'
+    })));
     console.groupEnd();
 
     const animesRodada = filaTotal.slice(0, 5);
-
-    console.log(`[Sync] 🎯 Checando os 5 primeiros da fila:`);
-    animesRodada.forEach((a, idx) => {
-        const tipo = filaQuente.includes(a) ? '🔥 Quente' : '❄️ Fria';
-        console.log(`   ↳ [${idx + 1}/5] (#${idx + 1} na fila | ${tipo}) "${a.title}"`);
-    });
-
-    const resumoGeralMudancas = [];
+    const mudancasQuentes = [];
+    const mudancasFrias = [];
 
     for (let i = 0; i < animesRodada.length; i++) {
         if (!navigator.onLine) break;
 
         const anime = animesRodada[i];
+        const ehQuente = filaQuente.includes(anime);
         const posicaoFila = i + 1;
 
         try {
@@ -377,9 +390,19 @@ async function sincronizacaoInteligente() {
                     anime.statusLancamento
                 );
 
-                const textoMudancas = alteracoes.join(' | ');
-                resumoGeralMudancas.push(`• ${anime.title}: ${textoMudancas}`);
-                console.log(`[Sync] ✅ Atualizado [${posicaoFila}/5]: "${anime.title}" [${textoMudancas}]`);
+                const itemHtml = `
+                    <div class="toast-sync-item">
+                        <span class="toast-sync-nome">${anime.title}</span>
+                        <span class="toast-sync-detalhe">${alteracoes.join(' • ')}</span>
+                    </div>`;
+
+                if (ehQuente) {
+                    mudancasQuentes.push(itemHtml);
+                } else {
+                    mudancasFrias.push(itemHtml);
+                }
+
+                console.log(`[Sync] ✅ Atualizado [${posicaoFila}/5] (${ehQuente ? '🔥' : '❄️'}): "${anime.title}"`);
             } else {
                 salvarCatalogoImediato();
                 console.log(`[Sync] ℹ️ Sem novidades para: "${anime.title}"`);
@@ -392,11 +415,42 @@ async function sincronizacaoInteligente() {
         }
     }
 
-    if (resumoGeralMudancas.length > 0) {
-        const mensagemToast = `🔄 Sincronização Atualizada:\n${resumoGeralMudancas.join('\n')}`;
-        showToast(mensagemToast, 'success', 9000);
+    const temMudancas = mudancasQuentes.length > 0 || mudancasFrias.length > 0;
+
+    if (temMudancas) {
+        let conteudoHtml = `
+            <div class="toast-sync-container">
+                <div class="toast-sync-topo">
+                    <span class="toast-sync-titulo">🔄 Atualizações Encontradas</span>
+                    <span class="toast-sync-badge">Rodada #${rodadaSyncAtual}</span>
+                </div>`;
+
+        if (mudancasQuentes.length > 0) {
+            conteudoHtml += `
+                <div class="toast-sync-bloco">
+                    <span class="toast-sync-secao-quente">🔥 Em Acompanhamento</span>
+                    ${mudancasQuentes.join('')}
+                </div>`;
+        }
+
+        if (mudancasFrias.length > 0) {
+            conteudoHtml += `
+                <div class="toast-sync-bloco">
+                    <span class="toast-sync-secao-fria">❄️ Revisão Semanal</span>
+                    ${mudancasFrias.join('')}
+                </div>`;
+        }
+
+        conteudoHtml += `</div>`;
+
+        showToast(conteudoHtml, 'success', 15000);
     } else {
-        console.log(`[Sync] 💤 Rodada concluída. Todas as ${animesRodada.length} obras verificadas já estavam em dia.`);
+        console.log(`[Sync] 💤 Rodada #${rodadaSyncAtual} concluída sem novidades.`);
+    }
+
+    if (typeof agendarSincronizacao === 'function') {
+        console.log(`[Sync] ⏱️ Próxima rodada agendada para daqui a 3 minutos...`);
+        agendarSincronizacao(3 * 60 * 1000);
     }
 }
 
@@ -467,5 +521,34 @@ async function precarregarImagensSegundoPlano() {
         console.log(`[Cache] Concluído! ${jaExistentes} já estavam no cache, ${baixadasAgora} foram baixadas agora.`);
     } catch (erro) {
         console.warn('[Cache] Falha na rotina de pré-carregamento:', erro);
+    }
+}
+
+async function limparImagensOrfasDoCache() {
+    if (!('caches' in window)) return;
+
+    try {
+        const imageCache = await caches.open('anime-images-cache');
+        const requisicoesSalvas = await imageCache.keys();
+
+        const urlsAtivas = new Set();
+        Object.values(catalogoPessoal).forEach(anime => {
+            if (anime.poster) urlsAtivas.add(anime.poster);
+            if (anime.largePoster) urlsAtivas.add(anime.largePoster);
+        });
+
+        let apagadas = 0;
+        for (const req of requisicoesSalvas) {
+            if (!urlsAtivas.has(req.url)) {
+                await imageCache.delete(req);
+                apagadas++;
+            }
+        }
+
+        if (apagadas > 0) {
+            console.log(`[Cache] 🧹 Faxina concluída: ${apagadas} imagem(ns) órfã(s) removida(s) do disco.`);
+        }
+    } catch (erro) {
+        console.warn('[Cache] Erro durante a limpeza de imagens órfãs:', erro);
     }
 }

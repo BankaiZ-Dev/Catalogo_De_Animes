@@ -215,10 +215,16 @@ function atualizarEpisodio(malId, novoEpisodio) {
 }
 
 function incrementarEpisodio(malId) {
+    if (document.activeElement && document.activeElement.tagName === 'BUTTON') {
+        document.activeElement.blur();
+    }
     quickUpdate(malId, 1);
 }
 
 function decrementarEpisodio(malId) {
+    if (document.activeElement && document.activeElement.tagName === 'BUTTON') {
+        document.activeElement.blur();
+    }
     quickUpdate(malId, -1);
 }
 

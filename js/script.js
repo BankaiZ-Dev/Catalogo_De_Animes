@@ -21,6 +21,7 @@ let currentViewMode = 'grid';
 let newWorker;
 let searchController = null;
 let modoBuscaAtual = 'online';
+let timerSincronizacao = null;
 if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
 }
@@ -423,43 +424,79 @@ function aplicarPreferenciasFiltros() {
 }
 
 // ========================================================
+// CONTROLE DE AGENDAMENTO DA SINCRONIZAÇÃO
+// ========================================================
+
+function agendarSincronizacao(delayMs = 6000) {
+    cancelarSincronizacao();
+    timerSincronizacao = setTimeout(() => {
+        if (typeof sincronizacaoInteligente === 'function') {
+            sincronizacaoInteligente();
+        }
+    }, delayMs);
+}
+
+function cancelarSincronizacao() {
+    if (timerSincronizacao) {
+        clearTimeout(timerSincronizacao);
+        timerSincronizacao = null;
+    }
+}
+
+// ========================================================
 // 5. PWA & SERVICE WORKER
 // ========================================================
 
 function setupServiceWorker() {
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-                .then(reg => {
+    if (!('serviceWorker' in navigator)) {
+        agendarSincronizacao(4000);
+        return;
+    }
 
-                    if (reg.waiting) {
-                        newWorker = reg.waiting;
+    navigator.serviceWorker.register('./sw.js')
+        .then(reg => {
+            // Força a checagem imediata na rede
+            reg.update().catch(() => {});
+
+            if (reg.waiting) {
+                newWorker = reg.waiting;
+                showUpdateNotification();
+                return;
+            }
+
+            reg.addEventListener('updatefound', () => {
+                newWorker = reg.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                         showUpdateNotification();
                     }
+                });
+            });
 
-                    reg.addEventListener('updatefound', () => {
-                        newWorker = reg.installing;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                showUpdateNotification();
-                            }
-                        });
-                    });
-                })
-                .catch(err => console.error('❌ Erro SW:', err));
+            setTimeout(() => {
+                if (!reg.waiting && !reg.installing) {
+                    agendarSincronizacao(5000);
+                }
+            }, 1000);
+        })
+        .catch(err => {
+            console.error('❌ Erro SW:', err);
+            agendarSincronizacao(4000);
         });
 
-        let refreshing = false;
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (refreshing) return;
-            refreshing = true;
-            localStorage.setItem('app_updated', 'true');
-            window.location.reload();
-        });
-    }
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        localStorage.setItem('app_updated', 'true');
+        window.location.reload();
+    });
 }
 
 function showUpdateNotification() {
+    cancelarSincronizacao();
+    console.log('[Sync] Pausado: atualização do app detectada.');
+
     const updateToast = DOM.notificacoes.pwaUpdateToast;
     const btnAgora = DOM.notificacoes.pwaUpdateBtnAgora;
     const btnDepois = DOM.notificacoes.pwaUpdateBtnDepois;
@@ -477,6 +514,8 @@ function showUpdateNotification() {
 
     btnDepois.onclick = () => {
         hideUpdateNotification();
+        console.log('[Sync] Atualização adiada pelo usuário. Sincronizando em 3s...');
+        agendarSincronizacao(3000);
     };
 }
 
@@ -804,13 +843,13 @@ document.addEventListener('DOMContentLoaded', () => {
     atualizarDatalistTags();
     
     setupListeners();
-    setupServiceWorker();
     
     if (localStorage.getItem('app_updated')) {
-        showToast('✅ App atualizado para a versão mais recente!', 'success');
+        showToast('✅ App atualizado para a versão mais recente!', 'success', 4000);
         localStorage.removeItem('app_updated');
     }
 
+    setupServiceWorker();
     setTimeout(precarregarImagensSegundoPlano, 3000);
-    setTimeout(sincronizacaoInteligente, 5000);
+    setTimeout(limparImagensOrfasDoCache, 5000);
 });

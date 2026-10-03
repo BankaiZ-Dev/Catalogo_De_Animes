@@ -42,9 +42,9 @@ function renderizarControleProgresso(dados) {
                 <span id="ep-atual-${malId}">Ep ${savedData.episode}${episodesTotal}</span>
             </p>
             <div class="controle-individual">
-                <button class="btn-progresso btn-menos" onclick="decrementarEpisodio(${malId})">-</button>
+                <button class="btn-progresso btn-menos" onmousedown="event.preventDefault()" onclick="decrementarEpisodio(${malId})">-</button>
                 <input type="number" id="episode-input-${malId}" value="${savedData.episode}" min="0" class="input-progresso-base" onchange="atualizarEpisodio(${malId}, this.value)" />
-                <button class="btn-progresso btn-mais" onclick="incrementarEpisodio(${malId})">+</button>
+                <button class="btn-progresso btn-mais" onmousedown="event.preventDefault()" onclick="incrementarEpisodio(${malId})">+</button>
             </div>
         </div>
         <div class="barra-progresso-fundo">
@@ -534,7 +534,13 @@ function renderizarNumerosPaginacao(paginaAtual, totalPaginas) {
 // --- OBTER LINKS DE STREAMING ---
 async function obterLinksStreaming(animeData) {
     try {
-        const tituloParaBusca = animeData.title_english || animeData.title;
+        const tituloBruto = animeData.title_english || animeData.title;
+
+        const tituloLimpo = tituloBruto
+            .replace(/[:\/\\#?]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+
         const todosOsLinks = [];
         
         if (animeData.streaming && animeData.streaming.length > 0) {
@@ -549,7 +555,7 @@ async function obterLinksStreaming(animeData) {
         }
         
         Object.values(PLATAFORMAS_STREAMING).forEach(plataforma => {
-            const urlBusca = plataforma.baseUrl + encodeURIComponent(tituloParaBusca);
+            const urlBusca = plataforma.baseUrl + encodeURIComponent(tituloLimpo);
             todosOsLinks.push({
                 nome: plataforma.nome,
                 url: urlBusca,
@@ -559,7 +565,7 @@ async function obterLinksStreaming(animeData) {
             });
         });
 
-        const urlGoogle = `https://www.google.com/search?q=${encodeURIComponent('Anime ' + tituloParaBusca)}`;
+        const urlGoogle = `https://www.google.com/search?q=${encodeURIComponent('Assistir ' + tituloLimpo + ' online')}`;
         todosOsLinks.push({
             nome: 'Google',
             url: urlGoogle,

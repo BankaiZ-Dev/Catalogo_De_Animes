@@ -31,7 +31,7 @@ async function abrirModal(malId) {
                 mal_id: savedData.mal_id,
                 title: savedData.title,
                 title_english: savedData.title,
-                images: { jpg: { large_image_url: savedData.largePoster || savedData.poster } }, 
+                images: { jpg: { large_image_url: savedData.largePoster || savedData.poster, image_url: savedData.poster } },
                 type: savedData.type,
                 year: savedData.year,
                 episodes: savedData.maxEpisodes,
@@ -167,9 +167,9 @@ function gerarBotoesAcaoModal(anime, isSaved) {
                 
                 <div class="controle-individual modal-controle-episodios">
                     <span class="modal-texto-eps">Eps:</span>
-                    <button class="btn-progresso btn-menos" onclick="decrementarEpisodio(${anime.mal_id})">-</button>
+                    <button class="btn-progresso btn-menos" onmousedown="event.preventDefault()" onclick="decrementarEpisodio(${anime.mal_id})">-</button>
                     <input type="number" id="modal-episode-input-${anime.mal_id}" value="${epAtual}" min="0" class="input-progresso-base" onchange="atualizarEpisodio(${anime.mal_id}, this.value)" />
-                    <button class="btn-progresso btn-mais" onclick="incrementarEpisodio(${anime.mal_id})">+</button>
+                    <button class="btn-progresso btn-mais" onmousedown="event.preventDefault()" onclick="incrementarEpisodio(${anime.mal_id})">+</button>
                     <span style="font-size: 0.85em;">/ ${maxEps}</span>
                 </div>
 

@@ -172,7 +172,7 @@
 }
 
 .modal-controle-episodios:hover,
-.modal-controle-episodios:focus-within {
+.modal-controle-episodios:has(.input-progresso-base:focus) {
     border-color: var(--cor-primaria);
     box-shadow: 0 0 8px rgba(217, 4, 41, 0.3);
 }

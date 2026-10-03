@@ -1,20 +1,54 @@
 // ========================================================
-// API SERVICE - Gerenciamento de Requisições (Com Fallback)
+// API SERVICE - Principal + Slot Reserva de Fallback
 // ========================================================
 
-async function fetchJikan(endpoint, options = {}) {
-    const url = endpoint.startsWith('http') ? endpoint : `${CONFIG.JIKAN_API_URL}${endpoint}`;
-    const response = await fetch(url, options);
-    
-    if (response.status === 429) throw new Error('RATE_LIMIT');
-    if (!response.ok) throw new Error(`Jikan Erro HTTP: ${response.status}`);
-    
-    return await response.json();
+const PROVEDORES_CONFIG = {
+    TIMEOUT_MS: 4500,
+
+    TENRAI: {
+        ativo: true,
+        baseUrl: () => (typeof CONFIG !== 'undefined' && CONFIG.TENRAI_API_URL) || 'https://api.tenrai.org/v1'
+    },
+
+    RESERVA: {
+        ativo: false,
+        baseUrl: () => (typeof CONFIG !== 'undefined' && CONFIG.RESERVA_API_URL) || ''
+    }
+};
+
+// ========================================================
+// REQUISIÇÕES INDIVIDUAIS COM CONTROLE DE TIMEOUT
+// ========================================================
+
+async function requisicaoComTimeout(url, options = {}) {
+    const controller = new AbortController();
+    const idTimer = setTimeout(() => controller.abort(), PROVEDORES_CONFIG.TIMEOUT_MS);
+
+    const sinalFinal = options.signal || controller.signal;
+
+    try {
+        const resposta = await fetch(url, { ...options, signal: sinalFinal });
+        clearTimeout(idTimer);
+        return resposta;
+    } catch (erro) {
+        clearTimeout(idTimer);
+        throw erro;
+    }
 }
 
 async function fetchTenrai(endpoint, options = {}) {
-    const url = endpoint.startsWith('http') ? endpoint : `${CONFIG.TENRAI_API_URL}${endpoint}`;
-    const response = await fetch(url, options);
+    const baseUrl = PROVEDORES_CONFIG.TENRAI.baseUrl();
+    let url;
+
+    if (endpoint.startsWith('http')) {
+        url = endpoint;
+    } else if (endpoint.startsWith('/schedules')) {
+        url = `${baseUrl.replace(/\/anime\/?$/, '')}${endpoint}`;
+    } else {
+        url = `${baseUrl}${endpoint}`;
+    }
+
+    const response = await requisicaoComTimeout(url, options);
     
     if (response.status === 429) throw new Error('RATE_LIMIT');
     if (!response.ok) throw new Error(`Tenrai Erro HTTP: ${response.status}`);
@@ -22,38 +56,80 @@ async function fetchTenrai(endpoint, options = {}) {
     return await response.json();
 }
 
-async function fetchComFallback(endpointJikan, endpointTenrai, options = {}) {
-    try {
-        return await fetchJikan(endpointJikan, options);
-    } catch (error) {
+async function fetchApiReserva(endpoint, options = {}) {
+    const baseUrl = PROVEDORES_CONFIG.RESERVA.baseUrl();
+    if (!PROVEDORES_CONFIG.RESERVA.ativo || !baseUrl) {
+        throw new Error('API Reserva não configurada');
+    }
+
+    let url;
+    if (endpoint.startsWith('http')) {
+        url = endpoint;
+    } else if (endpoint.startsWith('/schedules')) {
+        url = `${baseUrl.replace(/\/anime\/?$/, '')}${endpoint}`;
+    } else {
+        url = `${baseUrl}${endpoint}`;
+    }
+
+    const response = await requisicaoComTimeout(url, options);
+
+    if (response.status === 429) throw new Error('RATE_LIMIT');
+    if (!response.ok) throw new Error(`Reserva Erro HTTP: ${response.status}`);
+
+    return await response.json();
+}
+
+// ========================================================
+// ORQUESTRADOR DE FLUXO
+// ========================================================
+
+async function fetchComFallback(endpoint, options = {}) {
+    if (PROVEDORES_CONFIG.TENRAI.ativo) {
         try {
-            const endpointFinal = endpointTenrai || endpointJikan; 
-            return await fetchTenrai(endpointFinal, options);
-        } catch (errorTenrai) {
-            console.error("[API] Ambas as APIs falharam.", errorTenrai);
-            throw errorTenrai; 
+            return await fetchTenrai(endpoint, options);
+        } catch (erroTenrai) {
+            if (erroTenrai.name === 'AbortError' && options.signal?.aborted) {
+                throw erroTenrai;
+            }
+            console.warn('[API] Tenrai falhou ou demorou a responder:', erroTenrai.message);
         }
     }
+
+    if (PROVEDORES_CONFIG.RESERVA.ativo) {
+        try {
+            console.log('[API] Acionando API Reserva de contingência...');
+            return await fetchApiReserva(endpoint, options);
+        } catch (erroReserva) {
+            console.error('[API] Falha também na API Reserva:', erroReserva.message);
+            throw erroReserva;
+        }
+    }
+
+    throw new Error('Nenhuma API de animes disponível no momento');
 }
+
+// ========================================================
+// MÉTODOS PÚBLICOS UTILIZADOS PELO APP
+// ========================================================
 
 async function apiBuscarAnimes(query, page = 1, signal, limit = 9) {
     const endpoint = `?q=${encodeURIComponent(query)}&limit=${limit}&page=${page}`;
-    return await fetchComFallback(endpoint, endpoint, { signal }); 
+    return await fetchComFallback(endpoint, { signal });
 }
 
 async function apiBuscarSugestoes(query, signal) {
     const endpoint = `?q=${encodeURIComponent(query)}&limit=7`;
-    return await fetchComFallback(endpoint, endpoint, { signal });
+    return await fetchComFallback(endpoint, { signal });
 }
 
 async function apiObterDetalhesFull(malId) {
-    const endpointJikan = `/${malId}/full`;
-    const endpointTenrai = `/${malId}/full`; 
-    return await fetchComFallback(endpointJikan, endpointTenrai);
+    const endpoint = `/${malId}/full`;
+    return await fetchComFallback(endpoint);
 }
 
 async function apiObterDadosSimples(malId) {
-    return await fetchComFallback(`/${malId}`, `/${malId}`);
+    const endpoint = `/${malId}`;
+    return await fetchComFallback(endpoint);
 }
 
 async function apiObterCalendarioSemanal() {
@@ -66,11 +142,10 @@ async function apiObterCalendarioSemanal() {
             await new Promise(r => setTimeout(r, 500)); 
         }
         
-        const urlJikan = `https://api.jikan.moe/v4/schedules?page=${pagina}`;
-        const urlTenrai = `https://api.tenrai.org/v1/schedules?page=${pagina}`;
+        const endpoint = `/schedules?page=${pagina}`;
         
         try {
-            const json = await fetchComFallback(urlJikan, urlTenrai);
+            const json = await fetchComFallback(endpoint);
             
             if (json.data) {
                 todosAnimes = todosAnimes.concat(json.data);
@@ -80,12 +155,12 @@ async function apiObterCalendarioSemanal() {
             
         } catch (error) {
             if (error.message === 'RATE_LIMIT') {
-                console.warn(`[API] Rate limit atingido na página ${pagina}. Aguardando...`);
+                console.warn(`[API] Rate limit atingido na página ${pagina} do calendário. A aguardar...`);
                 await new Promise(r => setTimeout(r, 1000));
                 continue; 
             }
             
-            console.error(`[API] Falha crítica ao carregar a página ${pagina} do calendário:`, error);
+            console.error(`[API] Falha crítica ao carregar página ${pagina} do calendário:`, error);
             throw error; 
         }
         

@@ -55,8 +55,13 @@ function showToast(message, type = 'info', duracao = 3000) {
 
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.style.whiteSpace = 'pre-line';
-    toast.textContent = message;
+
+    if (typeof message === 'string' && message.includes('<')) {
+        toast.innerHTML = message;
+    } else {
+        toast.style.whiteSpace = 'pre-line';
+        toast.textContent = message;
+    }
     
     container.appendChild(toast);
 

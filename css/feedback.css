@@ -79,7 +79,81 @@
     margin-right: 8px;
 }
 
-/* 2. Notificação de Atualização PWA (Service Worker) */
+.toast-sync-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.toast-sync-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--cor-borda);
+    padding-bottom: 6px;
+    gap: 10px;
+}
+
+.toast-sync-titulo {
+    font-weight: 700;
+    color: #f8fafc;
+    font-size: 0.95em;
+}
+
+.toast-sync-badge {
+    background: var(--cor-primaria-ambiente);
+    border: 1px solid var(--cor-primaria);
+    color: #f87171;
+    font-size: 0.75em;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.toast-sync-bloco {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.toast-sync-secao-quente {
+    font-size: 0.8em;
+    font-weight: 800;
+    color: #fb923c;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.toast-sync-secao-fria {
+    font-size: 0.8em;
+    font-weight: 800;
+    color: #38bdf8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.toast-sync-item {
+    display: flex;
+    flex-direction: column;
+    padding-left: 8px;
+    border-left: 2px solid rgba(255, 255, 255, 0.15);
+    margin-bottom: 3px;
+}
+
+.toast-sync-nome {
+    font-size: 0.9em;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.toast-sync-detalhe {
+    font-size: 0.8em;
+    color: #34d399;
+    font-weight: 500;
+}
+
 /* 2. Notificação de Atualização PWA (Service Worker) */
 .update-notification {
     position: fixed;
@@ -285,6 +359,21 @@
         right: 20px;
         width: 40px;
         height: 40px;
+    }
+
+    #toast-container {
+        left: 10px !important;
+        right: 10px !important;
+        bottom: calc(15px + env(safe-area-inset-bottom)) !important;
+        width: auto !important;
+        max-width: calc(100vw - 20px) !important;
+    }
+
+    .toast {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 12px 14px !important;
+        font-size: 0.85rem !important;
     }
 }
 

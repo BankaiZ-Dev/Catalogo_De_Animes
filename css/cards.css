@@ -201,9 +201,13 @@
 }
 
 .controle-individual:hover,
-.controle-individual:focus-within {
+.controle-individual:has(.input-progresso-base:focus) {
     border-color: var(--cor-primaria);
     box-shadow: 0 0 8px rgba(217, 4, 41, 0.3);
+}
+
+.btn-progresso:focus {
+    outline: none;
 }
 
 .btn-progresso {
