@@ -79,6 +79,7 @@
     color: var(--cor-texto-principal);
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -434,6 +435,7 @@
     .mini-card-info p {
         font-size: 0.7rem !important;
         -webkit-line-clamp: 3 !important;
+        line-clamp: 3 !important;
     }
 
     /* Roleta no Mobile */

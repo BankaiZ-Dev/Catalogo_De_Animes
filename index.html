@@ -73,9 +73,7 @@
                         <button id="btn-stats" class="dropdown-item"><span>📊</span> Minhas Estatísticas</button>
                         <button id="btn-roleta" class="dropdown-item"><span>🎲</span> Sortear um Anime</button>
                         <hr class="dropdown-divisor">
-                        <button id="btn-exportar" class="dropdown-item"><span>⬇️</span> Fazer Backup (Salvar)</button>
-                        <button id="btn-importar" class="dropdown-item"><span>⬆️</span> Restaurar Backup</button>
-                        <input type="file" id="input-importar" accept=".json" class="oculto">
+                        <button class="dropdown-item" onclick="abrirModalGerenciadorDados()"><span>💾</span> Gerenciar Dados & Backup</button>
                     </div>
                 </div>
             </div>
@@ -432,6 +430,136 @@
             </div>
         </div>
     </div>
+
+    <dialog id="modal-gerenciador-dados" class="modal-dialog modal-painel-dados">
+        <button class="fechar-btn" onclick="fecharModalGerenciadorDados()" aria-label="Fechar">✕</button>
+        
+        <div class="modal-dados-header">
+            <h2 class="modal-dados-titulo">💾 Gerenciamento de Dados</h2>
+            <p class="modal-dados-subtitulo">Controle o espaço em disco, faça cópias de segurança e gerencie seu catálogo.</p>
+        </div>
+
+        <div class="modal-dados-corpo">
+            <section class="secao-dados">
+                <h3 class="secao-dados-titulo">📊 Uso de Armazenamento</h3>
+                <div class="grade-metricas">
+                    <div class="card-metrica">
+                        <span class="metrica-rotulo">Total de Animes</span>
+                        <strong id="metrica-total-animes" class="metrica-valor">0</strong>
+                    </div>
+                    <div class="card-metrica">
+                        <span class="metrica-rotulo">Catálogo (Texto)</span>
+                        <strong id="metrica-tamanho-dados" class="metrica-valor">0 KB</strong>
+                    </div>
+                    <div class="card-metrica">
+                        <span class="metrica-rotulo">Pôsteres em Cache</span>
+                        <strong id="metrica-tamanho-cache" class="metrica-valor">Calculando...</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="secao-dados">
+                <h3 class="secao-dados-titulo">📁 Backup Local (.JSON)</h3>
+                <p class="secao-dados-descricao">Salve uma cópia do seu catálogo em arquivo ou restaure uma versão salva anteriormente.</p>
+                
+                <div class="acoes-backup-grid">
+                    <button class="btn-dados-acao btn-exportar" onclick="exportarBackupCatalogo()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Exportar Backup
+                    </button>
+
+                    <label for="input-importar-backup" class="btn-dados-acao btn-importar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Importar Backup
+                    </label>
+                    <input type="file" id="input-importar-backup" accept=".json" style="display: none;" onchange="importarBackupCatalogo(event)">
+                </div>
+            </section>
+
+            <section class="secao-dados">
+                <h3 class="secao-dados-titulo">☁️ Sincronização em Nuvem (Google Planilhas)</h3>
+                <p class="secao-dados-descricao">Mantenha seu catálogo espelhado em tempo real no Google Drive e sincronize entre seus aparelhos.</p>
+                
+                <div class="container-config-nuvem">
+                    <div class="linha-input-nuvem">
+                        <input 
+                            type="url" 
+                            id="input-sheets-url" 
+                            class="input-sheets-url" 
+                            placeholder="Cole a URL do seu App da Web (/exec)" 
+                            autocomplete="off"
+                            spellcheck="false"
+                        >
+                        <button class="btn-dados-acao btn-salvar-nuvem" onclick="salvarConfiguracaoNuvem()">
+                            Salvar URL
+                        </button>
+                    </div>
+                    <div class="status-nuvem-texto">
+                        Status: <span id="texto-status-nuvem">Não configurado</span>
+                    </div>
+                </div>
+
+                <div class="acoes-backup-grid" style="margin-top: 14px;">
+                    <button class="btn-dados-acao" id="btn-enviar-nuvem" onclick="enviarCatalogoParaNuvemManual()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                            <path d="M12 13v6"/>
+                            <path d="m15 16-3-3-3 3"/>
+                        </svg>
+                        Enviar para Nuvem
+                    </button>
+                    <button class="btn-dados-acao" id="btn-baixar-nuvem" onclick="baixarCatalogoDaNuvem()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                            <path d="M12 13v6"/>
+                            <path d="m9 16 3 3 3-3"/>
+                        </svg>
+                        Puxar da Nuvem
+                    </button>
+                </div>
+            </section>
+
+            <section class="secao-dados secao-perigo">
+                <h3 class="secao-dados-titulo titulo-perigo">⚠️ Zona de Perigo</h3>
+                <p class="secao-dados-descricao">
+                    Isso apagará permanentemente todos os animes, anotações, histórico e o cache de imagens salvos neste dispositivo.
+                </p>
+
+                <div class="container-confirmacao-perigo">
+                    <label for="input-confirmar-reset" class="label-confirmar-reset">
+                        Para confirmar, digite <strong>DELETAR</strong> abaixo:
+                    </label>
+                    <div class="linha-reset-input">
+                        <input 
+                            type="text" 
+                            id="input-confirmar-reset" 
+                            class="input-confirmar-reset" 
+                            placeholder="Digite DELETAR" 
+                            autocomplete="off"
+                            oninput="verificarTextoConfirmacaoReset(this.value)"
+                            onkeydown="if(event.key === 'Enter' && !document.getElementById('btn-confirmar-reset-total').disabled) executarLimpezaTotalCatalogo()"
+                        >
+                        <button 
+                            id="btn-confirmar-reset-total" 
+                            class="btn-perigo-reset" 
+                            disabled 
+                            onclick="executarLimpezaTotalCatalogo()"
+                        >
+                            Limpar Tudo
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </dialog>
 
 </body>
 </html>

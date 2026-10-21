@@ -436,7 +436,7 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
                     <div class="secao-tags">
                         <div class="tags-input-group">
                             <input 
-                                type="text" 
+                                type="search" 
                                 id="input-nova-tag-${anime.mal_id}" 
                                 class="input-tag" 
                                 placeholder="Adicionar tag (ex: Maratona, incrivel)..." 
@@ -455,6 +455,10 @@ function renderizarConteudoModal(anime, sinopse, links, isSaved) {
                         id="input-nota-anime" 
                         class="textarea-notas" 
                         placeholder="Escreva suas anotações, impressões ou lembretes sobre este anime..."
+                        spellcheck="true"
+                        lang="pt-BR"
+                        autocorrect="on"
+                        autocapitalize="sentences"
                         oninput="salvarNotaLocal(${anime.mal_id}, this.value)"
                     >${catalogoPessoal[anime.mal_id]?.notes || ''}</textarea>
                     <span class="nota-status-salvo">💾 Salvo automaticamente</span>

@@ -95,6 +95,7 @@
     margin-bottom: 10px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -238,6 +239,7 @@
     padding: 0;
     margin: 0;
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .input-progresso-base:focus {
@@ -388,6 +390,7 @@
 .lista-cards.compact-view .card-titulo-compacto {
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -706,6 +709,7 @@
         font-size: 0.95rem !important;
         height: auto !important;
         -webkit-line-clamp: 1 !important;
+        line-clamp: 1 !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
