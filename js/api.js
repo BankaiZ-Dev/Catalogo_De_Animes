@@ -127,11 +127,6 @@ async function apiObterDetalhesFull(malId) {
     return await fetchComFallback(endpoint);
 }
 
-async function apiObterDadosSimples(malId) {
-    const endpoint = `/${malId}`;
-    return await fetchComFallback(endpoint);
-}
-
 async function apiObterCalendarioSemanal() {
     let todosAnimes = [];
     let pagina = 1;

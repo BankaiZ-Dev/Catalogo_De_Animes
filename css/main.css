@@ -39,6 +39,16 @@
 /* ==========================================================================
    2. RESET E ESTILOS GLOBAIS
    ========================================================================== */
+html:has(dialog[open]),
+body:has(dialog[open]) {
+    overflow: hidden;
+    touch-action: none;
+}
+
+.modal-dialog {
+    overscroll-behavior: contain;
+}
+
 * {
     box-sizing: border-box;
 }

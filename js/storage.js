@@ -765,6 +765,11 @@ async function baixarCatalogoDaNuvem() {
             if (!anime.hasOwnProperty('customTags')) anime.customTags = [];
             if (!anime.hasOwnProperty('year') || !anime.year) anime.year = '----';
             if (!anime.hasOwnProperty('type')) anime.type = 'TV';
+
+            if (!anime.dateAdded && !anime.addedAt) {
+                anime.dateAdded = anime.lastModified || new Date().toISOString();
+                anime.addedAt = anime.dateAdded;
+            }
         });
 
         catalogoPessoal = resultado.catalogo;

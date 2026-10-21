@@ -75,9 +75,6 @@ const DOM = {
     // AÇÕES GLOBAIS (Header)
     // ========================================================
     acoesGlobais: {
-        botaoExportar: $('btn-exportar'),
-        botaoImportar: $('btn-importar'),
-        inputImportar: $('input-importar'),
         botaoStats: $('btn-stats'),
         botaoRoleta: $('btn-roleta'),
         botaoTopo: $('btn-topo')

@@ -686,22 +686,13 @@ function setupListeners() {
             }
         });
 
-        dialog.addEventListener('close', () => {
-            document.body.style.overflow = '';
-            
+        dialog.addEventListener('close', () => {            
             const iframe = dialog.querySelector('iframe');
             if (iframe) iframe.src = ''; 
         });
     });
 
     DOM.modais.animeFecharBtn?.addEventListener('click', fecharModal);
-    DOM.acoesGlobais.botaoExportar?.addEventListener('click', exportarBackup);
-
-    // Importação/Exportação
-    if (DOM.acoesGlobais.botaoImportar && DOM.acoesGlobais.inputImportar) {
-        DOM.acoesGlobais.botaoImportar.addEventListener('click', () => DOM.acoesGlobais.inputImportar.click());
-        DOM.acoesGlobais.inputImportar.addEventListener('change', importarBackup);
-    }
 
     // Estatísticas & Roleta
     DOM.acoesGlobais.botaoStats?.addEventListener('click', calcularEstatisticas);

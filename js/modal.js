@@ -14,7 +14,6 @@ async function abrirModal(malId) {
         animeModal.showModal();
         animeModal.scrollTop = 0;
     }
-    document.body.style.overflow = 'hidden';
 
     // ==========================================
     // 🌍 MODO OFFLINE (Eco Mode)
@@ -111,8 +110,6 @@ function fecharModal() {
         if (iframe) iframe.src = '';
         DOM.modais.animeInfo && (DOM.modais.animeInfo.innerHTML = '');
     }
-
-    document.body.style.overflow = '';
 }
 
 function mudarAba(event, nomeAba) {
@@ -367,9 +364,7 @@ function abrirModalRoleta() {
     irParaEtapaRoleta('config');
 
     resetarFiltrosRoleta();
-    
-    document.body.style.overflow = 'hidden'; 
-    
+       
     modal.showModal();
 }
 
